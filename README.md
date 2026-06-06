@@ -1,4 +1,4 @@
-# ha-teamtracker-scoreboard
+# TeamTracker Scoreboard Card
 
 A compact, auto-generating sports scoreboard card for Home Assistant Lovelace dashboards.
 
@@ -30,7 +30,7 @@ That's it. This card replaces button-card, config-template-card, stack-in-card, 
 
 ### Via HACS (recommended)
 
-1. In HACS → Frontend → click **+** → search **Sport Scoreboard Card** → Install
+1. In HACS → Frontend → click **+** → search **TeamTracker Scoreboard Card** → Install
 2. Reload your browser
 3. Add the card to your dashboard (see Configuration below)
 
@@ -99,13 +99,13 @@ sections:
 
 ## Theming
 
-You can override colours with CSS custom properties in your theme:
+Override colours with CSS custom properties in your HA theme:
 
 ```yaml
 ha-teamtracker-scoreboard-card:
-  --scoreboard-team-color: white        # tracked team name colour
-  --scoreboard-opponent-color: "#777"   # opponent name colour
-  --scoreboard-special-color: orange    # special_teams highlight colour
+  --scoreboard-team-color: white
+  --scoreboard-opponent-color: "#777"
+  --scoreboard-special-color: orange
 ```
 
 ## Score row visual states
@@ -115,3 +115,15 @@ ha-teamtracker-scoreboard-card:
 | `PRE` | dark (`#303030`) | black | Countdown · odds / series |
 | `IN` | light gray | brown (leading) / black (trailing) | Clock · win % |
 | `POST` | transparent | orange (winner) / gray (loser) | Final clock · series |
+
+## Development
+
+```bash
+npm install
+npm run build      # bundle src/ → dist/card.js
+npm run dev        # watch mode
+npm test           # run tests
+npm run check      # biome lint + format
+```
+
+Source is in `src/`, built output is `dist/card.js`. The dist file is committed so HACS can serve it directly without a CI build step.
