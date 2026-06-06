@@ -19,16 +19,18 @@ export function scoreBg(gs) {
   return 'transparent';
 }
 
-export function scoreColor(side, gs, attr) {
+export function scoreColor(side, gs, attr, colors = {}) {
   const isSide = isTeamSide(side, attr);
   if (gs === 'PRE') return 'black';
   if (gs === 'IN') {
     const ts = parseFloat(attr.team_score);
     const os = parseFloat(attr.opponent_score);
-    return (isSide ? ts >= os : os >= ts) ? 'brown' : 'black';
+    return (isSide ? ts >= os : os >= ts) ? (colors.leading ?? 'brown') : 'black';
   }
   if (gs === 'POST') {
-    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : 'darkgray';
+    return (isSide ? attr.team_winner : attr.opponent_winner)
+      ? (colors.winner ?? 'orange')
+      : (colors.loser ?? 'darkgray');
   }
   return 'black';
 }
@@ -59,16 +61,16 @@ export function logoHtml(side, gs, attr) {
   return url ? `<img src="${url}" alt="">` : '';
 }
 
-export function tvHtml(gs, attr) {
+export function tvHtml(gs, attr, colors = {}) {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
-  const bg = gs === 'IN' ? 'indianred' : '#666'; /* dimgray */
+  const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666'; /* dimgray */
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
 
-export function messageHtml(gs, attr) {
+export function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
     case 'NOT_FOUND': {
       const msg = String(attr.api_message ?? 'Unknown')
@@ -91,7 +93,7 @@ export function messageHtml(gs, attr) {
           ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
           : '';
       return (
-        `<span style="color:indianred">${clock}</span>` +
+        `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +
         (pct ? `<span class="msg-sub">${pct}</span>` : '')
       );
     }
@@ -99,7 +101,7 @@ export function messageHtml(gs, attr) {
       const clock = esc(attr.clock ?? '');
       const sub = esc(attr.series_summary ?? '');
       return (
-        `<span style="color:orange">${clock}</span>` +
+        `<span style="color:${colors.winner ?? 'orange'}">${clock}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }

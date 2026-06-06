@@ -105,32 +105,33 @@ automatically sorts by game date regardless of your setting.
 
 ## Colors
 
-Set team colours directly in the card config:
+Set any colour directly in the card config:
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
 colors:
-  team: white # your tracked team (default: white)
-  opponent: "#777" # the other team (default: #777)
-  special: "#2196F3" # special_teams highlight (default: #2196F3, matches section headers)
+  team: white
+  opponent: gray
+  special: "#2196F3" # Material Blue — matches section headers
+  header: "#2196F3" # Material Blue
+  winner: orange
+  loser: darkgray
+  live: indianred
+  leading: brown
 sections:
   - ...
 ```
 
-| Key        | Default   | Description                          |
-| ---------- | --------- | ------------------------------------ |
-| `team`     | `white`   | Colour for your tracked team         |
-| `opponent` | `#777`    | Colour for the opposing team         |
-| `special`  | `#2196F3` | Highlight colour for `special_teams` |
-
-All three also accept CSS custom properties via your HA theme as a fallback:
-
-```yaml
-ha-teamtracker-scoreboard-card:
-  --scoreboard-team-color: white
-  --scoreboard-opponent-color: "#777"
-  --scoreboard-special-color: "#2196F3"
-```
+| Key        | Default                   | Description                                |
+| ---------- | ------------------------- | ------------------------------------------ |
+| `team`     | `white`                   | Your tracked team name                     |
+| `opponent` | `#777` (gray)             | Opponent name                              |
+| `special`  | `#2196F3` (Material Blue) | `special_teams` highlight                  |
+| `header`   | `#2196F3` (Material Blue) | Section header label                       |
+| `winner`   | `orange`                  | POST winner score and final clock          |
+| `loser`    | `darkgray`                | POST loser score                           |
+| `live`     | `indianred`               | IN game clock text and TV badge background |
+| `leading`  | `brown`                   | IN score for the currently leading team    |
 
 ## Score row visual states
 

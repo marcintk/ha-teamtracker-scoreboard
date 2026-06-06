@@ -46,9 +46,12 @@ class SportScoreboardCard extends HTMLElement {
 
       const body = sections.map((s) => sectionHtml(s, states, colors)).join('');
       const h = esc(String(height));
+      const headerOverride = colors.header
+        ? `.section-header{color:${esc(String(colors.header))}}`
+        : '';
 
       this.shadowRoot.innerHTML = `
-        <style>${CARD_STYLES}</style>
+        <style>${CARD_STYLES}${headerOverride}</style>
         <ha-card style="height:${h};min-height:${h};max-height:${h};">
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>

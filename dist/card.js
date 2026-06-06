@@ -30,16 +30,18 @@ function scoreBg(gs) {
   return 'transparent';
 }
 
-function scoreColor(side, gs, attr) {
+function scoreColor(side, gs, attr, colors = {}) {
   const isSide = isTeamSide(side, attr);
   if (gs === 'PRE') return 'black';
   if (gs === 'IN') {
     const ts = parseFloat(attr.team_score);
     const os = parseFloat(attr.opponent_score);
-    return (isSide ? ts >= os : os >= ts) ? 'brown' : 'black';
+    return (isSide ? ts >= os : os >= ts) ? (colors.leading ?? 'brown') : 'black';
   }
   if (gs === 'POST') {
-    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : 'darkgray';
+    return (isSide ? attr.team_winner : attr.opponent_winner)
+      ? (colors.winner ?? 'orange')
+      : (colors.loser ?? 'darkgray');
   }
   return 'black';
 }
@@ -70,16 +72,16 @@ function logoHtml(side, gs, attr) {
   return url ? `<img src="${url}" alt="">` : '';
 }
 
-function tvHtml(gs, attr) {
+function tvHtml(gs, attr, colors = {}) {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
-  const bg = gs === 'IN' ? 'indianred' : '#666'; /* dimgray */
+  const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666'; /* dimgray */
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
 
-function messageHtml(gs, attr) {
+function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
     case 'NOT_FOUND': {
       const msg = String(attr.api_message ?? 'Unknown')
@@ -102,7 +104,7 @@ function messageHtml(gs, attr) {
           ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
           : '';
       return (
-        `<span style="color:indianred">${clock}</span>` +
+        `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +
         (pct ? `<span class="msg-sub">${pct}</span>` : '')
       );
     }
@@ -110,7 +112,7 @@ function messageHtml(gs, attr) {
       const clock = esc(attr.clock ?? '');
       const sub = esc(attr.series_summary ?? '');
       return (
-        `<span style="color:orange">${clock}</span>` +
+        `<span style="color:${colors.winner ?? 'orange'}">${clock}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }
@@ -170,16 +172,16 @@ function rowHtml(stateObj, special, colors = {}) {
     <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', gs, attr)}</div>
-  <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr)}">${scoreText('home', gs, attr)}</div>
+  <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
   <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs !== 'NOT_FOUND' ? ':' : ''}</div>
-  <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr)}">${scoreText('away', gs, attr)}</div>
+  <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', gs, attr)}</div>
   <div class="team-col team-col-b">
     <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
   </div>
-  <div class="message">${messageHtml(gs, attr)}</div>
-  <div class="tv">${tvHtml(gs, attr)}</div>
+  <div class="message">${messageHtml(gs, attr, colors)}</div>
+  <div class="tv">${tvHtml(gs, attr, colors)}</div>
 </div>`;
 }
 
@@ -392,9 +394,12 @@ class SportScoreboardCard extends HTMLElement {
 
       const body = sections.map((s) => sectionHtml(s, states, colors)).join('');
       const h = esc(String(height));
+      const headerOverride = colors.header
+        ? `.section-header{color:${esc(String(colors.header))}}`
+        : '';
 
       this.shadowRoot.innerHTML = `
-        <style>${CARD_STYLES}</style>
+        <style>${CARD_STYLES}${headerOverride}</style>
         <ha-card style="height:${h};min-height:${h};max-height:${h};">
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>

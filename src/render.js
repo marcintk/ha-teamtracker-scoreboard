@@ -27,16 +27,16 @@ export function rowHtml(stateObj, special, colors = {}) {
     <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', gs, attr)}</div>
-  <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr)}">${scoreText('home', gs, attr)}</div>
+  <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
   <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs !== 'NOT_FOUND' ? ':' : ''}</div>
-  <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr)}">${scoreText('away', gs, attr)}</div>
+  <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', gs, attr)}</div>
   <div class="team-col team-col-b">
     <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
   </div>
-  <div class="message">${messageHtml(gs, attr)}</div>
-  <div class="tv">${tvHtml(gs, attr)}</div>
+  <div class="message">${messageHtml(gs, attr, colors)}</div>
+  <div class="tv">${tvHtml(gs, attr, colors)}</div>
 </div>`;
 }
 
