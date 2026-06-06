@@ -1,5 +1,5 @@
 export default {
-  input: 'src/card.js',
+  input: 'src/index.js',
   output: {
     file: 'dist/card.js',
     format: 'es',
