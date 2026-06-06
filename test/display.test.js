@@ -1,22 +1,31 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  isTeamSide,
-  teamColor,
-  scoreBg,
-  scoreColor,
   colonColor,
-  scoreText,
+  isTeamSide,
+  logoHtml,
+  messageHtml,
   nameText,
   rankText,
-  logoHtml,
+  scoreBg,
+  scoreColor,
+  scoreText,
+  teamColor,
   tvHtml,
-  messageHtml,
 } from '../src/display.js';
 
-const homeAttr = { team_homeaway: 'home', team_name: 'Lakers', opponent_name: 'Celtics',
-  team_record: '20-10', opponent_record: '18-12', team_score: '95', opponent_score: '90',
-  team_winner: true, opponent_winner: false,
-  team_logo: 'https://cdn.example.com/lal.png', opponent_logo: 'https://cdn.example.com/bos.png' };
+const homeAttr = {
+  team_homeaway: 'home',
+  team_name: 'Lakers',
+  opponent_name: 'Celtics',
+  team_record: '20-10',
+  opponent_record: '18-12',
+  team_score: '95',
+  opponent_score: '90',
+  team_winner: true,
+  opponent_winner: false,
+  team_logo: 'https://cdn.example.com/lal.png',
+  opponent_logo: 'https://cdn.example.com/bos.png',
+};
 
 const awayAttr = { ...homeAttr, team_homeaway: 'away' };
 
@@ -111,6 +120,12 @@ describe('scoreText', () => {
     expect(scoreText('home', 'IN', homeAttr)).toBe('95');
     expect(scoreText('away', 'IN', homeAttr)).toBe('90');
   });
+
+  it('returns empty string when score is undefined in IN state', () => {
+    const attr = { team_homeaway: 'home', team_score: undefined, opponent_score: undefined };
+    expect(scoreText('home', 'IN', attr)).toBe('');
+    expect(scoreText('away', 'IN', attr)).toBe('');
+  });
 });
 
 describe('nameText', () => {
@@ -154,6 +169,11 @@ describe('tvHtml', () => {
     expect(tvHtml('POST', { tv_network: 'ESPN' })).toBe('');
   });
 
+  it('returns empty when tv_network is blank', () => {
+    expect(tvHtml('IN', { tv_network: '' })).toBe('');
+    expect(tvHtml('IN', { tv_network: '   ' })).toBe('');
+  });
+
   it('returns red badge for IN state', () => {
     const html = tvHtml('IN', { tv_network: 'ESPN' });
     expect(html).toContain('ESPN');
@@ -184,21 +204,59 @@ describe('messageHtml', () => {
     expect(html).not.toContain('Cached data');
   });
 
+  it('strips API_LIMIT prefix from NOT_FOUND message', () => {
+    const html = messageHtml('NOT_FOUND', { api_message: 'API_LIMIT hit. Please wait.' });
+    expect(html).toContain('Please wait');
+    expect(html).not.toContain('API_LIMIT');
+  });
+
   it('shows kickoff and odds for PRE', () => {
     const html = messageHtml('PRE', { kickoff_in: '2h', odds: 'LAL -3.5' });
     expect(html).toContain('2h');
     expect(html).toContain('LAL -3.5');
   });
 
+  it('shows only kickoff for PRE when no odds or series summary', () => {
+    const html = messageHtml('PRE', { kickoff_in: 'Tomorrow' });
+    expect(html).toContain('Tomorrow');
+    expect(html).not.toContain('msg-sub');
+  });
+
   it('shows clock and win probability for IN', () => {
-    const html = messageHtml('IN', { clock: 'Q3 5:00', team_abbr: 'LAL', team_win_probability: '0.65' });
+    const html = messageHtml('IN', {
+      clock: 'Q3 5:00',
+      team_abbr: 'LAL',
+      team_win_probability: '0.65',
+    });
     expect(html).toContain('Q3 5:00');
     expect(html).toContain('65.0%');
+  });
+
+  it('omits win probability span when team_win_probability is null', () => {
+    const html = messageHtml('IN', { clock: 'Q3 5:00', team_win_probability: null });
+    expect(html).toContain('Q3 5:00');
+    expect(html).not.toContain('msg-sub');
+  });
+
+  it('omits team_abbr from win probability when abbr is absent', () => {
+    const html = messageHtml('IN', { clock: 'Q2 1:30', team_win_probability: '0.4' });
+    expect(html).toContain('40.0%');
   });
 
   it('shows clock and series summary for POST', () => {
     const html = messageHtml('POST', { clock: 'Final', series_summary: 'LAL leads 3-2' });
     expect(html).toContain('Final');
     expect(html).toContain('LAL leads 3-2');
+  });
+
+  it('shows only clock for POST when no series summary', () => {
+    const html = messageHtml('POST', { clock: 'Final' });
+    expect(html).toContain('Final');
+    expect(html).not.toContain('msg-sub');
+  });
+
+  it('handles missing clock in POST state', () => {
+    const html = messageHtml('POST', {});
+    expect(html).toContain('color:orange');
   });
 });

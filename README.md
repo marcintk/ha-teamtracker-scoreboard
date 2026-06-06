@@ -4,7 +4,9 @@
 
 A compact, auto-generating sports scoreboard card for Home Assistant Lovelace dashboards.
 
-Displays live scores, pre-game odds, win probability, TV network, and series info — one row per game, grouped by sport. Built on top of the [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
+Displays live scores, pre-game odds, win probability, TV network, and series info — one row per
+game, grouped by sport. Built on top of the
+[ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
 
 ## Features
 
@@ -20,8 +22,8 @@ Displays live scores, pre-game odds, win probability, TV network, and series inf
 
 ## Requirements
 
-| Dependency | Type | Notes |
-|---|---|---|
+| Dependency                                                   | Type             | Notes                                         |
+| ------------------------------------------------------------ | ---------------- | --------------------------------------------- |
 | [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) | HACS Integration | Provides the `sensor.<sport>_<team>` entities |
 
 ## Installation
@@ -37,7 +39,8 @@ Displays live scores, pre-game odds, win probability, TV network, and series inf
 
 ### Manual
 
-1. Copy `dist/card.js` to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder if needed)
+1. Copy `dist/card.js` to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder
+   if needed)
 2. In Home Assistant → Settings → Dashboards → Resources → **Add resource**
    - URL: `/local/ha-teamtracker-scoreboard-card/card.js`
    - Resource type: **JavaScript module**
@@ -73,30 +76,31 @@ sections:
 
 ### Options
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `height` | string | `475px` | Card height (CSS value) |
-| `sections` | list | required | One entry per sport/league |
+| Option     | Type   | Default  | Description                |
+| ---------- | ------ | -------- | -------------------------- |
+| `height`   | string | `475px`  | Card height (CSS value)    |
+| `sections` | list   | required | One entry per sport/league |
 
 ### Section options
 
-| Field | Type | Default | Description |
-|---|---|---|---|
-| `name` | string | required | Header label shown above the section |
-| `prefix` | string | required | Entity ID prefix, e.g. `sensor.nba_` |
-| `limit` | number | `10` | Max rows to show |
-| `special_teams` | list | `[]` | Team suffixes to highlight in orange. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `rankType` | string | `win-loss` | How to rank teams during regular season. See below |
+| Field           | Type   | Default    | Description                                                                                           |
+| --------------- | ------ | ---------- | ----------------------------------------------------------------------------------------------------- |
+| `name`          | string | required   | Header label shown above the section                                                                  |
+| `prefix`        | string | required   | Entity ID prefix, e.g. `sensor.nba_`                                                                  |
+| `limit`         | number | `10`       | Max rows to show                                                                                      |
+| `special_teams` | list   | `[]`       | Team suffixes to highlight in orange. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
+| `rankType`      | string | `win-loss` | How to rank teams during regular season. See below                                                    |
 
 ### rankType values
 
-| Value | Use for |
-|---|---|
-| `win-loss` | Leagues with W/L records (NBA, NFL, MLB, …) |
+| Value           | Use for                                         |
+| --------------- | ----------------------------------------------- |
+| `win-loss`      | Leagues with W/L records (NBA, NFL, MLB, …)     |
 | `win-draw-loss` | Leagues where draws count (NHL, MLS, soccer, …) |
-| `by-date` | Tournaments without standings (World Cup, …) |
+| `by-date`       | Tournaments without standings (World Cup, …)    |
 
-`rankType` only applies during the regular season. Outside it (playoffs, cups), the card automatically sorts by game date regardless of your setting.
+`rankType` only applies during the regular season. Outside it (playoffs, cups), the card
+automatically sorts by game date regardless of your setting.
 
 ## Theming
 
@@ -111,20 +115,24 @@ ha-teamtracker-scoreboard-card:
 
 ## Score row visual states
 
-| State | Score bg | Score colour | Message area |
-|---|---|---|---|
-| `PRE` | dark (`#303030`) | black | Countdown · odds / series |
-| `IN` | light gray | brown (leading) / black (trailing) | Clock · win % |
-| `POST` | transparent | orange (winner) / gray (loser) | Final clock · series |
+| State  | Score bg         | Score colour                       | Message area              |
+| ------ | ---------------- | ---------------------------------- | ------------------------- |
+| `PRE`  | dark (`#303030`) | black                              | Countdown · odds / series |
+| `IN`   | light gray       | brown (leading) / black (trailing) | Clock · win %             |
+| `POST` | transparent      | orange (winner) / gray (loser)     | Final clock · series      |
 
 ## Development
 
 ```bash
 npm install
-npm run build      # bundle src/ → dist/card.js
-npm run dev        # watch mode
-npm test           # run tests
-npm run check      # biome lint + format
+npm run build          # bundle src/ → dist/card.js
+npm run build:prod     # minified production build
+npm run dev            # watch mode
+npm test               # run tests
+npm run test:coverage  # run tests with coverage report
+npm run check          # biome lint + format (src/ and test/)
+npm run format:md      # prettier for markdown files
 ```
 
-Source is in `src/`, built output is `dist/card.js`. The dist file is committed so HACS can serve it directly without a CI build step.
+Source is in `src/`, built output is `dist/card.js`. The dist file is committed so HACS can serve it
+directly without a CI build step.

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { rowHtml, sectionHtml } from '../src/render.js';
 
 const makeState = (state, attrs) => ({ state, attributes: attrs });
@@ -66,7 +66,13 @@ describe('rowHtml', () => {
 });
 
 describe('sectionHtml', () => {
-  const section = { name: 'NBA', prefix: 'sensor.nba_', limit: 10, special_teams: [], rankType: 'win-loss' };
+  const section = {
+    name: 'NBA',
+    prefix: 'sensor.nba_',
+    limit: 10,
+    special_teams: [],
+    rankType: 'win-loss',
+  };
 
   it('returns empty string when no matching entities', () => {
     expect(sectionHtml(section, {})).toBe('');
@@ -118,9 +124,39 @@ describe('sectionHtml', () => {
     expect(html).toContain('scoreboard-special-color');
   });
 
+  it('sorts by-date with multiple entities in ascending date order', () => {
+    const states = {
+      'sensor.wc_bra': makeState('PRE', {
+        ...baseAttrs,
+        date: '2024-04-20T00:00:00Z',
+        team_name: 'Brazil',
+        season: 'regular',
+      }),
+      'sensor.wc_fra': makeState('PRE', {
+        ...baseAttrs,
+        date: '2024-04-18T00:00:00Z',
+        team_name: 'France',
+        season: 'regular',
+      }),
+    };
+    const wcSection = {
+      name: 'WC',
+      prefix: 'sensor.wc_',
+      limit: 10,
+      special_teams: [],
+      rankType: 'by-date',
+    };
+    const html = sectionHtml(wcSection, states);
+    expect(html.indexOf('France')).toBeLessThan(html.indexOf('Brazil'));
+  });
+
   it('auto-switches to by-date sort outside regular season', () => {
     const states = {
-      'sensor.nba_lal': makeState('PRE', { ...baseAttrs, season: 'playoffs', date: '2024-04-20T00:00:00Z' }),
+      'sensor.nba_lal': makeState('PRE', {
+        ...baseAttrs,
+        season: 'playoffs',
+        date: '2024-04-20T00:00:00Z',
+      }),
     };
     // Should not throw — just verifies the fallback path executes cleanly
     expect(() => sectionHtml(section, states)).not.toThrow();

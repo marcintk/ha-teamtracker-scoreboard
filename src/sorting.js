@@ -1,14 +1,16 @@
 // rankType: 'win-loss' | 'win-draw-loss' | 'by-date'
 
 export function winRatio(record, rankType) {
-  const pts = String(record ?? '0-0').split('-').map(Number);
+  const pts = String(record ?? '0-0')
+    .split('-')
+    .map(Number);
   if (rankType === 'win-draw-loss') {
     // points = 2W + D, max possible = 2(W+D+L)
     const total = pts[0] + pts[1] + pts[2];
     return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
   }
   // win-loss: simple win percentage
-  return (pts[0] + pts[1]) ? pts[0] / (pts[0] + pts[1]) : 0;
+  return pts[0] + pts[1] ? pts[0] / (pts[0] + pts[1]) : 0;
 }
 
 export function sortKeyFor(attr, rankType) {

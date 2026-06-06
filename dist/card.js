@@ -1,10 +1,9 @@
 /* ha-teamtracker-scoreboard-card */
+const VALID_STATES = new Set(['PRE', 'IN', 'POST', 'BYE']);
+
 function esc(str) {
   if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function safeLogoUrl(url) {
@@ -12,52 +11,9 @@ function safeLogoUrl(url) {
   return String(url);
 }
 
-const VALID_STATES = new Set(['PRE', 'IN', 'POST', 'BYE']);
-
-// rankType: 'win-loss' | 'win-draw-loss' | 'by-date'
-
-function winRatio(record, rankType) {
-  const pts = String(record ?? '0-0').split('-').map(Number);
-  if (rankType === 'win-draw-loss') {
-    // points = 2W + D, max possible = 2(W+D+L)
-    const total = pts[0] + pts[1] + pts[2];
-    return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
-  }
-  // win-loss: simple win percentage
-  return (pts[0] + pts[1]) ? pts[0] / (pts[0] + pts[1]) : 0;
-}
-
-function sortKeyFor(attr, rankType) {
-  if (rankType === 'by-date') return new Date(attr?.date ?? 0).getTime();
-  return winRatio(attr?.team_record, rankType);
-}
-
-function preferHome(list, states) {
-  return [...list].sort((a, b) => {
-    const aHome = states[a.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
-    const bHome = states[b.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
-    return aHome - bHome;
-  });
-}
-
-// For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.
-function deduplicate(list, rankType, states) {
-  if (rankType !== 'by-date') return list;
-  const seen = new Set();
-  return preferHome(list, states).filter(({ entityId }) => {
-    const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
-    const key = `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
 // Returns true when `side` ('home'|'away') matches the sensor's tracked team.
 function isTeamSide(side, attr) {
-  return side === 'home'
-    ? attr?.team_homeaway === 'home'
-    : attr?.team_homeaway !== 'home';
+  return side === 'home' ? attr?.team_homeaway === 'home' : attr?.team_homeaway !== 'home';
 }
 
 function teamColor(side, attr, special) {
@@ -117,9 +73,7 @@ function tvHtml(gs, attr) {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
-  const label = tv.includes('/')
-    ? `${tv.split('/')[0].substring(0, 8)}›`
-    : tv.substring(0, 8);
+  const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
   const bg = gs === 'IN' ? 'indianred' : '#666';
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
@@ -162,6 +116,47 @@ function messageHtml(gs, attr) {
   }
 }
 
+// rankType: 'win-loss' | 'win-draw-loss' | 'by-date'
+
+function winRatio(record, rankType) {
+  const pts = String(record ?? '0-0')
+    .split('-')
+    .map(Number);
+  if (rankType === 'win-draw-loss') {
+    // points = 2W + D, max possible = 2(W+D+L)
+    const total = pts[0] + pts[1] + pts[2];
+    return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
+  }
+  // win-loss: simple win percentage
+  return pts[0] + pts[1] ? pts[0] / (pts[0] + pts[1]) : 0;
+}
+
+function sortKeyFor(attr, rankType) {
+  if (rankType === 'by-date') return new Date(attr?.date ?? 0).getTime();
+  return winRatio(attr?.team_record, rankType);
+}
+
+function preferHome(list, states) {
+  return [...list].sort((a, b) => {
+    const aHome = states[a.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
+    const bHome = states[b.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
+    return aHome - bHome;
+  });
+}
+
+// For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.
+function deduplicate(list, rankType, states) {
+  if (rankType !== 'by-date') return list;
+  const seen = new Set();
+  return preferHome(list, states).filter(({ entityId }) => {
+    const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
+    const key = `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function rowHtml(stateObj, special) {
   const gs = stateObj?.state ?? 'NOT_FOUND';
   const attr = stateObj?.attributes ?? {};
@@ -182,8 +177,8 @@ function rowHtml(stateObj, special) {
     <div class="team-name" style="color:${teamColor('away', attr, special)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special)}">${rankText('away', attr)}</div>
   </div>
-  <div class="tv">${tvHtml(gs, attr)}</div>
   <div class="message">${messageHtml(gs, attr)}</div>
+  <div class="tv">${tvHtml(gs, attr)}</div>
 </div>`;
 }
 
@@ -310,10 +305,10 @@ const CARD_STYLES = `
   }
 
   .tv {
-    width: 44px;
-    min-width: 44px;
+    flex-shrink: 0;
     text-align: center;
     font-size: 0;
+    padding: 0 3px;
   }
   .tv-badge {
     font-size: 8px;
@@ -326,6 +321,7 @@ const CARD_STYLES = `
 
   .message {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -404,6 +400,7 @@ class SportScoreboardCard extends HTMLElement {
       `;
     } catch (e) {
       this._showError(e.message);
+      // biome-ignore lint/suspicious/noConsole: intentional render error logging
       console.error('ha-teamtracker-scoreboard-card render error:', e);
     }
   }
@@ -419,15 +416,27 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize() {
-    return Math.ceil(parseInt(this._config?.height ?? 475) / 50);
+    return Math.ceil(parseInt(this._config?.height ?? 475, 10) / 50);
   }
 
   static getStubConfig() {
     return {
       height: '475px',
       sections: [
-        { name: 'NBA Scoreboard', prefix: 'sensor.nba_', limit: 10, special_teams: [], rankType: 'win-loss' },
-        { name: 'NHL Scoreboard', prefix: 'sensor.nhl_', limit: 5, special_teams: [], rankType: 'win-draw-loss' },
+        {
+          name: 'NBA Scoreboard',
+          prefix: 'sensor.nba_',
+          limit: 10,
+          special_teams: [],
+          rankType: 'win-loss',
+        },
+        {
+          name: 'NHL Scoreboard',
+          prefix: 'sensor.nhl_',
+          limit: 5,
+          special_teams: [],
+          rankType: 'win-draw-loss',
+        },
       ],
     };
   }

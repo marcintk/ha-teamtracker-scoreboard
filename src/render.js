@@ -1,19 +1,19 @@
 import { VALID_STATES } from './constants.js';
-import { esc } from './utils.js';
-import { sortKeyFor, deduplicate } from './sorting.js';
 import {
-  isTeamSide,
-  teamColor,
-  scoreBg,
-  scoreColor,
   colonColor,
-  scoreText,
+  isTeamSide,
+  logoHtml,
+  messageHtml,
   nameText,
   rankText,
-  logoHtml,
+  scoreBg,
+  scoreColor,
+  scoreText,
+  teamColor,
   tvHtml,
-  messageHtml,
 } from './display.js';
+import { deduplicate, sortKeyFor } from './sorting.js';
+import { esc } from './utils.js';
 
 export function rowHtml(stateObj, special) {
   const gs = stateObj?.state ?? 'NOT_FOUND';
@@ -35,8 +35,8 @@ export function rowHtml(stateObj, special) {
     <div class="team-name" style="color:${teamColor('away', attr, special)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special)}">${rankText('away', attr)}</div>
   </div>
-  <div class="tv">${tvHtml(gs, attr)}</div>
   <div class="message">${messageHtml(gs, attr)}</div>
+  <div class="tv">${tvHtml(gs, attr)}</div>
 </div>`;
 }
 
