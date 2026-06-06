@@ -4,8 +4,6 @@ A compact, auto-generating sports scoreboard card for Home Assistant Lovelace da
 
 Displays live scores, pre-game odds, win probability, TV network, and series info — one row per game, grouped by sport. Built on top of the [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
 
-![Scoreboard preview](docs/preview.png)
-
 ## Features
 
 - Live scores with in-game win probability and clock
@@ -24,15 +22,16 @@ Displays live scores, pre-game odds, win probability, TV network, and series inf
 |---|---|---|
 | [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) | HACS Integration | Provides the `sensor.<sport>_<team>` entities |
 
-That's it. This card replaces button-card, config-template-card, stack-in-card, and card-mod.
-
 ## Installation
 
 ### Via HACS (recommended)
 
-1. In HACS → Frontend → click **+** → search **TeamTracker Scoreboard Card** → Install
-2. Reload your browser
-3. Add the card to your dashboard (see Configuration below)
+1. In HACS → Frontend → click the three-dot menu → **Custom repositories**
+   - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard`
+   - Category: **Frontend**
+2. Search **TeamTracker Scoreboard Card** → Install
+3. Reload your browser
+4. Add the card to your dashboard (see Configuration below)
 
 ### Manual
 
