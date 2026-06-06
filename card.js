@@ -1,17 +1,4 @@
-'use strict';
-
-// =============================================================================
-// ha-teamtracker-scoreboard-card.js
-// Custom Lovelace card for ha-teamtracker sports scoreboards
-// https://github.com/vasqued2/ha-teamtracker
-// =============================================================================
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const VALID_STATES = new Set(['PRE', 'IN', 'POST', 'BYE']);
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
-
+/* ha-teamtracker-scoreboard-card */
 function esc(str) {
   if (str == null) return '';
   return String(str)
@@ -25,15 +12,18 @@ function safeLogoUrl(url) {
   return String(url);
 }
 
-// ── Sorting ───────────────────────────────────────────────────────────────────
+const VALID_STATES = new Set(['PRE', 'IN', 'POST', 'BYE']);
+
+// rankType: 'win-loss' | 'win-draw-loss' | 'by-date'
 
 function winRatio(record, rankType) {
   const pts = String(record ?? '0-0').split('-').map(Number);
   if (rankType === 'win-draw-loss') {
-    // W-D-L: points = 2W + D, max = 2(W+D+L)
-    return (pts[0] + pts[1] + pts[2]) ? (2 * pts[0] + pts[2]) / (2 * (pts[0] + pts[1] + pts[2])) : 0;
+    // points = 2W + D, max possible = 2(W+D+L)
+    const total = pts[0] + pts[1] + pts[2];
+    return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
   }
-  // W-L: simple win %
+  // win-loss: simple win percentage
   return (pts[0] + pts[1]) ? pts[0] / (pts[0] + pts[1]) : 0;
 }
 
@@ -50,7 +40,7 @@ function preferHome(list, states) {
   });
 }
 
-// For tournament-style (by-date), one row per game — deduplicate by (date, team pair).
+// For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.
 function deduplicate(list, rankType, states) {
   if (rankType !== 'by-date') return list;
   const seen = new Set();
@@ -63,10 +53,8 @@ function deduplicate(list, rankType, states) {
   });
 }
 
-// ── Display helpers ───────────────────────────────────────────────────────────
-
+// Returns true when `side` ('home'|'away') matches the sensor's tracked team.
 function isTeamSide(side, attr) {
-  // 'home'/'away' side relative to the sensor's tracked team
   return side === 'home'
     ? attr?.team_homeaway === 'home'
     : attr?.team_homeaway !== 'home';
@@ -81,7 +69,7 @@ function teamColor(side, attr, special) {
 
 function scoreBg(gs) {
   if (gs === 'PRE') return '#303030';
-  if (gs === 'IN')  return 'lightgray';
+  if (gs === 'IN') return 'lightgray';
   return 'transparent';
 }
 
@@ -89,7 +77,8 @@ function scoreColor(side, gs, attr) {
   const isSide = isTeamSide(side, attr);
   if (gs === 'PRE') return 'black';
   if (gs === 'IN') {
-    const ts = parseFloat(attr.team_score), os = parseFloat(attr.opponent_score);
+    const ts = parseFloat(attr.team_score);
+    const os = parseFloat(attr.opponent_score);
     return (isSide ? ts >= os : os >= ts) ? 'brown' : 'black';
   }
   if (gs === 'POST') {
@@ -106,7 +95,7 @@ function colonColor(gs) {
 
 function scoreText(side, gs, attr) {
   if (gs === 'NOT_FOUND') return '';
-  if (gs === 'PRE')       return '–';
+  if (gs === 'PRE') return '–';
   return isTeamSide(side, attr) ? (attr.team_score ?? '') : (attr.opponent_score ?? '');
 }
 
@@ -129,7 +118,7 @@ function tvHtml(gs, attr) {
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const label = tv.includes('/')
-    ? tv.split('/')[0].substring(0, 8) + '›'
+    ? `${tv.split('/')[0].substring(0, 8)}›`
     : tv.substring(0, 8);
   const bg = gs === 'IN' ? 'indianred' : '#666';
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
@@ -146,32 +135,37 @@ function messageHtml(gs, attr) {
     case 'PRE': {
       const kickoff = esc(attr.kickoff_in ?? '');
       const sub = esc(attr.series_summary ?? attr.odds ?? '');
-      return `<span style="color:#aaa">${kickoff}</span>`
-           + (sub ? `<span class="msg-sub">${sub}</span>` : '');
+      return (
+        `<span style="color:#aaa">${kickoff}</span>` +
+        (sub ? `<span class="msg-sub">${sub}</span>` : '')
+      );
     }
     case 'IN': {
       const clock = esc(attr.clock ?? '');
-      const pct = attr.team_win_probability != null
-        ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
-        : '';
-      return `<span style="color:indianred">${clock}</span>`
-           + (pct ? `<span class="msg-sub">${pct}</span>` : '');
+      const pct =
+        attr.team_win_probability != null
+          ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
+          : '';
+      return (
+        `<span style="color:indianred">${clock}</span>` +
+        (pct ? `<span class="msg-sub">${pct}</span>` : '')
+      );
     }
     default: {
       const clock = esc(attr.clock ?? '');
       const sub = esc(attr.series_summary ?? '');
-      return `<span style="color:orange">${clock}</span>`
-           + (sub ? `<span class="msg-sub">${sub}</span>` : '');
+      return (
+        `<span style="color:orange">${clock}</span>` +
+        (sub ? `<span class="msg-sub">${sub}</span>` : '')
+      );
     }
   }
 }
 
-// ── Row + section HTML ────────────────────────────────────────────────────────
-
 function rowHtml(stateObj, special) {
-  const gs  = stateObj?.state ?? 'NOT_FOUND';
+  const gs = stateObj?.state ?? 'NOT_FOUND';
   const attr = stateObj?.attributes ?? {};
-  const bg   = scoreBg(gs);
+  const bg = scoreBg(gs);
 
   return `
 <div class="game-row">
@@ -197,25 +191,22 @@ function sectionHtml(section, states) {
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-loss' } = section;
 
   const entities = Object.keys(states).filter(
-    id => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
+    (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
   );
   if (!entities.length) return '';
 
   // rankType applies to regular season only — auto-switch to by-date outside it
   const firstAttr = states[entities[0]]?.attributes;
-  const effectiveRankType = (rankType !== 'by-date' && firstAttr?.season !== 'regular')
-    ? 'by-date'
-    : rankType;
+  const effectiveRankType =
+    rankType !== 'by-date' && firstAttr?.season !== 'regular' ? 'by-date' : rankType;
 
-  const items = entities.map(entityId => ({
+  const items = entities.map((entityId) => ({
     entityId,
     special: special_teams.includes(entityId.replace(prefix, '')),
     key: sortKeyFor(states[entityId]?.attributes, effectiveRankType),
   }));
 
-  items.sort((a, b) =>
-    effectiveRankType === 'by-date' ? a.key - b.key : b.key - a.key
-  );
+  items.sort((a, b) => (effectiveRankType === 'by-date' ? a.key - b.key : b.key - a.key));
 
   const rows = deduplicate(items, effectiveRankType, states)
     .slice(0, limit)
@@ -224,8 +215,6 @@ function sectionHtml(section, states) {
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;
 }
-
-// ── Styles ────────────────────────────────────────────────────────────────────
 
 const CARD_STYLES = `
   :host { display: block; }
@@ -254,7 +243,6 @@ const CARD_STYLES = `
     gap: 0;
   }
 
-  /* Team columns: name stacked over rank */
   .team-col {
     display: flex;
     flex-direction: column;
@@ -280,7 +268,6 @@ const CARD_STYLES = `
     overflow: hidden;
   }
 
-  /* Logos */
   .logo {
     width: 26px;
     min-width: 26px;
@@ -298,7 +285,6 @@ const CARD_STYLES = `
     display: block;
   }
 
-  /* Scores */
   .score {
     width: 30px;
     min-width: 30px;
@@ -323,12 +309,11 @@ const CARD_STYLES = `
     justify-content: center;
   }
 
-  /* TV badge */
   .tv {
     width: 44px;
     min-width: 44px;
     text-align: center;
-    font-size: 0; /* avoid gap around inline child */
+    font-size: 0;
   }
   .tv-badge {
     font-size: 8px;
@@ -339,7 +324,6 @@ const CARD_STYLES = `
     white-space: nowrap;
   }
 
-  /* Message / clock area */
   .message {
     flex: 1;
     display: flex;
@@ -367,23 +351,19 @@ const CARD_STYLES = `
   }
 `;
 
-// ── Card element ──────────────────────────────────────────────────────────────
-
 class SportScoreboardCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this._config = null;
-    this._hass   = null;
+    this._hass = null;
   }
 
-  // Called by HA when the user saves card config
   setConfig(config) {
     this._config = config;
     if (this._hass) this._render();
   }
 
-  // HA pushes updated state here whenever anything changes
   set hass(hass) {
     if (this._hasRelevantChange(hass)) {
       this._hass = hass;
@@ -393,33 +373,32 @@ class SportScoreboardCard extends HTMLElement {
     }
   }
 
-  // Only re-render when a tracked entity actually changed
   _hasRelevantChange(newHass) {
     if (!this._hass || !this._config) return true;
-    const prefixes = this._config.sections.map(s => s.prefix);
-    return prefixes.some(prefix =>
-      Object.keys(newHass.states).some(id =>
-        id.startsWith(prefix) && newHass.states[id] !== this._hass.states[id]
+    const prefixes = (this._config.sections ?? []).map((s) => s.prefix);
+    return prefixes.some((prefix) =>
+      Object.keys(newHass.states).some(
+        (id) => id.startsWith(prefix) && newHass.states[id] !== this._hass.states[id]
       )
     );
   }
 
   _render() {
     try {
-      const sections = this._config.sections;
-      const height   = this._config.height ?? '475px';
-      const states   = this._hass.states;
+      const { sections, height = '475px' } = this._config;
+      const states = this._hass.states;
 
       if (!Array.isArray(sections) || !sections.length) {
         this._showError('Add at least one section to your card config.');
         return;
       }
 
-      const body = sections.map(s => sectionHtml(s, states)).join('');
+      const body = sections.map((s) => sectionHtml(s, states)).join('');
+      const h = esc(String(height));
 
       this.shadowRoot.innerHTML = `
         <style>${CARD_STYLES}</style>
-        <ha-card style="height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};">
+        <ha-card style="height:${h};min-height:${h};max-height:${h};">
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>
       `;
@@ -439,7 +418,6 @@ class SportScoreboardCard extends HTMLElement {
     `;
   }
 
-  // Tells HA roughly how many dashboard rows to allocate
   getCardSize() {
     return Math.ceil(parseInt(this._config?.height ?? 475) / 50);
   }
@@ -449,7 +427,7 @@ class SportScoreboardCard extends HTMLElement {
       height: '475px',
       sections: [
         { name: 'NBA Scoreboard', prefix: 'sensor.nba_', limit: 10, special_teams: [], rankType: 'win-loss' },
-        { name: 'NHL Scoreboard', prefix: 'sensor.nhl_', limit: 5,  special_teams: [], rankType: 'win-draw-loss' },
+        { name: 'NHL Scoreboard', prefix: 'sensor.nhl_', limit: 5, special_teams: [], rankType: 'win-draw-loss' },
       ],
     };
   }
@@ -457,11 +435,10 @@ class SportScoreboardCard extends HTMLElement {
 
 customElements.define('ha-teamtracker-scoreboard-card', SportScoreboardCard);
 
-// Register with the HA card picker
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type:        'ha-teamtracker-scoreboard-card',
-  name:        'TeamTracker Scoreboard Card',
+  type: 'ha-teamtracker-scoreboard-card',
+  name: 'TeamTracker Scoreboard Card',
   description: 'Compact sports scoreboard powered by ha-teamtracker',
-  preview:     false,
+  preview: false,
 });
