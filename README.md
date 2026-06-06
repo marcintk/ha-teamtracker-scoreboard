@@ -1,5 +1,7 @@
 # TeamTracker Scoreboard Card
 
+![Preview](docs/preview.png)
+
 A compact, auto-generating sports scoreboard card for Home Assistant Lovelace dashboards.
 
 Displays live scores, pre-game odds, win probability, TV network, and series info — one row per game, grouped by sport. Built on top of the [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
