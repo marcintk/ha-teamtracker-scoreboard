@@ -118,10 +118,26 @@ describe('sectionHtml', () => {
     expect(html).toContain('&lt;b&gt;NBA&lt;/b&gt;');
   });
 
-  it('marks special teams correctly', () => {
+  it('marks special teams correctly using default CSS var color', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
     const html = sectionHtml({ ...section, special_teams: ['lal'] }, states);
     expect(html).toContain('scoreboard-special-color');
+  });
+
+  it('applies config colors to special teams', () => {
+    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+    const html = sectionHtml({ ...section, special_teams: ['lal'] }, states, {
+      special: 'gold',
+    });
+    expect(html).toContain('gold');
+    expect(html).not.toContain('scoreboard-special-color');
+  });
+
+  it('applies config colors to team and opponent', () => {
+    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+    const html = sectionHtml(section, states, { team: 'cyan', opponent: 'dimgray' });
+    expect(html).toContain('cyan');
+    expect(html).toContain('dimgray');
   });
 
   it('sorts by-date with multiple entities in ascending date order', () => {

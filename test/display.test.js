@@ -51,13 +51,20 @@ describe('teamColor', () => {
     expect(teamColor('home', homeAttr, false)).toBe('var(--scoreboard-team-color, white)');
   });
 
-  it('returns special color when side matches and special is true', () => {
-    expect(teamColor('home', homeAttr, true)).toBe('var(--scoreboard-special-color, orange)');
+  it('returns special color (blue) when side matches and special is true', () => {
+    expect(teamColor('home', homeAttr, true)).toBe('var(--scoreboard-special-color, #2196F3)');
   });
 
   it('returns opponent color when side does not match', () => {
     expect(teamColor('away', homeAttr, false)).toBe('var(--scoreboard-opponent-color, #777)');
     expect(teamColor('away', homeAttr, true)).toBe('var(--scoreboard-opponent-color, #777)');
+  });
+
+  it('uses config colors when provided', () => {
+    const colors = { team: 'cyan', special: 'gold', opponent: 'gray' };
+    expect(teamColor('home', homeAttr, false, colors)).toBe('cyan');
+    expect(teamColor('home', homeAttr, true, colors)).toBe('gold');
+    expect(teamColor('away', homeAttr, false, colors)).toBe('gray');
   });
 });
 

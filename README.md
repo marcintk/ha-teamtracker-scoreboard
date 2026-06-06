@@ -16,7 +16,7 @@ game, grouped by sport. Built on top of the
 - TV network badge on live and upcoming games
 - Team logos from ha-teamtracker (ESPN CDN)
 - Auto-deduplication: one row per game, not per sensor
-- Highlight your favourite teams in orange via `special_teams`
+- Highlight your favourite teams in blue via `special_teams` (colour configurable)
 - Automatically falls back to date sort during playoffs / tournaments
 - Single HACS install — no extra card dependencies
 
@@ -76,20 +76,21 @@ sections:
 
 ### Options
 
-| Option     | Type   | Default  | Description                |
-| ---------- | ------ | -------- | -------------------------- |
-| `height`   | string | `475px`  | Card height (CSS value)    |
-| `sections` | list   | required | One entry per sport/league |
+| Option     | Type   | Default  | Description                                   |
+| ---------- | ------ | -------- | --------------------------------------------- |
+| `height`   | string | `475px`  | Card height (CSS value)                       |
+| `sections` | list   | required | One entry per sport/league                    |
+| `colors`   | map    | —        | Override team colours (see [Colors](#colors)) |
 
 ### Section options
 
-| Field           | Type   | Default    | Description                                                                                           |
-| --------------- | ------ | ---------- | ----------------------------------------------------------------------------------------------------- |
-| `name`          | string | required   | Header label shown above the section                                                                  |
-| `prefix`        | string | required   | Entity ID prefix, e.g. `sensor.nba_`                                                                  |
-| `limit`         | number | `10`       | Max rows to show                                                                                      |
-| `special_teams` | list   | `[]`       | Team suffixes to highlight in orange. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `rankType`      | string | `win-loss` | How to rank teams during regular season. See below                                                    |
+| Field           | Type   | Default    | Description                                                                                 |
+| --------------- | ------ | ---------- | ------------------------------------------------------------------------------------------- |
+| `name`          | string | required   | Header label shown above the section                                                        |
+| `prefix`        | string | required   | Entity ID prefix, e.g. `sensor.nba_`                                                        |
+| `limit`         | number | `10`       | Max rows to show                                                                            |
+| `special_teams` | list   | `[]`       | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
+| `rankType`      | string | `win-loss` | How to rank teams during regular season. See below                                          |
 
 ### rankType values
 
@@ -102,15 +103,33 @@ sections:
 `rankType` only applies during the regular season. Outside it (playoffs, cups), the card
 automatically sorts by game date regardless of your setting.
 
-## Theming
+## Colors
 
-Override colours with CSS custom properties in your HA theme:
+Set team colours directly in the card config:
+
+```yaml
+type: custom:ha-teamtracker-scoreboard-card
+colors:
+  team: white # your tracked team (default: white)
+  opponent: "#777" # the other team (default: #777)
+  special: "#2196F3" # special_teams highlight (default: #2196F3, matches section headers)
+sections:
+  - ...
+```
+
+| Key        | Default   | Description                          |
+| ---------- | --------- | ------------------------------------ |
+| `team`     | `white`   | Colour for your tracked team         |
+| `opponent` | `#777`    | Colour for the opposing team         |
+| `special`  | `#2196F3` | Highlight colour for `special_teams` |
+
+All three also accept CSS custom properties via your HA theme as a fallback:
 
 ```yaml
 ha-teamtracker-scoreboard-card:
   --scoreboard-team-color: white
   --scoreboard-opponent-color: "#777"
-  --scoreboard-special-color: orange
+  --scoreboard-special-color: "#2196F3"
 ```
 
 ## Score row visual states

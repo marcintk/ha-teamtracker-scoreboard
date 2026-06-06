@@ -15,7 +15,7 @@ import {
 import { deduplicate, sortKeyFor } from './sorting.js';
 import { esc } from './utils.js';
 
-export function rowHtml(stateObj, special) {
+export function rowHtml(stateObj, special, colors = {}) {
   const gs = stateObj?.state ?? 'NOT_FOUND';
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
@@ -23,8 +23,8 @@ export function rowHtml(stateObj, special) {
   return `
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:${teamColor('home', attr, special)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('home', attr, special)}">${rankText('home', attr)}</div>
+    <div class="team-name" style="color:${teamColor('home', attr, special, colors)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', gs, attr)}</div>
   <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr)}">${scoreText('home', gs, attr)}</div>
@@ -32,15 +32,15 @@ export function rowHtml(stateObj, special) {
   <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', gs, attr)}</div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:${teamColor('away', attr, special)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('away', attr, special)}">${rankText('away', attr)}</div>
+    <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
   </div>
   <div class="message">${messageHtml(gs, attr)}</div>
   <div class="tv">${tvHtml(gs, attr)}</div>
 </div>`;
 }
 
-export function sectionHtml(section, states) {
+export function sectionHtml(section, states, colors = {}) {
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-loss' } = section;
 
   const entities = Object.keys(states).filter(
@@ -63,7 +63,7 @@ export function sectionHtml(section, states) {
 
   const rows = deduplicate(items, effectiveRankType, states)
     .slice(0, limit)
-    .map(({ entityId, special }) => rowHtml(states[entityId], special))
+    .map(({ entityId, special }) => rowHtml(states[entityId], special, colors))
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;

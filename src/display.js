@@ -5,11 +5,10 @@ export function isTeamSide(side, attr) {
   return side === 'home' ? attr?.team_homeaway === 'home' : attr?.team_homeaway !== 'home';
 }
 
-export function teamColor(side, attr, special) {
-  if (!isTeamSide(side, attr)) return 'var(--scoreboard-opponent-color, #777)';
-  return special
-    ? 'var(--scoreboard-special-color, orange)'
-    : 'var(--scoreboard-team-color, white)';
+export function teamColor(side, attr, special, colors = {}) {
+  if (!isTeamSide(side, attr)) return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)';
+  if (special) return colors.special ?? 'var(--scoreboard-special-color, #2196F3)';
+  return colors.team ?? 'var(--scoreboard-team-color, white)';
 }
 
 export function scoreBg(gs) {
