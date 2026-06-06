@@ -4,7 +4,7 @@ export const CARD_STYLES = `
   ha-card {
     padding: 4px 8px 4px 6px;
     box-sizing: border-box;
-    overflow-y: auto;
+    overflow: hidden;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
     font-size: 14px;

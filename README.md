@@ -76,7 +76,6 @@ Add a **Manual card** to your dashboard and paste:
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
-height: 475px
 sections:
   - name: NBA Scoreboard
     prefix: sensor.nba_
@@ -101,7 +100,7 @@ sections:
 
 | Option     | Type   | Default  | Description                                   |
 | ---------- | ------ | -------- | --------------------------------------------- |
-| `height`   | string | `475px`  | Card height (CSS value)                       |
+| `height`   | string | auto     | Card height (CSS value); omit to fit content  |
 | `sections` | list   | required | One entry per sport/league                    |
 | `colors`   | map    | —        | Override team colours (see [Colors](#colors)) |
 

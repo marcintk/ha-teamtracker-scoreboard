@@ -36,7 +36,7 @@ class SportScoreboardCard extends HTMLElement {
 
   _render() {
     try {
-      const { sections, height = '475px', colors = {} } = this._config;
+      const { sections, height, colors = {} } = this._config;
       const states = this._hass.states;
 
       if (!Array.isArray(sections) || !sections.length) {
@@ -45,14 +45,16 @@ class SportScoreboardCard extends HTMLElement {
       }
 
       const body = sections.map((s) => sectionHtml(s, states, colors)).join('');
-      const h = esc(String(height));
+      const heightStyle = height
+        ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
+        : '';
       const headerOverride = colors.header
         ? `.section-header{color:${esc(String(colors.header))}}`
         : '';
 
       this.shadowRoot.innerHTML = `
         <style>${CARD_STYLES}${headerOverride}</style>
-        <ha-card style="height:${h};min-height:${h};max-height:${h};">
+        <ha-card style="${heightStyle}">
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>
       `;
@@ -74,12 +76,13 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize() {
-    return Math.ceil(parseInt(this._config?.height ?? 475, 10) / 50);
+    if (this._config?.height) return Math.ceil(parseInt(this._config.height, 10) / 50);
+    const rows = (this._config?.sections ?? []).reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
+    return Math.max(1, Math.ceil((rows * 28) / 50));
   }
 
   static getStubConfig() {
     return {
-      height: '475px',
       sections: [
         {
           name: 'NBA Scoreboard',
