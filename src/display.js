@@ -2,9 +2,7 @@ import { esc, safeLogoUrl } from './utils.js';
 
 // Returns true when `side` ('home'|'away') matches the sensor's tracked team.
 export function isTeamSide(side, attr) {
-  return side === 'home'
-    ? attr?.team_homeaway === 'home'
-    : attr?.team_homeaway !== 'home';
+  return side === 'home' ? attr?.team_homeaway === 'home' : attr?.team_homeaway !== 'home';
 }
 
 export function teamColor(side, attr, special) {
@@ -64,9 +62,7 @@ export function tvHtml(gs, attr) {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
-  const label = tv.includes('/')
-    ? `${tv.split('/')[0].substring(0, 8)}›`
-    : tv.substring(0, 8);
+  const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
   const bg = gs === 'IN' ? 'indianred' : '#666';
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }

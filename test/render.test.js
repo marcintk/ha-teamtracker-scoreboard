@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { rowHtml, sectionHtml } from '../src/render.js';
 
 const makeState = (state, attrs) => ({ state, attributes: attrs });
@@ -66,7 +66,13 @@ describe('rowHtml', () => {
 });
 
 describe('sectionHtml', () => {
-  const section = { name: 'NBA', prefix: 'sensor.nba_', limit: 10, special_teams: [], rankType: 'win-loss' };
+  const section = {
+    name: 'NBA',
+    prefix: 'sensor.nba_',
+    limit: 10,
+    special_teams: [],
+    rankType: 'win-loss',
+  };
 
   it('returns empty string when no matching entities', () => {
     expect(sectionHtml(section, {})).toBe('');
@@ -120,7 +126,11 @@ describe('sectionHtml', () => {
 
   it('auto-switches to by-date sort outside regular season', () => {
     const states = {
-      'sensor.nba_lal': makeState('PRE', { ...baseAttrs, season: 'playoffs', date: '2024-04-20T00:00:00Z' }),
+      'sensor.nba_lal': makeState('PRE', {
+        ...baseAttrs,
+        season: 'playoffs',
+        date: '2024-04-20T00:00:00Z',
+      }),
     };
     // Should not throw — just verifies the fallback path executes cleanly
     expect(() => sectionHtml(section, states)).not.toThrow();

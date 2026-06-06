@@ -1,19 +1,19 @@
 import { VALID_STATES } from './constants.js';
-import { esc } from './utils.js';
-import { sortKeyFor, deduplicate } from './sorting.js';
 import {
-  isTeamSide,
-  teamColor,
-  scoreBg,
-  scoreColor,
   colonColor,
-  scoreText,
+  isTeamSide,
+  logoHtml,
+  messageHtml,
   nameText,
   rankText,
-  logoHtml,
+  scoreBg,
+  scoreColor,
+  scoreText,
+  teamColor,
   tvHtml,
-  messageHtml,
 } from './display.js';
+import { deduplicate, sortKeyFor } from './sorting.js';
+import { esc } from './utils.js';
 
 export function rowHtml(stateObj, special) {
   const gs = stateObj?.state ?? 'NOT_FOUND';

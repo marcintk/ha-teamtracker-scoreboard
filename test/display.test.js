@@ -1,22 +1,31 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  isTeamSide,
-  teamColor,
-  scoreBg,
-  scoreColor,
   colonColor,
-  scoreText,
+  isTeamSide,
+  logoHtml,
+  messageHtml,
   nameText,
   rankText,
-  logoHtml,
+  scoreBg,
+  scoreColor,
+  scoreText,
+  teamColor,
   tvHtml,
-  messageHtml,
 } from '../src/display.js';
 
-const homeAttr = { team_homeaway: 'home', team_name: 'Lakers', opponent_name: 'Celtics',
-  team_record: '20-10', opponent_record: '18-12', team_score: '95', opponent_score: '90',
-  team_winner: true, opponent_winner: false,
-  team_logo: 'https://cdn.example.com/lal.png', opponent_logo: 'https://cdn.example.com/bos.png' };
+const homeAttr = {
+  team_homeaway: 'home',
+  team_name: 'Lakers',
+  opponent_name: 'Celtics',
+  team_record: '20-10',
+  opponent_record: '18-12',
+  team_score: '95',
+  opponent_score: '90',
+  team_winner: true,
+  opponent_winner: false,
+  team_logo: 'https://cdn.example.com/lal.png',
+  opponent_logo: 'https://cdn.example.com/bos.png',
+};
 
 const awayAttr = { ...homeAttr, team_homeaway: 'away' };
 
@@ -191,7 +200,11 @@ describe('messageHtml', () => {
   });
 
   it('shows clock and win probability for IN', () => {
-    const html = messageHtml('IN', { clock: 'Q3 5:00', team_abbr: 'LAL', team_win_probability: '0.65' });
+    const html = messageHtml('IN', {
+      clock: 'Q3 5:00',
+      team_abbr: 'LAL',
+      team_win_probability: '0.65',
+    });
     expect(html).toContain('Q3 5:00');
     expect(html).toContain('65.0%');
   });

@@ -1,6 +1,6 @@
-import { esc } from './utils.js';
 import { sectionHtml } from './render.js';
 import { CARD_STYLES } from './styles.js';
+import { esc } from './utils.js';
 
 class SportScoreboardCard extends HTMLElement {
   constructor() {
@@ -55,6 +55,7 @@ class SportScoreboardCard extends HTMLElement {
       `;
     } catch (e) {
       this._showError(e.message);
+      // biome-ignore lint/suspicious/noConsole: intentional render error logging
       console.error('ha-teamtracker-scoreboard-card render error:', e);
     }
   }
@@ -70,15 +71,27 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize() {
-    return Math.ceil(parseInt(this._config?.height ?? 475) / 50);
+    return Math.ceil(parseInt(this._config?.height ?? 475, 10) / 50);
   }
 
   static getStubConfig() {
     return {
       height: '475px',
       sections: [
-        { name: 'NBA Scoreboard', prefix: 'sensor.nba_', limit: 10, special_teams: [], rankType: 'win-loss' },
-        { name: 'NHL Scoreboard', prefix: 'sensor.nhl_', limit: 5, special_teams: [], rankType: 'win-draw-loss' },
+        {
+          name: 'NBA Scoreboard',
+          prefix: 'sensor.nba_',
+          limit: 10,
+          special_teams: [],
+          rankType: 'win-loss',
+        },
+        {
+          name: 'NHL Scoreboard',
+          prefix: 'sensor.nhl_',
+          limit: 5,
+          special_teams: [],
+          rankType: 'win-draw-loss',
+        },
       ],
     };
   }

@@ -1,10 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { winRatio, sortKeyFor, preferHome, deduplicate } from '../src/sorting.js';
-
-const state = (homeaway, date, team_abbr, opponent_abbr, team_record) => ({
-  entityId: `sensor.nba_${team_abbr}`,
-  attributes: { team_homeaway: homeaway, date, team_abbr, opponent_abbr, team_record },
-});
+import { describe, expect, it } from 'vitest';
+import { deduplicate, preferHome, sortKeyFor, winRatio } from '../src/sorting.js';
 
 describe('winRatio', () => {
   it('calculates win percentage for win-loss', () => {
@@ -47,10 +42,7 @@ describe('preferHome', () => {
       'sensor.nba_lal': { attributes: { team_homeaway: 'away' } },
       'sensor.nba_gsw': { attributes: { team_homeaway: 'home' } },
     };
-    const list = [
-      { entityId: 'sensor.nba_lal' },
-      { entityId: 'sensor.nba_gsw' },
-    ];
+    const list = [{ entityId: 'sensor.nba_lal' }, { entityId: 'sensor.nba_gsw' }];
     const result = preferHome(list, states);
     expect(result[0].entityId).toBe('sensor.nba_gsw');
   });
@@ -66,39 +58,52 @@ describe('deduplicate', () => {
   it('removes duplicate game from two sensors for the same match', () => {
     const date = '2024-03-15';
     const states = {
-      'sensor.wc_fra': { attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' } },
-      'sensor.wc_bra': { attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' } },
+      'sensor.wc_fra': {
+        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
+      },
+      'sensor.wc_bra': {
+        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
+      },
     };
-    const list = [
-      { entityId: 'sensor.wc_fra' },
-      { entityId: 'sensor.wc_bra' },
-    ];
+    const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(1);
   });
 
   it('keeps both entries when games are on different dates', () => {
     const states = {
-      'sensor.wc_fra': { attributes: { team_homeaway: 'home', date: '2024-03-15', team_abbr: 'fra', opponent_abbr: 'bra' } },
-      'sensor.wc_bra': { attributes: { team_homeaway: 'home', date: '2024-03-16', team_abbr: 'bra', opponent_abbr: 'fra' } },
+      'sensor.wc_fra': {
+        attributes: {
+          team_homeaway: 'home',
+          date: '2024-03-15',
+          team_abbr: 'fra',
+          opponent_abbr: 'bra',
+        },
+      },
+      'sensor.wc_bra': {
+        attributes: {
+          team_homeaway: 'home',
+          date: '2024-03-16',
+          team_abbr: 'bra',
+          opponent_abbr: 'fra',
+        },
+      },
     };
-    const list = [
-      { entityId: 'sensor.wc_fra' },
-      { entityId: 'sensor.wc_bra' },
-    ];
+    const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     expect(deduplicate(list, 'by-date', states)).toHaveLength(2);
   });
 
   it('prefers home sensor when deduplicating', () => {
     const date = '2024-03-15';
     const states = {
-      'sensor.wc_fra': { attributes: { team_homeaway: 'away', date, team_abbr: 'fra', opponent_abbr: 'bra' } },
-      'sensor.wc_bra': { attributes: { team_homeaway: 'home', date, team_abbr: 'bra', opponent_abbr: 'fra' } },
+      'sensor.wc_fra': {
+        attributes: { team_homeaway: 'away', date, team_abbr: 'fra', opponent_abbr: 'bra' },
+      },
+      'sensor.wc_bra': {
+        attributes: { team_homeaway: 'home', date, team_abbr: 'bra', opponent_abbr: 'fra' },
+      },
     };
-    const list = [
-      { entityId: 'sensor.wc_fra' },
-      { entityId: 'sensor.wc_bra' },
-    ];
+    const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     const result = deduplicate(list, 'by-date', states);
     expect(result[0].entityId).toBe('sensor.wc_bra');
   });
