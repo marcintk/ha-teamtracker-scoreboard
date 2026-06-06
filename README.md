@@ -36,9 +36,9 @@ That's it. This card replaces button-card, config-template-card, stack-in-card, 
 
 ### Manual
 
-1. Copy `ha-teamtracker-scoreboard-card.js` to `<config>/www/ha-teamtracker-scoreboard-card.js`
+1. Copy `card.js` to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder if needed)
 2. In Home Assistant → Settings → Dashboards → Resources → **Add resource**
-   - URL: `/local/ha-teamtracker-scoreboard-card.js`
+   - URL: `/local/ha-teamtracker-scoreboard-card/card.js`
    - Resource type: **JavaScript module**
 3. Reload your browser
 
@@ -55,19 +55,19 @@ sections:
     limit: 10
     special_teams:
       - bos
-    sort: rank-win-loss
+    rankType: win-loss
   - name: NHL Scoreboard
     prefix: sensor.nhl_
     limit: 5
     special_teams:
       - dal
-    sort: rank-win-draw-loss
+    rankType: win-draw-loss
   - name: World Cup
     prefix: sensor.wc_
     limit: 13
     special_teams:
       - fra
-    sort: earliest_date
+    rankType: by-date
 ```
 
 ### Options
@@ -85,17 +85,17 @@ sections:
 | `prefix` | string | required | Entity ID prefix, e.g. `sensor.nba_` |
 | `limit` | number | `10` | Max rows to show |
 | `special_teams` | list | `[]` | Team suffixes to highlight in orange. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `sort` | string | `rank-win-loss` | See sort types below |
+| `rankType` | string | `win-loss` | How to rank teams during regular season. See below |
 
-### Sort types
+### rankType values
 
 | Value | Use for |
 |---|---|
-| `rank-win-loss` | Leagues with W/L records (NBA, NFL, MLB, …) |
-| `rank-win-draw-loss` | Leagues where draws count (NHL, MLS, soccer, …) |
-| `earliest_date` | Tournaments without standings (World Cup, playoffs, …) |
+| `win-loss` | Leagues with W/L records (NBA, NFL, MLB, …) |
+| `win-draw-loss` | Leagues where draws count (NHL, MLS, soccer, …) |
+| `by-date` | Tournaments without standings (World Cup, …) |
 
-During non-regular seasons (e.g. playoffs) the card automatically switches to `earliest_date` regardless of your setting.
+`rankType` only applies during the regular season. Outside it (playoffs, cups), the card automatically sorts by game date regardless of your setting.
 
 ## Theming
 

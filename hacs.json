@@ -1,4 +1,5 @@
 {
-  "name": "Sport Scoreboard Card",
-  "render_readme": true
+  "name": "TeamTracker Scoreboard Card",
+  "render_readme": true,
+  "filename": "card.js"
 }
