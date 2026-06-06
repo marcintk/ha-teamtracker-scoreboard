@@ -8,20 +8,50 @@ class SportScoreboardCard extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this._config = null;
     this._hass = null;
+    this._refreshTimer = null;
   }
 
   setConfig(config) {
     this._config = config;
+    this._startRefreshTimer();
     if (this._hass) this._render();
   }
 
   set hass(hass) {
-    if (this._hasRelevantChange(hass)) {
-      this._hass = hass;
-      if (this._config) this._render();
+    const isAuto =
+      !this._config || this._config.refresh === undefined || this._config.refresh === 'auto';
+
+    if (isAuto) {
+      if (this._hasRelevantChange(hass)) {
+        this._hass = hass;
+        if (this._config) this._render();
+      } else {
+        this._hass = hass;
+      }
     } else {
       this._hass = hass;
     }
+  }
+
+  _startRefreshTimer() {
+    this._stopRefreshTimer();
+    const interval = this._config?.refresh;
+    if (typeof interval === 'number' && interval > 0) {
+      this._refreshTimer = setInterval(() => {
+        if (this._hass && this._config) this._render();
+      }, interval * 1000);
+    }
+  }
+
+  _stopRefreshTimer() {
+    if (this._refreshTimer) {
+      clearInterval(this._refreshTimer);
+      this._refreshTimer = null;
+    }
+  }
+
+  disconnectedCallback() {
+    this._stopRefreshTimer();
   }
 
   _hasRelevantChange(newHass) {

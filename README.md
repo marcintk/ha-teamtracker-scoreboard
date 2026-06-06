@@ -1,11 +1,14 @@
 # TeamTracker Scoreboard Card
+
 [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz)
 [![GitHub Release](https://img.shields.io/github/release/marcintk/ha-teamtracker-scoreboard.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard/releases)
 [![CI](https://github.com/marcintk/ha-teamtracker-scoreboard/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard/actions/workflows/build-and-test.yml)
 
-Home Assistant custom Lovelace card displaying live scores, pre-game odds, win probability, TV network, and series info — one row per game, grouped by sport. Built on top of the [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
+Home Assistant custom Lovelace card displaying live scores, pre-game odds, win probability, TV
+network, and series info — one row per game, grouped by sport. Built on top of the
+[ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
 
-Preview:
+## Preview
 
 <picture>
   <img src="docs/preview.png" alt="TeamTracker Scoreboard Card preview">
@@ -101,31 +104,32 @@ sections:
 
 ### Options
 
-| Option     | Type   | Default  | Description                                   |
-| ---------- | ------ | -------- | --------------------------------------------- |
-| `height`   | string | auto     | Card height (CSS value); omit to fit content  |
-| `sections` | list   | required | One entry per sport/league                    |
-| `colors`   | map    | —        | Override team colours (see [Colors](#colors)) |
+| Option     | Type              | Default  | Description                                                                  |
+| ---------- | ----------------- | -------- | ---------------------------------------------------------------------------- |
+| `height`   | string            | auto     | Card height (CSS value); omit to fit content                                 |
+| `refresh`  | `"auto"` / number | `"auto"` | `"auto"` re-renders on HA state changes; a number re-renders every n seconds |
+| `sections` | list              | required | One entry per sport/league                                                   |
+| `colors`   | map               | —        | Override team colours (see [Colors](#colors))                                |
 
 ### Section options
 
-| Field           | Type   | Default    | Description                                                                                 |
-| --------------- | ------ | ---------- | ------------------------------------------------------------------------------------------- |
-| `name`          | string | required   | Header label shown above the section                                                        |
-| `prefix`        | string | required   | Entity ID prefix, e.g. `sensor.nba_`                                                        |
-| `limit`         | number | `10`       | Max rows to show                                                                            |
-| `special_teams` | list   | `[]`       | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `rankType`      | string | `win-draw-loss` | How to rank teams during regular season. See below                                     |
+| Field           | Type   | Default         | Description                                                                                 |
+| --------------- | ------ | --------------- | ------------------------------------------------------------------------------------------- |
+| `name`          | string | required        | Header label shown above the section                                                        |
+| `prefix`        | string | required        | Entity ID prefix, e.g. `sensor.nba_`                                                        |
+| `limit`         | number | `10`            | Max rows to show                                                                            |
+| `special_teams` | list   | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
+| `rankType`      | string | `win-draw-loss` | How to rank teams during regular season. See below                                          |
 
 ### rankType values
 
 | Value           | Use for                                         |
 | --------------- | ----------------------------------------------- |
 | `win-draw-loss` | Leagues where draws count (NHL, MLS, soccer, …) |
-| `win-loss`      | Leagues with W/L records only (NBA, NFL, MLB, …)|
+| `win-loss`      | Leagues with W/L records only (NBA, …)          |
 
 `rankType` only applies during the regular season. Outside it (playoffs, cups, tournaments), the
-card automatically sorts by game date regardless of your setting — no `by-date` option needed.
+card automatically sorts by game date regardless of your setting.
 
 ## Colors
 
@@ -136,7 +140,7 @@ type: custom:ha-teamtracker-scoreboard-card
 colors:
   team: white
   opponent: gray
-  special: "#2196F3" # Material Blue — matches section headers
+  special: "#2196F3" # Material Blue
   header: "#2196F3" # Material Blue
   winner: orange
   loser: darkgray
@@ -149,7 +153,7 @@ sections:
 | Key        | Default                   | Description                                |
 | ---------- | ------------------------- | ------------------------------------------ |
 | `team`     | `white`                   | Your tracked team name                     |
-| `opponent` | `#777` (gray)             | Opponent name                              |
+| `opponent` | `#777` (Gray)             | Opponent name                              |
 | `special`  | `#2196F3` (Material Blue) | `special_teams` highlight                  |
 | `header`   | `#2196F3` (Material Blue) | Section header label                       |
 | `winner`   | `orange`                  | POST winner score and final clock          |
