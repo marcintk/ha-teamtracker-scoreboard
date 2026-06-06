@@ -11,7 +11,7 @@ export const CARD_STYLES = `
   }
 
   .section-header {
-    color: #2196F3;
+    color: #2196F3; /* Material Blue */
     font-size: 15px;
     padding: 2px 0 2px 0;
     margin-top: 1px;

@@ -7,7 +7,8 @@ export function isTeamSide(side, attr) {
 
 export function teamColor(side, attr, special, colors = {}) {
   if (!isTeamSide(side, attr)) return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)';
-  if (special) return colors.special ?? 'var(--scoreboard-special-color, #2196F3)';
+  if (special)
+    return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
   return colors.team ?? 'var(--scoreboard-team-color, white)';
 }
 

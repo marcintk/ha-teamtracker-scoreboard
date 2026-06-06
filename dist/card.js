@@ -18,7 +18,8 @@ function isTeamSide(side, attr) {
 
 function teamColor(side, attr, special, colors = {}) {
   if (!isTeamSide(side, attr)) return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)';
-  if (special) return colors.special ?? 'var(--scoreboard-special-color, #2196F3)';
+  if (special)
+    return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
   return colors.team ?? 'var(--scoreboard-team-color, white)';
 }
 
@@ -223,7 +224,7 @@ const CARD_STYLES = `
   }
 
   .section-header {
-    color: #2196F3;
+    color: #2196F3; /* Material Blue */
     font-size: 15px;
     padding: 2px 0 2px 0;
     margin-top: 1px;
