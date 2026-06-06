@@ -124,6 +124,32 @@ describe('sectionHtml', () => {
     expect(html).toContain('scoreboard-special-color');
   });
 
+  it('sorts by-date with multiple entities in ascending date order', () => {
+    const states = {
+      'sensor.wc_bra': makeState('PRE', {
+        ...baseAttrs,
+        date: '2024-04-20T00:00:00Z',
+        team_name: 'Brazil',
+        season: 'regular',
+      }),
+      'sensor.wc_fra': makeState('PRE', {
+        ...baseAttrs,
+        date: '2024-04-18T00:00:00Z',
+        team_name: 'France',
+        season: 'regular',
+      }),
+    };
+    const wcSection = {
+      name: 'WC',
+      prefix: 'sensor.wc_',
+      limit: 10,
+      special_teams: [],
+      rankType: 'by-date',
+    };
+    const html = sectionHtml(wcSection, states);
+    expect(html.indexOf('France')).toBeLessThan(html.indexOf('Brazil'));
+  });
+
   it('auto-switches to by-date sort outside regular season', () => {
     const states = {
       'sensor.nba_lal': makeState('PRE', {

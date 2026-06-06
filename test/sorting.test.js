@@ -93,6 +93,26 @@ describe('deduplicate', () => {
     expect(deduplicate(list, 'by-date', states)).toHaveLength(2);
   });
 
+  it('handles entity missing from states gracefully', () => {
+    const list = [
+      { entityId: 'sensor.wc_fra' },
+      { entityId: 'sensor.wc_missing' }, // not in states
+    ];
+    const states = {
+      'sensor.wc_fra': {
+        attributes: {
+          team_homeaway: 'home',
+          date: '2024-03-15',
+          team_abbr: 'fra',
+          opponent_abbr: 'bra',
+        },
+      },
+    };
+    // sensor.wc_missing hits the ?? {} fallback — key becomes "undefined_..."
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(2);
+  });
+
   it('prefers home sensor when deduplicating', () => {
     const date = '2024-03-15';
     const states = {
