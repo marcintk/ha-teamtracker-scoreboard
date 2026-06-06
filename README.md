@@ -56,7 +56,7 @@ consistent `<league>_<team>` pattern so the card can group them with a single `p
 
 1. In HACS → Frontend → click the three-dot menu → **Custom repositories**
    - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard` (exact URL)
-   - Category: **Lovelace**
+   - Category: **Dashboard**
 2. Search **TeamTracker Scoreboard Card** → Install
 3. Reload your browser
 4. Add the card to your dashboard (see Configuration below)
