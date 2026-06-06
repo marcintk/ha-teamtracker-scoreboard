@@ -27,9 +27,9 @@ function safeLogoUrl(url) {
 
 // ── Sorting ───────────────────────────────────────────────────────────────────
 
-function winRatio(record, sortType) {
+function winRatio(record, rankType) {
   const pts = String(record ?? '0-0').split('-').map(Number);
-  if (sortType === 'rank-win-draw-loss') {
+  if (rankType === 'win-draw-loss') {
     // W-D-L: points = 2W + D, max = 2(W+D+L)
     return (pts[0] + pts[1] + pts[2]) ? (2 * pts[0] + pts[2]) / (2 * (pts[0] + pts[1] + pts[2])) : 0;
   }
@@ -37,9 +37,9 @@ function winRatio(record, sortType) {
   return (pts[0] + pts[1]) ? pts[0] / (pts[0] + pts[1]) : 0;
 }
 
-function sortKeyFor(attr, sortType) {
-  if (sortType === 'earliest_date') return new Date(attr?.date ?? 0).getTime();
-  return winRatio(attr?.team_record, sortType);
+function sortKeyFor(attr, rankType) {
+  if (rankType === 'by-date') return new Date(attr?.date ?? 0).getTime();
+  return winRatio(attr?.team_record, rankType);
 }
 
 function preferHome(list, states) {
@@ -50,9 +50,9 @@ function preferHome(list, states) {
   });
 }
 
-// For tournament-style (earliest_date), one row per game — deduplicate by (date, team pair).
-function deduplicate(list, sortType, states) {
-  if (sortType !== 'earliest_date') return list;
+// For tournament-style (by-date), one row per game — deduplicate by (date, team pair).
+function deduplicate(list, rankType, states) {
+  if (rankType !== 'by-date') return list;
   const seen = new Set();
   return preferHome(list, states).filter(({ entityId }) => {
     const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
@@ -194,30 +194,30 @@ function rowHtml(stateObj, special) {
 }
 
 function sectionHtml(section, states) {
-  const { name, prefix, limit = 10, special_teams = [], sort = 'rank-win-loss' } = section;
+  const { name, prefix, limit = 10, special_teams = [], rankType = 'win-loss' } = section;
 
   const entities = Object.keys(states).filter(
     id => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
   );
   if (!entities.length) return '';
 
-  // Auto-switch to date sort outside regular season
+  // rankType applies to regular season only — auto-switch to by-date outside it
   const firstAttr = states[entities[0]]?.attributes;
-  const effectiveSort = (sort !== 'earliest_date' && firstAttr?.season !== 'regular')
-    ? 'earliest_date'
-    : sort;
+  const effectiveRankType = (rankType !== 'by-date' && firstAttr?.season !== 'regular')
+    ? 'by-date'
+    : rankType;
 
   const items = entities.map(entityId => ({
     entityId,
     special: special_teams.includes(entityId.replace(prefix, '')),
-    key: sortKeyFor(states[entityId]?.attributes, effectiveSort),
+    key: sortKeyFor(states[entityId]?.attributes, effectiveRankType),
   }));
 
   items.sort((a, b) =>
-    effectiveSort === 'earliest_date' ? a.key - b.key : b.key - a.key
+    effectiveRankType === 'by-date' ? a.key - b.key : b.key - a.key
   );
 
-  const rows = deduplicate(items, effectiveSort, states)
+  const rows = deduplicate(items, effectiveRankType, states)
     .slice(0, limit)
     .map(({ entityId, special }) => rowHtml(states[entityId], special))
     .join('');
@@ -242,8 +242,8 @@ const CARD_STYLES = `
   .section-header {
     color: #2196F3;
     font-size: 15px;
-    padding: 5px 0 2px 0;
-    margin-top: 2px;
+    padding: 2px 0 2px 0;
+    margin-top: 1px;
   }
 
   .game-row {
@@ -379,9 +379,6 @@ class SportScoreboardCard extends HTMLElement {
 
   // Called by HA when the user saves card config
   setConfig(config) {
-    if (!Array.isArray(config.sections) || !config.sections.length) {
-      throw new Error('"sections" must be a non-empty array');
-    }
     this._config = config;
     if (this._hass) this._render();
   }
@@ -408,15 +405,36 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _render() {
-    const { sections, height = '475px' } = this._config;
-    const states = this._hass.states;
+    try {
+      const sections = this._config.sections;
+      const height   = this._config.height ?? '475px';
+      const states   = this._hass.states;
 
-    const body = sections.map(s => sectionHtml(s, states)).join('');
+      if (!Array.isArray(sections) || !sections.length) {
+        this._showError('Add at least one section to your card config.');
+        return;
+      }
 
+      const body = sections.map(s => sectionHtml(s, states)).join('');
+
+      this.shadowRoot.innerHTML = `
+        <style>${CARD_STYLES}</style>
+        <ha-card style="height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};">
+          ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
+        </ha-card>
+      `;
+    } catch (e) {
+      this._showError(e.message);
+      console.error('ha-teamtracker-scoreboard-card render error:', e);
+    }
+  }
+
+  _showError(msg) {
     this.shadowRoot.innerHTML = `
-      <style>${CARD_STYLES}</style>
-      <ha-card style="height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};">
-        ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
+      <ha-card>
+        <div style="padding:12px;color:var(--error-color,red);font-size:13px;">
+          <b>ha-teamtracker-scoreboard-card error:</b><br>${esc(msg)}
+        </div>
       </ha-card>
     `;
   }
@@ -426,17 +444,12 @@ class SportScoreboardCard extends HTMLElement {
     return Math.ceil(parseInt(this._config?.height ?? 475) / 50);
   }
 
-  // Minimal visual editor stub — HA shows a JSON fallback when this is absent
-  static getConfigElement() {
-    return document.createElement('ha-teamtracker-scoreboard-card-editor');
-  }
-
   static getStubConfig() {
     return {
       height: '475px',
       sections: [
-        { name: 'NBA Scoreboard', prefix: 'sensor.nba_', limit: 10, special_teams: [], sort: 'rank-win-loss' },
-        { name: 'NHL Scoreboard', prefix: 'sensor.nhl_', limit: 5,  special_teams: [], sort: 'rank-win-draw-loss' },
+        { name: 'NBA Scoreboard', prefix: 'sensor.nba_', limit: 10, special_teams: [], rankType: 'win-loss' },
+        { name: 'NHL Scoreboard', prefix: 'sensor.nhl_', limit: 5,  special_teams: [], rankType: 'win-draw-loss' },
       ],
     };
   }

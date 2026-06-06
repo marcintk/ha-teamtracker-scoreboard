@@ -1,0 +1,351 @@
+button_card_templates:
+
+  mtk_sport_template:
+    variables:
+      entity: null
+      title: false
+      special: false
+      entity_obj: "[[[ return states[variables.entity] ?? null; ]]]"
+      attrs_obj: "[[[ return variables.entity_obj?.attributes ?? {}; ]]]"
+      game_state_obj: "[[[ return variables.entity_obj?.state ?? \"NOT_FOUND\"; ]]]"
+      home_away_obj: "[[[ return variables.attrs_obj.team_homeaway ?? 'none'; ]]]"
+      is_side_func: "[[[ return side => side === variables.home_away_obj; ]]]"
+      team_color_func: |-
+        [[[
+          return side => variables.is_side_func(side)
+            ? (variables.special ? 'orange' : 'white')
+            : 'gray';
+        ]]]
+      score_background_color_func: |-
+        [[[
+          return () => {
+            switch (variables.game_state_obj) {
+              case 'PRE': return "#303030";
+              case 'IN':  return "lightgray";
+              default:    return "rgba(0,0,0,0)";
+            }
+          }
+        ]]]
+      score_color_func: |-
+        [[[
+          return side => {
+            const { team_score, opponent_score, team_winner, opponent_winner } = variables.attrs_obj;
+            const isSide = variables.is_side_func(side);
+            switch (variables.game_state_obj) {
+              case 'PRE': return "black";
+              case 'IN':
+                const ts = parseFloat(team_score), os = parseFloat(opponent_score);
+                return (isSide ? ts >= os : os >= ts) ? "brown" : "black";
+              case 'POST':
+                return (isSide ? team_winner : opponent_winner) ? "orange" : "lightgray";
+              default: return "black";
+            }
+          }
+        ]]]
+      team_weight_func: |-
+        [[[ return side => variables.is_side_func(side) ? "bold" : "normal"; ]]]
+      logo_icon_func: |-
+        [[[
+          return side => {
+            if (variables.game_state_obj === "NOT_FOUND") return "";
+            const attr = variables.attrs_obj;
+            const logo = variables.is_side_func(side) ? attr.team_logo : attr.opponent_logo;
+            return `<img style="width:23px;" src="${logo}" />`;
+          }
+        ]]]
+      name_text_func: |-
+        [[[
+          return side => variables.is_side_func(side)
+            ? variables.attrs_obj.team_name
+            : variables.attrs_obj.opponent_name;
+        ]]]
+      rank_text_func: |-
+        [[[
+          return side => variables.is_side_func(side)
+            ? variables.attrs_obj.team_record
+            : variables.attrs_obj.opponent_record;
+        ]]]
+      score_text_func: |-
+        [[[
+          return side => {
+            switch (variables.game_state_obj) {
+              case "NOT_FOUND": return "";
+              case "PRE":       return "-";
+              default:          return variables.is_side_func(side)
+                ? variables.attrs_obj.team_score
+                : variables.attrs_obj.opponent_score;
+            }
+          }
+        ]]]
+    tap_action:
+      action: none
+    hold_action:
+      action: none
+    entity: "[[[ return variables.entity ]]]"
+    name: "[[[ return variables.name ]]]"
+    show_icon: false
+    styles:
+      grid:
+        - grid-template-areas: >-
+            "team_a logo_a score_a colon score_b logo_b team_b tv_channel message"
+            "rank_a logo_a score_a colon score_b logo_b rank_b tv_channel message"
+        - grid-template-columns: >-
+            min-content min-content min-content min-content min-content
+            min-content min-content min-content 1fr
+        - grid-template-rows: 1fr min-content
+      card:
+        - height: 28px
+        - padding: 0px 0px
+        - font-size: 14px
+        - font-weight: normal
+        - color: darkgray
+        - justify-self: start
+        - text-align: start
+        - display: "[[[ return variables.visible ? \"block\" : \"none\"; ]]]"
+      custom_fields:
+        logo_a:
+          - padding-right: 5px
+        team_a:
+          - text-align: end
+          - width: 100px
+          - color: "[[[ return variables.team_color_func(\"home\"); ]]]"
+          - font-weight: "[[[ return variables.team_weight_func(\"home\"); ]]]"
+        rank_a:
+          - font-size: 10px
+          - text-align: end
+          - color: "[[[ return variables.team_color_func(\"home\"); ]]]"
+          - font-weight: "[[[ return variables.team_weight_func(\"home\"); ]]]"
+        score_a:
+          - font-size: 18px
+          - font-weight: bold
+          - text-align: end
+          - display: flex
+          - flex-direction: column
+          - justify-content: center
+          - width: 33px
+          - background-color: "[[[ return variables.score_background_color_func(); ]]]"
+          - color: "[[[ return variables.score_color_func(\"home\"); ]]]"
+        colon:
+          - font-size: 18px
+          - font-weight: bold
+          - display: flex
+          - flex-direction: column
+          - justify-content: center
+          - background-color: "[[[ return variables.score_background_color_func(); ]]]"
+          - color: |-
+              [[[
+                switch (variables.game_state_obj) {
+                  case 'PRE':  return "black";
+                  case 'IN':   return "black";
+                  case 'POST': return "darkgray";
+                  default:     return "transparent";
+                }
+              ]]]
+        score_b:
+          - font-size: 18px
+          - font-weight: bold
+          - text-align: start
+          - display: flex
+          - flex-direction: column
+          - justify-content: center
+          - width: 33px
+          - background-color: "[[[ return variables.score_background_color_func(); ]]]"
+          - color: "[[[ return variables.score_color_func(\"away\"); ]]]"
+        logo_b:
+          - padding-left: 5px
+        team_b:
+          - text-align: start
+          - width: 100px
+          - color: "[[[ return variables.team_color_func(\"away\"); ]]]"
+          - font-weight: "[[[ return variables.team_weight_func(\"away\"); ]]]"
+        rank_b:
+          - font-size: 10px
+          - text-align: start
+          - color: "[[[ return variables.team_color_func(\"away\"); ]]]"
+          - font-weight: "[[[ return variables.team_weight_func(\"away\"); ]]]"
+        tv_channel:
+          - position: absolute
+          - font-size: 8px
+          - font-weight: bold
+          - border-radius: 40%
+          - right: 0%
+          - top: 0%
+          - color: black
+          - background-color: |-
+              [[[
+                switch (variables.game_state_obj) {
+                  case 'IN':  return "indianred";
+                  case 'PRE': return "darkgray";
+                  default:    return "transparent";
+                }
+              ]]]
+        message:
+          - font-size: 14px
+          - font-weight: bold
+          - display: flex
+          - flex-direction: row
+          - flex-wrap: wrap
+          - align-items: center
+          - justify-content: center
+          - line-height: 1
+          - color: |-
+              [[[
+                switch (variables.game_state_obj) {
+                  case 'IN':   return "indianred";
+                  case 'POST': return "orange";
+                  default:     return "darkgray";
+                }
+              ]]]
+    custom_fields:
+      logo_a: "[[[ return variables.logo_icon_func(\"home\"); ]]]"
+      team_a: "[[[ return variables.name_text_func(\"home\"); ]]]"
+      rank_a: "[[[ return variables.rank_text_func(\"home\"); ]]]"
+      score_a: "[[[ return variables.score_text_func(\"home\"); ]]]"
+      colon: |-
+        [[[
+          if (variables.game_state_obj === "NOT_FOUND") return "";
+          return "&nbsp;:&nbsp;";
+        ]]]
+      score_b: "[[[ return variables.score_text_func(\"away\"); ]]]"
+      logo_b: "[[[ return variables.logo_icon_func(\"away\"); ]]]"
+      team_b: "[[[ return variables.name_text_func(\"away\"); ]]]"
+      rank_b: "[[[ return variables.rank_text_func(\"away\"); ]]]"
+      tv_channel: |-
+        [[[
+          const game_state = variables.game_state_obj;
+          if (game_state === "PRE" || game_state === "IN") {
+            const tv = (variables.attrs_obj.tv_network ?? "").trim();
+            const channel = tv.includes("/") ? tv.split("/")[0].substring(0, 8) + ">" : tv.substring(0, 8);
+            return `&nbsp;${channel}&nbsp;`;
+          }
+        ]]]
+      message: |-
+        [[[
+          const game_state = variables.game_state_obj;
+          const attrs = variables.attrs_obj;
+          switch (game_state) {
+            case "NOT_FOUND":
+              const msg = (attrs.api_message ?? "Unknown").replace(/^Cached data:\s*/i, "").replace(/^API_LIMIT hit.\s*/i, "");
+              return `<span style="font-size:11px;font-weight:normal;">${msg}</span>`;
+            case "PRE":
+              return `${attrs.kickoff_in ?? ""}<div style="width:100%;font-size:11px;font-weight:normal;">${attrs.series_summary ?? attrs.odds}</div>`;
+            case "IN":
+              return `${attrs.clock ?? ""}<div style="width:100%;font-size:11px;font-weight:normal;">(${attrs.team_abbr ?? ""}${(Number(attrs.team_win_probability) * 100).toFixed(1)}%)</div>`;
+            default:
+              return `${attrs.clock}<div style="width:100%;font-size:11px;font-weight:normal;">${attrs.series_summary ?? ""}</div>`;
+          }
+        ]]]
+
+
+title: Home
+kiosk_mode:
+  user_settings:
+    - users:
+        - Pi Kiosk
+      kiosk: true
+views:
+  - title: Kiosk
+    path: kiosk
+    icon: mdi:home-import-outline
+    subview: false
+    type: panel
+    badges: []
+    cards:
+                  - type: custom:config-template-card
+                    entities:
+                      - sensor.sport_refresh_signal
+                    variables:
+                      generated_team_cards: |-
+                        (() => {
+                          const VALID_STATES = new Set(['PRE', 'IN', 'POST', 'BYE']);
+                          const sections = [
+                            { name: "NBA Scoreboard",      prefix: "sensor.nba_", limit: 10, special_teams: ['sa'],  sortType: 'rank-win-loss' },
+                            { name: "NHL Scoreboard",      prefix: "sensor.nhl_", limit: 5,  special_teams: ['dal'], sortType: 'rank-win-draw-loss' },
+                            { name: "WorldCup Scoreboard", prefix: "sensor.wc_",  limit: 13, special_teams: ['fra'], sortType: 'earliest_date' },
+                          ];
+                        
+                          const ratio = (numerator, total) => total ? numerator / total : 0;
+                        
+                          const calcRank = (pts, sortType) => {
+                            switch (sortType) {
+                              case 'rank-win-draw-loss': return ratio(2*pts[0] + pts[2], 2*pts[0] + pts[1] + pts[2]);
+                              default:                   return ratio(pts[0], pts[0] + pts[1]);
+                            }
+                          };
+                        
+                          const sortKey = (entityId, sortType) => {
+                            const attr = states[entityId]?.attributes;
+                            switch (sortType) {
+                              case 'earliest_date': return new Date(attr?.date ?? 0).getTime();
+                              default:              return calcRank((attr?.team_record ?? '0-0-0').split('-').map(Number), sortType);
+                            }
+                          };
+                        
+                          const preferHome = (list) => [...list].sort((a, b) =>
+                            (states[a.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1) -
+                            (states[b.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1)
+                          );
+                        
+                          const deduplicate = (list, sortType) => {
+                            if (sortType !== 'earliest_date') return list;
+                            const seen = new Set();
+                            return preferHome(list).filter(({ entityId }) => {
+                              const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
+                              const key = `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
+                              return seen.has(key) ? false : !!seen.add(key);
+                            });
+                          };
+                        
+                          const toCard = ({ entityId, special }) => ({
+                            type: 'custom:button-card',
+                            template: 'mtk_sport_template',
+                            variables: { entity: entityId, visible: true, special }
+                          });
+                        
+                          const buildSection = ({ name, prefix, limit, special_teams, sortType }) => {
+                            const header = {
+                              type: "custom:button-card",
+                              name,
+                              styles: {
+                                card: [{ height: "18px" }, { padding: "0px" }, { "box-shadow": "none" }],
+                                name: [{ color: "#2196F3" }, { "font-size": "16px" }, { "justify-self": "start" }, { padding: "4px 2px 4px 2px" }]
+                              }
+                            };
+                        
+                            const firstEntity = Object.keys(states).find(e => e.startsWith(prefix) && VALID_STATES.has(states[e]?.state));
+                            const effectiveSortType = sortType !== 'earliest_date' && states[firstEntity]?.attributes?.season !== 'regular'
+                              ? 'earliest_date'
+                              : sortType;
+                        
+                            const cards = deduplicate(
+                              Object.keys(states)
+                                .filter(e => e.startsWith(prefix) && VALID_STATES.has(states[e]?.state))
+                                .map(entityId => ({ entityId, special: special_teams.includes(entityId.replace(prefix, '')), sortKey: sortKey(entityId, effectiveSortType) }))
+                                .sort((a, b) => {
+                                  switch (effectiveSortType) {
+                                    case 'earliest_date': return a.sortKey - b.sortKey;
+                                    default:              return b.sortKey - a.sortKey;
+                                  }
+                                }),
+                              effectiveSortType
+                            ).slice(0, limit).map(toCard);
+                        
+                            return cards.length ? [header, ...cards] : [];
+                          };
+                        
+                          return sections.flatMap(buildSection);
+                        })()
+                    card_mod:
+                      style: "stack-in-card { --stack-card-gap: 0px; }"
+                    card:
+                      type: custom:stack-in-card
+                      mode: vertical
+                      cards: ${generated_team_cards}
+                      card_mod:
+                        style: |
+                          ha-card {
+                            --stack-card-gap: 0px;
+                            height: 475px !important;
+                            min-height: 475px !important;
+                            max-height: 475px !important;
+                          }
