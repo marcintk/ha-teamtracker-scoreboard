@@ -35,8 +35,8 @@ export function rowHtml(stateObj, special) {
     <div class="team-name" style="color:${teamColor('away', attr, special)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special)}">${rankText('away', attr)}</div>
   </div>
-  <div class="tv">${tvHtml(gs, attr)}</div>
   <div class="message">${messageHtml(gs, attr)}</div>
+  <div class="tv">${tvHtml(gs, attr)}</div>
 </div>`;
 }
 

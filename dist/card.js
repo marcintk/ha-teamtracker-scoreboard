@@ -182,8 +182,8 @@ function rowHtml(stateObj, special) {
     <div class="team-name" style="color:${teamColor('away', attr, special)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special)}">${rankText('away', attr)}</div>
   </div>
-  <div class="tv">${tvHtml(gs, attr)}</div>
   <div class="message">${messageHtml(gs, attr)}</div>
+  <div class="tv">${tvHtml(gs, attr)}</div>
 </div>`;
 }
 
@@ -310,10 +310,10 @@ const CARD_STYLES = `
   }
 
   .tv {
-    width: 44px;
-    min-width: 44px;
+    flex-shrink: 0;
     text-align: center;
     font-size: 0;
+    padding: 0 3px;
   }
   .tv-badge {
     font-size: 8px;
@@ -326,6 +326,7 @@ const CARD_STYLES = `
 
   .message {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
