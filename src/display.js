@@ -6,14 +6,15 @@ export function isTeamSide(side, attr) {
 }
 
 export function teamColor(side, attr, special, colors = {}) {
-  if (!isTeamSide(side, attr)) return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)';
+  if (!isTeamSide(side, attr))
+    return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)'; /* gray */
   if (special)
     return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
   return colors.team ?? 'var(--scoreboard-team-color, white)';
 }
 
 export function scoreBg(gs) {
-  if (gs === 'PRE') return '#303030';
+  if (gs === 'PRE') return '#303030'; /* near-black */
   if (gs === 'IN') return 'lightgray';
   return 'transparent';
 }
@@ -27,14 +28,14 @@ export function scoreColor(side, gs, attr) {
     return (isSide ? ts >= os : os >= ts) ? 'brown' : 'black';
   }
   if (gs === 'POST') {
-    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : '#aaa';
+    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : 'darkgray';
   }
   return 'black';
 }
 
 export function colonColor(gs) {
   if (gs === 'PRE' || gs === 'IN') return 'black';
-  if (gs === 'POST') return '#777';
+  if (gs === 'POST') return '#777'; /* gray */
   return 'transparent';
 }
 
@@ -63,7 +64,7 @@ export function tvHtml(gs, attr) {
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
-  const bg = gs === 'IN' ? 'indianred' : '#666';
+  const bg = gs === 'IN' ? 'indianred' : '#666'; /* dimgray */
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
 
@@ -79,7 +80,7 @@ export function messageHtml(gs, attr) {
       const kickoff = esc(attr.kickoff_in ?? '');
       const sub = esc(attr.series_summary ?? attr.odds ?? '');
       return (
-        `<span style="color:#aaa">${kickoff}</span>` +
+        `<span style="color:darkgray">${kickoff}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }

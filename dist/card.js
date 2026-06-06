@@ -17,14 +17,15 @@ function isTeamSide(side, attr) {
 }
 
 function teamColor(side, attr, special, colors = {}) {
-  if (!isTeamSide(side, attr)) return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)';
+  if (!isTeamSide(side, attr))
+    return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)'; /* gray */
   if (special)
     return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
   return colors.team ?? 'var(--scoreboard-team-color, white)';
 }
 
 function scoreBg(gs) {
-  if (gs === 'PRE') return '#303030';
+  if (gs === 'PRE') return '#303030'; /* near-black */
   if (gs === 'IN') return 'lightgray';
   return 'transparent';
 }
@@ -38,14 +39,14 @@ function scoreColor(side, gs, attr) {
     return (isSide ? ts >= os : os >= ts) ? 'brown' : 'black';
   }
   if (gs === 'POST') {
-    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : '#aaa';
+    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : 'darkgray';
   }
   return 'black';
 }
 
 function colonColor(gs) {
   if (gs === 'PRE' || gs === 'IN') return 'black';
-  if (gs === 'POST') return '#777';
+  if (gs === 'POST') return '#777'; /* gray */
   return 'transparent';
 }
 
@@ -74,7 +75,7 @@ function tvHtml(gs, attr) {
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
-  const bg = gs === 'IN' ? 'indianred' : '#666';
+  const bg = gs === 'IN' ? 'indianred' : '#666'; /* dimgray */
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
 
@@ -90,7 +91,7 @@ function messageHtml(gs, attr) {
       const kickoff = esc(attr.kickoff_in ?? '');
       const sub = esc(attr.series_summary ?? attr.odds ?? '');
       return (
-        `<span style="color:#aaa">${kickoff}</span>` +
+        `<span style="color:darkgray">${kickoff}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }
@@ -219,7 +220,7 @@ const CARD_STYLES = `
     box-sizing: border-box;
     overflow-y: auto;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
-    color: #888;
+    color: #888; /* gray */
     font-size: 14px;
   }
 
@@ -313,7 +314,7 @@ const CARD_STYLES = `
   .tv-badge {
     font-size: 8px;
     font-weight: bold;
-    color: #fff;
+    color: white;
     border-radius: 3px;
     padding: 1px 3px;
     white-space: nowrap;
@@ -334,7 +335,7 @@ const CARD_STYLES = `
   .msg-sub {
     font-size: 10px;
     font-weight: normal;
-    color: #666;
+    color: #666; /* dimgray */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -343,7 +344,7 @@ const CARD_STYLES = `
   .empty {
     padding: 8px 4px;
     font-size: 13px;
-    color: #555;
+    color: #555; /* dark gray */
   }
 `;
 

@@ -97,7 +97,7 @@ describe('scoreColor', () => {
 
   it('returns orange for winner and gray for loser in POST', () => {
     expect(scoreColor('home', 'POST', homeAttr)).toBe('orange');
-    expect(scoreColor('away', 'POST', homeAttr)).toBe('#aaa');
+    expect(scoreColor('away', 'POST', homeAttr)).toBe('darkgray');
   });
 });
 
