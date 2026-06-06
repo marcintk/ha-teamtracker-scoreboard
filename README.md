@@ -177,3 +177,29 @@ npm run format:md      # prettier for markdown files
 
 Source is in `src/`, built output is `dist/card.js`. The dist file is committed so HACS can serve it
 directly without a CI build step.
+
+### Contributing
+
+`main` is protected — all changes go through a pull request:
+
+```bash
+git checkout -b feat/your-feature
+# make changes, then:
+npm run build:prod   # rebuild dist/card.js
+npm test             # must pass
+git add src/ dist/ test/
+git commit -m "describe your change"
+git push origin feat/your-feature
+gh pr create
+```
+
+### Releasing
+
+After a PR is merged into `main`, tag the release to trigger the GitHub Actions release workflow,
+which builds `dist/card.js` and publishes a GitHub Release that HACS picks up:
+
+```bash
+git checkout main && git pull
+git tag v1.x.x
+git push origin v1.x.x
+```
