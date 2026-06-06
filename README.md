@@ -185,6 +185,5 @@ build, lint, and tests automatically on every PR.
 
 ### Releasing
 
-Go to **Actions → Tag Release → Run workflow**, enter the version number (e.g. `1.0.1`).
-The workflow bumps `package.json`, commits, tags, and pushes — which triggers the release
-workflow to build `dist/card.js` and publish a GitHub Release that HACS picks up.
+Go to **Actions → Release → Run workflow**, enter the version number (e.g. `1.0.1`).
+The workflow builds `dist/card.js`, tags the release, and publishes a GitHub Release that HACS picks up.
