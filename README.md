@@ -14,10 +14,7 @@ game, grouped by sport. Built on top of the
 - Pre-game: countdown, odds / series summary
 - Post-game: final score, winner highlighted in orange
 - TV network badge on live and upcoming games
-- Team logos from ha-teamtracker (ESPN CDN)
-- Auto-deduplication: one row per game, not per sensor
 - Highlight your favourite teams in blue via `special_teams` (colour configurable)
-- Automatically falls back to date sort during playoffs / tournaments
 - Single HACS install — no extra card dependencies
 
 ## Requirements
@@ -25,6 +22,33 @@ game, grouped by sport. Built on top of the
 | Dependency                                                   | Type             | Notes                                         |
 | ------------------------------------------------------------ | ---------------- | --------------------------------------------- |
 | [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) | HACS Integration | Provides the `sensor.<sport>_<team>` entities |
+
+### Setting up ha-teamtracker sensors
+
+Install [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) via HACS (Integrations), then
+add your team sensors to `configuration.yaml`. The sensor `name` becomes the entity ID prefix used
+in this card's `prefix` field — e.g. `name: nba_bos` → `sensor.nba_bos`.
+
+```yaml
+sensor:
+  # ── NBA ──────────────────────────────────────────
+  # ── ATLANTIC ───────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NBA"
+    team_id: "BOS"
+    name: "nba_bos"
+  - platform: teamtracker
+    league_id: "NBA"
+    team_id: "BKN"
+    name: "nba_bkn"
+  - platform: teamtracker
+    league_id: "NBA"
+    team_id: "NY"
+    name: "nba_ny"
+```
+
+Add one entry per team you want to track. The `name` value must be unique and should follow a
+consistent `<league>_<team>` pattern so the card can group them with a single `prefix`.
 
 ## Installation
 
@@ -71,7 +95,6 @@ sections:
     limit: 13
     special_teams:
       - fra
-    rankType: by-date
 ```
 
 ### Options
@@ -90,18 +113,17 @@ sections:
 | `prefix`        | string | required   | Entity ID prefix, e.g. `sensor.nba_`                                                        |
 | `limit`         | number | `10`       | Max rows to show                                                                            |
 | `special_teams` | list   | `[]`       | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `rankType`      | string | `win-loss` | How to rank teams during regular season. See below                                          |
+| `rankType`      | string | `win-draw-loss` | How to rank teams during regular season. See below                                     |
 
 ### rankType values
 
 | Value           | Use for                                         |
 | --------------- | ----------------------------------------------- |
-| `win-loss`      | Leagues with W/L records (NBA, NFL, MLB, …)     |
 | `win-draw-loss` | Leagues where draws count (NHL, MLS, soccer, …) |
-| `by-date`       | Tournaments without standings (World Cup, …)    |
+| `win-loss`      | Leagues with W/L records only (NBA, NFL, MLB, …)|
 
-`rankType` only applies during the regular season. Outside it (playoffs, cups), the card
-automatically sorts by game date regardless of your setting.
+`rankType` only applies during the regular season. Outside it (playoffs, cups, tournaments), the
+card automatically sorts by game date regardless of your setting — no `by-date` option needed.
 
 ## Colors
 

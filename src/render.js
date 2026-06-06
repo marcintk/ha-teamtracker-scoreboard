@@ -41,7 +41,7 @@ export function rowHtml(stateObj, special, colors = {}) {
 }
 
 export function sectionHtml(section, states, colors = {}) {
-  const { name, prefix, limit = 10, special_teams = [], rankType = 'win-loss' } = section;
+  const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
 
   const entities = Object.keys(states).filter(
     (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
@@ -50,8 +50,7 @@ export function sectionHtml(section, states, colors = {}) {
 
   // rankType applies to regular season only — auto-switch to by-date outside it
   const firstAttr = states[entities[0]]?.attributes;
-  const effectiveRankType =
-    rankType !== 'by-date' && firstAttr?.season !== 'regular' ? 'by-date' : rankType;
+  const effectiveRankType = firstAttr?.season !== 'regular' ? 'by-date' : rankType;
 
   const items = entities.map((entityId) => ({
     entityId,
