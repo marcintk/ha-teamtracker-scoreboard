@@ -27,7 +27,7 @@ Displays live scores, pre-game odds, win probability, TV network, and series inf
 ### Via HACS (recommended)
 
 1. In HACS → Frontend → click the three-dot menu → **Custom repositories**
-   - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard`
+   - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard` (exact URL)
    - Category: **Frontend**
 2. Search **TeamTracker Scoreboard Card** → Install
 3. Reload your browser
