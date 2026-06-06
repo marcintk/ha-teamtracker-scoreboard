@@ -214,6 +214,28 @@ describe('tvHtml', () => {
     const html = tvHtml('PRE', { tv_network: 'ESPN/ESPN2' });
     expect(html).toContain('›');
   });
+
+  it('wraps multi-network badge in tooltip element', () => {
+    const html = tvHtml('PRE', { tv_network: 'ESPN/ESPN2' });
+    expect(html).toContain('tv-tooltip');
+    expect(html).toContain('data-tooltip');
+  });
+
+  it('tooltip contains all networks separated by ·', () => {
+    const html = tvHtml('PRE', { tv_network: 'ESPN/ESPN2/TNT' });
+    expect(html).toContain('ESPN · ESPN2 · TNT');
+  });
+
+  it('trims whitespace around network names in tooltip', () => {
+    const html = tvHtml('PRE', { tv_network: 'ESPN / ESPN2' });
+    expect(html).toContain('ESPN · ESPN2');
+  });
+
+  it('does not wrap single network in tooltip element', () => {
+    const html = tvHtml('PRE', { tv_network: 'ESPN' });
+    expect(html).not.toContain('tv-tooltip');
+    expect(html).not.toContain('data-tooltip');
+  });
 });
 
 describe('messageHtml', () => {
