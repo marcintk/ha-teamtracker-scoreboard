@@ -36,7 +36,7 @@ class SportScoreboardCard extends HTMLElement {
 
   _render() {
     try {
-      const { sections, height = '475px' } = this._config;
+      const { sections, height = '475px', colors = {} } = this._config;
       const states = this._hass.states;
 
       if (!Array.isArray(sections) || !sections.length) {
@@ -44,11 +44,14 @@ class SportScoreboardCard extends HTMLElement {
         return;
       }
 
-      const body = sections.map((s) => sectionHtml(s, states)).join('');
+      const body = sections.map((s) => sectionHtml(s, states, colors)).join('');
       const h = esc(String(height));
+      const headerOverride = colors.header
+        ? `.section-header{color:${esc(String(colors.header))}}`
+        : '';
 
       this.shadowRoot.innerHTML = `
-        <style>${CARD_STYLES}</style>
+        <style>${CARD_STYLES}${headerOverride}</style>
         <ha-card style="height:${h};min-height:${h};max-height:${h};">
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>

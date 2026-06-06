@@ -16,36 +16,39 @@ function isTeamSide(side, attr) {
   return side === 'home' ? attr?.team_homeaway === 'home' : attr?.team_homeaway !== 'home';
 }
 
-function teamColor(side, attr, special) {
-  if (!isTeamSide(side, attr)) return 'var(--scoreboard-opponent-color, #777)';
-  return special
-    ? 'var(--scoreboard-special-color, orange)'
-    : 'var(--scoreboard-team-color, white)';
+function teamColor(side, attr, special, colors = {}) {
+  if (!isTeamSide(side, attr))
+    return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)'; /* gray */
+  if (special)
+    return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
+  return colors.team ?? 'var(--scoreboard-team-color, white)';
 }
 
 function scoreBg(gs) {
-  if (gs === 'PRE') return '#303030';
+  if (gs === 'PRE') return '#303030'; /* near-black */
   if (gs === 'IN') return 'lightgray';
   return 'transparent';
 }
 
-function scoreColor(side, gs, attr) {
+function scoreColor(side, gs, attr, colors = {}) {
   const isSide = isTeamSide(side, attr);
   if (gs === 'PRE') return 'black';
   if (gs === 'IN') {
     const ts = parseFloat(attr.team_score);
     const os = parseFloat(attr.opponent_score);
-    return (isSide ? ts >= os : os >= ts) ? 'brown' : 'black';
+    return (isSide ? ts >= os : os >= ts) ? (colors.leading ?? 'brown') : 'black';
   }
   if (gs === 'POST') {
-    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : '#aaa';
+    return (isSide ? attr.team_winner : attr.opponent_winner)
+      ? (colors.winner ?? 'orange')
+      : (colors.loser ?? 'darkgray');
   }
   return 'black';
 }
 
 function colonColor(gs) {
   if (gs === 'PRE' || gs === 'IN') return 'black';
-  if (gs === 'POST') return '#777';
+  if (gs === 'POST') return '#777'; /* gray */
   return 'transparent';
 }
 
@@ -69,16 +72,16 @@ function logoHtml(side, gs, attr) {
   return url ? `<img src="${url}" alt="">` : '';
 }
 
-function tvHtml(gs, attr) {
+function tvHtml(gs, attr, colors = {}) {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
-  const bg = gs === 'IN' ? 'indianred' : '#666';
+  const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666'; /* dimgray */
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
 
-function messageHtml(gs, attr) {
+function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
     case 'NOT_FOUND': {
       const msg = String(attr.api_message ?? 'Unknown')
@@ -90,7 +93,7 @@ function messageHtml(gs, attr) {
       const kickoff = esc(attr.kickoff_in ?? '');
       const sub = esc(attr.series_summary ?? attr.odds ?? '');
       return (
-        `<span style="color:#aaa">${kickoff}</span>` +
+        `<span style="color:darkgray">${kickoff}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }
@@ -101,7 +104,7 @@ function messageHtml(gs, attr) {
           ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
           : '';
       return (
-        `<span style="color:indianred">${clock}</span>` +
+        `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +
         (pct ? `<span class="msg-sub">${pct}</span>` : '')
       );
     }
@@ -109,7 +112,7 @@ function messageHtml(gs, attr) {
       const clock = esc(attr.clock ?? '');
       const sub = esc(attr.series_summary ?? '');
       return (
-        `<span style="color:orange">${clock}</span>` +
+        `<span style="color:${colors.winner ?? 'orange'}">${clock}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }
@@ -157,7 +160,7 @@ function deduplicate(list, rankType, states) {
   });
 }
 
-function rowHtml(stateObj, special) {
+function rowHtml(stateObj, special, colors = {}) {
   const gs = stateObj?.state ?? 'NOT_FOUND';
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
@@ -165,24 +168,24 @@ function rowHtml(stateObj, special) {
   return `
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:${teamColor('home', attr, special)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('home', attr, special)}">${rankText('home', attr)}</div>
+    <div class="team-name" style="color:${teamColor('home', attr, special, colors)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', gs, attr)}</div>
-  <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr)}">${scoreText('home', gs, attr)}</div>
+  <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
   <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs !== 'NOT_FOUND' ? ':' : ''}</div>
-  <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr)}">${scoreText('away', gs, attr)}</div>
+  <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', gs, attr)}</div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:${teamColor('away', attr, special)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('away', attr, special)}">${rankText('away', attr)}</div>
+    <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
   </div>
-  <div class="message">${messageHtml(gs, attr)}</div>
-  <div class="tv">${tvHtml(gs, attr)}</div>
+  <div class="message">${messageHtml(gs, attr, colors)}</div>
+  <div class="tv">${tvHtml(gs, attr, colors)}</div>
 </div>`;
 }
 
-function sectionHtml(section, states) {
+function sectionHtml(section, states, colors = {}) {
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-loss' } = section;
 
   const entities = Object.keys(states).filter(
@@ -205,7 +208,7 @@ function sectionHtml(section, states) {
 
   const rows = deduplicate(items, effectiveRankType, states)
     .slice(0, limit)
-    .map(({ entityId, special }) => rowHtml(states[entityId], special))
+    .map(({ entityId, special }) => rowHtml(states[entityId], special, colors))
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;
@@ -219,12 +222,12 @@ const CARD_STYLES = `
     box-sizing: border-box;
     overflow-y: auto;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
-    color: #888;
+    color: #888; /* gray */
     font-size: 14px;
   }
 
   .section-header {
-    color: #2196F3;
+    color: #2196F3; /* Material Blue */
     font-size: 15px;
     padding: 2px 0 2px 0;
     margin-top: 1px;
@@ -313,7 +316,7 @@ const CARD_STYLES = `
   .tv-badge {
     font-size: 8px;
     font-weight: bold;
-    color: #fff;
+    color: white;
     border-radius: 3px;
     padding: 1px 3px;
     white-space: nowrap;
@@ -334,7 +337,7 @@ const CARD_STYLES = `
   .msg-sub {
     font-size: 10px;
     font-weight: normal;
-    color: #666;
+    color: #666; /* dimgray */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -343,7 +346,7 @@ const CARD_STYLES = `
   .empty {
     padding: 8px 4px;
     font-size: 13px;
-    color: #555;
+    color: #555; /* dark gray */
   }
 `;
 
@@ -381,7 +384,7 @@ class SportScoreboardCard extends HTMLElement {
 
   _render() {
     try {
-      const { sections, height = '475px' } = this._config;
+      const { sections, height = '475px', colors = {} } = this._config;
       const states = this._hass.states;
 
       if (!Array.isArray(sections) || !sections.length) {
@@ -389,11 +392,14 @@ class SportScoreboardCard extends HTMLElement {
         return;
       }
 
-      const body = sections.map((s) => sectionHtml(s, states)).join('');
+      const body = sections.map((s) => sectionHtml(s, states, colors)).join('');
       const h = esc(String(height));
+      const headerOverride = colors.header
+        ? `.section-header{color:${esc(String(colors.header))}}`
+        : '';
 
       this.shadowRoot.innerHTML = `
-        <style>${CARD_STYLES}</style>
+        <style>${CARD_STYLES}${headerOverride}</style>
         <ha-card style="height:${h};min-height:${h};max-height:${h};">
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>

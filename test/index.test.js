@@ -168,6 +168,25 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot.innerHTML).toContain('300px');
     });
 
+    it('passes colors config through to row rendering', () => {
+      const card = makeCard();
+      card._config = {
+        sections: [{ ...nbaSection, special_teams: ['lal'] }],
+        colors: { special: 'gold' },
+      };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).toContain('gold');
+    });
+
+    it('injects header color override into style block', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], colors: { header: 'tomato' } };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).toContain('.section-header{color:tomato}');
+    });
+
     it('shows error when sections is not an array', () => {
       const card = makeCard();
       card._config = { sections: null };

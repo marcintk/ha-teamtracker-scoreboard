@@ -5,36 +5,39 @@ export function isTeamSide(side, attr) {
   return side === 'home' ? attr?.team_homeaway === 'home' : attr?.team_homeaway !== 'home';
 }
 
-export function teamColor(side, attr, special) {
-  if (!isTeamSide(side, attr)) return 'var(--scoreboard-opponent-color, #777)';
-  return special
-    ? 'var(--scoreboard-special-color, orange)'
-    : 'var(--scoreboard-team-color, white)';
+export function teamColor(side, attr, special, colors = {}) {
+  if (!isTeamSide(side, attr))
+    return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)'; /* gray */
+  if (special)
+    return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
+  return colors.team ?? 'var(--scoreboard-team-color, white)';
 }
 
 export function scoreBg(gs) {
-  if (gs === 'PRE') return '#303030';
+  if (gs === 'PRE') return '#303030'; /* near-black */
   if (gs === 'IN') return 'lightgray';
   return 'transparent';
 }
 
-export function scoreColor(side, gs, attr) {
+export function scoreColor(side, gs, attr, colors = {}) {
   const isSide = isTeamSide(side, attr);
   if (gs === 'PRE') return 'black';
   if (gs === 'IN') {
     const ts = parseFloat(attr.team_score);
     const os = parseFloat(attr.opponent_score);
-    return (isSide ? ts >= os : os >= ts) ? 'brown' : 'black';
+    return (isSide ? ts >= os : os >= ts) ? (colors.leading ?? 'brown') : 'black';
   }
   if (gs === 'POST') {
-    return (isSide ? attr.team_winner : attr.opponent_winner) ? 'orange' : '#aaa';
+    return (isSide ? attr.team_winner : attr.opponent_winner)
+      ? (colors.winner ?? 'orange')
+      : (colors.loser ?? 'darkgray');
   }
   return 'black';
 }
 
 export function colonColor(gs) {
   if (gs === 'PRE' || gs === 'IN') return 'black';
-  if (gs === 'POST') return '#777';
+  if (gs === 'POST') return '#777'; /* gray */
   return 'transparent';
 }
 
@@ -58,16 +61,16 @@ export function logoHtml(side, gs, attr) {
   return url ? `<img src="${url}" alt="">` : '';
 }
 
-export function tvHtml(gs, attr) {
+export function tvHtml(gs, attr, colors = {}) {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
-  const bg = gs === 'IN' ? 'indianred' : '#666';
+  const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666'; /* dimgray */
   return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
 
-export function messageHtml(gs, attr) {
+export function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
     case 'NOT_FOUND': {
       const msg = String(attr.api_message ?? 'Unknown')
@@ -79,7 +82,7 @@ export function messageHtml(gs, attr) {
       const kickoff = esc(attr.kickoff_in ?? '');
       const sub = esc(attr.series_summary ?? attr.odds ?? '');
       return (
-        `<span style="color:#aaa">${kickoff}</span>` +
+        `<span style="color:darkgray">${kickoff}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }
@@ -90,7 +93,7 @@ export function messageHtml(gs, attr) {
           ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
           : '';
       return (
-        `<span style="color:indianred">${clock}</span>` +
+        `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +
         (pct ? `<span class="msg-sub">${pct}</span>` : '')
       );
     }
@@ -98,7 +101,7 @@ export function messageHtml(gs, attr) {
       const clock = esc(attr.clock ?? '');
       const sub = esc(attr.series_summary ?? '');
       return (
-        `<span style="color:orange">${clock}</span>` +
+        `<span style="color:${colors.winner ?? 'orange'}">${clock}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
       );
     }

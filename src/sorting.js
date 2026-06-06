@@ -1,4 +1,4 @@
-// rankType: 'win-loss' | 'win-draw-loss' | 'by-date'
+// rankType: 'win-loss' | 'win-draw-loss'  (by-date is internal only — auto-applied outside regular season)
 
 export function winRatio(record, rankType) {
   const pts = String(record ?? '0-0')

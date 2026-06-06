@@ -14,10 +14,7 @@ game, grouped by sport. Built on top of the
 - Pre-game: countdown, odds / series summary
 - Post-game: final score, winner highlighted in orange
 - TV network badge on live and upcoming games
-- Team logos from ha-teamtracker (ESPN CDN)
-- Auto-deduplication: one row per game, not per sensor
-- Highlight your favourite teams in orange via `special_teams`
-- Automatically falls back to date sort during playoffs / tournaments
+- Highlight your favourite teams in blue via `special_teams` (colour configurable)
 - Single HACS install — no extra card dependencies
 
 ## Requirements
@@ -25,6 +22,33 @@ game, grouped by sport. Built on top of the
 | Dependency                                                   | Type             | Notes                                         |
 | ------------------------------------------------------------ | ---------------- | --------------------------------------------- |
 | [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) | HACS Integration | Provides the `sensor.<sport>_<team>` entities |
+
+### Setting up ha-teamtracker sensors
+
+Install [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) via HACS (Integrations), then
+add your team sensors to `configuration.yaml`. The sensor `name` becomes the entity ID prefix used
+in this card's `prefix` field — e.g. `name: nba_bos` → `sensor.nba_bos`.
+
+```yaml
+sensor:
+  # ── NBA ──────────────────────────────────────────
+  # ── ATLANTIC ───────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NBA"
+    team_id: "BOS"
+    name: "nba_bos"
+  - platform: teamtracker
+    league_id: "NBA"
+    team_id: "BKN"
+    name: "nba_bkn"
+  - platform: teamtracker
+    league_id: "NBA"
+    team_id: "NY"
+    name: "nba_ny"
+```
+
+Add one entry per team you want to track. The `name` value must be unique and should follow a
+consistent `<league>_<team>` pattern so the card can group them with a single `prefix`.
 
 ## Installation
 
@@ -71,47 +95,65 @@ sections:
     limit: 13
     special_teams:
       - fra
-    rankType: by-date
 ```
 
 ### Options
 
-| Option     | Type   | Default  | Description                |
-| ---------- | ------ | -------- | -------------------------- |
-| `height`   | string | `475px`  | Card height (CSS value)    |
-| `sections` | list   | required | One entry per sport/league |
+| Option     | Type   | Default  | Description                                   |
+| ---------- | ------ | -------- | --------------------------------------------- |
+| `height`   | string | `475px`  | Card height (CSS value)                       |
+| `sections` | list   | required | One entry per sport/league                    |
+| `colors`   | map    | —        | Override team colours (see [Colors](#colors)) |
 
 ### Section options
 
-| Field           | Type   | Default    | Description                                                                                           |
-| --------------- | ------ | ---------- | ----------------------------------------------------------------------------------------------------- |
-| `name`          | string | required   | Header label shown above the section                                                                  |
-| `prefix`        | string | required   | Entity ID prefix, e.g. `sensor.nba_`                                                                  |
-| `limit`         | number | `10`       | Max rows to show                                                                                      |
-| `special_teams` | list   | `[]`       | Team suffixes to highlight in orange. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `rankType`      | string | `win-loss` | How to rank teams during regular season. See below                                                    |
+| Field           | Type   | Default    | Description                                                                                 |
+| --------------- | ------ | ---------- | ------------------------------------------------------------------------------------------- |
+| `name`          | string | required   | Header label shown above the section                                                        |
+| `prefix`        | string | required   | Entity ID prefix, e.g. `sensor.nba_`                                                        |
+| `limit`         | number | `10`       | Max rows to show                                                                            |
+| `special_teams` | list   | `[]`       | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
+| `rankType`      | string | `win-draw-loss` | How to rank teams during regular season. See below                                     |
 
 ### rankType values
 
 | Value           | Use for                                         |
 | --------------- | ----------------------------------------------- |
-| `win-loss`      | Leagues with W/L records (NBA, NFL, MLB, …)     |
 | `win-draw-loss` | Leagues where draws count (NHL, MLS, soccer, …) |
-| `by-date`       | Tournaments without standings (World Cup, …)    |
+| `win-loss`      | Leagues with W/L records only (NBA, NFL, MLB, …)|
 
-`rankType` only applies during the regular season. Outside it (playoffs, cups), the card
-automatically sorts by game date regardless of your setting.
+`rankType` only applies during the regular season. Outside it (playoffs, cups, tournaments), the
+card automatically sorts by game date regardless of your setting — no `by-date` option needed.
 
-## Theming
+## Colors
 
-Override colours with CSS custom properties in your HA theme:
+Set any colour directly in the card config:
 
 ```yaml
-ha-teamtracker-scoreboard-card:
-  --scoreboard-team-color: white
-  --scoreboard-opponent-color: "#777"
-  --scoreboard-special-color: orange
+type: custom:ha-teamtracker-scoreboard-card
+colors:
+  team: white
+  opponent: gray
+  special: "#2196F3" # Material Blue — matches section headers
+  header: "#2196F3" # Material Blue
+  winner: orange
+  loser: darkgray
+  live: indianred
+  leading: brown
+sections:
+  - ...
 ```
+
+| Key        | Default                   | Description                                |
+| ---------- | ------------------------- | ------------------------------------------ |
+| `team`     | `white`                   | Your tracked team name                     |
+| `opponent` | `#777` (gray)             | Opponent name                              |
+| `special`  | `#2196F3` (Material Blue) | `special_teams` highlight                  |
+| `header`   | `#2196F3` (Material Blue) | Section header label                       |
+| `winner`   | `orange`                  | POST winner score and final clock          |
+| `loser`    | `darkgray`                | POST loser score                           |
+| `live`     | `indianred`               | IN game clock text and TV badge background |
+| `leading`  | `brown`                   | IN score for the currently leading team    |
 
 ## Score row visual states
 

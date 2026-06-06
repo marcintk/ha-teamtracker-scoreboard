@@ -6,12 +6,12 @@ export const CARD_STYLES = `
     box-sizing: border-box;
     overflow-y: auto;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
-    color: #888;
+    color: #888; /* gray */
     font-size: 14px;
   }
 
   .section-header {
-    color: #2196F3;
+    color: #2196F3; /* Material Blue */
     font-size: 15px;
     padding: 2px 0 2px 0;
     margin-top: 1px;
@@ -100,7 +100,7 @@ export const CARD_STYLES = `
   .tv-badge {
     font-size: 8px;
     font-weight: bold;
-    color: #fff;
+    color: white;
     border-radius: 3px;
     padding: 1px 3px;
     white-space: nowrap;
@@ -121,7 +121,7 @@ export const CARD_STYLES = `
   .msg-sub {
     font-size: 10px;
     font-weight: normal;
-    color: #666;
+    color: #666; /* dimgray */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -130,6 +130,6 @@ export const CARD_STYLES = `
   .empty {
     padding: 8px 4px;
     font-size: 13px;
-    color: #555;
+    color: #555; /* dark gray */
   }
 `;

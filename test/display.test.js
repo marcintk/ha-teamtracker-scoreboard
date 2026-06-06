@@ -51,13 +51,20 @@ describe('teamColor', () => {
     expect(teamColor('home', homeAttr, false)).toBe('var(--scoreboard-team-color, white)');
   });
 
-  it('returns special color when side matches and special is true', () => {
-    expect(teamColor('home', homeAttr, true)).toBe('var(--scoreboard-special-color, orange)');
+  it('returns special color (blue) when side matches and special is true', () => {
+    expect(teamColor('home', homeAttr, true)).toBe('var(--scoreboard-special-color, #2196F3)');
   });
 
   it('returns opponent color when side does not match', () => {
     expect(teamColor('away', homeAttr, false)).toBe('var(--scoreboard-opponent-color, #777)');
     expect(teamColor('away', homeAttr, true)).toBe('var(--scoreboard-opponent-color, #777)');
+  });
+
+  it('uses config colors when provided', () => {
+    const colors = { team: 'cyan', special: 'gold', opponent: 'gray' };
+    expect(teamColor('home', homeAttr, false, colors)).toBe('cyan');
+    expect(teamColor('home', homeAttr, true, colors)).toBe('gold');
+    expect(teamColor('away', homeAttr, false, colors)).toBe('gray');
   });
 });
 
@@ -88,9 +95,16 @@ describe('scoreColor', () => {
     expect(scoreColor('away', 'IN', homeAttr)).toBe('black');
   });
 
-  it('returns orange for winner and gray for loser in POST', () => {
+  it('returns orange for winner and darkgray for loser in POST', () => {
     expect(scoreColor('home', 'POST', homeAttr)).toBe('orange');
-    expect(scoreColor('away', 'POST', homeAttr)).toBe('#aaa');
+    expect(scoreColor('away', 'POST', homeAttr)).toBe('darkgray');
+  });
+
+  it('uses config colors for winner, loser, and leading', () => {
+    const colors = { winner: 'gold', loser: 'silver', leading: 'teal' };
+    expect(scoreColor('home', 'POST', homeAttr, colors)).toBe('gold');
+    expect(scoreColor('away', 'POST', homeAttr, colors)).toBe('silver');
+    expect(scoreColor('home', 'IN', homeAttr, colors)).toBe('teal');
   });
 });
 
@@ -180,6 +194,11 @@ describe('tvHtml', () => {
     expect(html).toContain('indianred');
   });
 
+  it('uses config live color for IN TV badge', () => {
+    const html = tvHtml('IN', { tv_network: 'ESPN' }, { live: 'steelblue' });
+    expect(html).toContain('steelblue');
+  });
+
   it('returns gray badge for PRE state', () => {
     const html = tvHtml('PRE', { tv_network: 'TNT' });
     expect(html).toContain('TNT');
@@ -258,5 +277,19 @@ describe('messageHtml', () => {
   it('handles missing clock in POST state', () => {
     const html = messageHtml('POST', {});
     expect(html).toContain('color:orange');
+  });
+
+  it('uses config live color for IN clock', () => {
+    const html = messageHtml(
+      'IN',
+      { clock: 'Q1 10:00', team_win_probability: null },
+      { live: 'teal' }
+    );
+    expect(html).toContain('color:teal');
+  });
+
+  it('uses config winner color for POST clock', () => {
+    const html = messageHtml('POST', { clock: 'Final' }, { winner: 'gold' });
+    expect(html).toContain('color:gold');
   });
 });
