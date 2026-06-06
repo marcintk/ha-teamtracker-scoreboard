@@ -180,26 +180,11 @@ directly without a CI build step.
 
 ### Contributing
 
-`main` is protected — all changes go through a pull request:
-
-```bash
-git checkout -b feat/your-feature
-# make changes, then:
-npm run build:prod   # rebuild dist/card.js
-npm test             # must pass
-git add src/ dist/ test/
-git commit -m "describe your change"
-git push origin feat/your-feature
-gh pr create
-```
+All changes go through a pull request — push a branch and open a PR against `main`. CI runs
+build, lint, and tests automatically on every PR.
 
 ### Releasing
 
-After a PR is merged into `main`, tag the release to trigger the GitHub Actions release workflow,
-which builds `dist/card.js` and publishes a GitHub Release that HACS picks up:
-
-```bash
-git checkout main && git pull
-git tag v1.x.x
-git push origin v1.x.x
-```
+Go to **Actions → Tag Release → Run workflow**, enter the version number (e.g. `1.0.1`).
+The workflow bumps `package.json`, commits, tags, and pushes — which triggers the release
+workflow to build `dist/card.js` and publish a GitHub Release that HACS picks up.
