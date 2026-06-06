@@ -105,31 +105,6 @@ export const CARD_STYLES = `
     padding: 1px 3px;
     white-space: nowrap;
   }
-  .tv-tooltip {
-    position: relative;
-    cursor: default;
-  }
-  .tv-tooltip::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: calc(100% + 4px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #222;
-    color: #fff;
-    font-size: 10px;
-    font-weight: bold;
-    padding: 3px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 10;
-  }
-  .tv-tooltip:hover::after {
-    opacity: 1;
-  }
 
   .message {
     flex: 1;

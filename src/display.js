@@ -65,16 +65,9 @@ export function tvHtml(gs, attr, colors = {}) {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
-  const networks = tv.split('/').map((n) => n.trim());
-  const hasMultiple = networks.length > 1;
-  const label = hasMultiple ? `${networks[0].substring(0, 8)}›` : networks[0].substring(0, 8);
-  const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666';
-  const badge = `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
-  if (hasMultiple) {
-    const tooltip = esc(networks.join(' · '));
-    return `<span class="tv-tooltip" data-tooltip="${tooltip}">${badge}</span>`;
-  }
-  return badge;
+  const label = tv.includes('/') ? `${tv.split('/')[0].substring(0, 8)}›` : tv.substring(0, 8);
+  const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666'; /* dimgray */
+  return `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
 }
 
 export function messageHtml(gs, attr, colors = {}) {
