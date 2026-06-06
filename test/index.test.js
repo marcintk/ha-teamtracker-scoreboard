@@ -50,7 +50,7 @@ describe('SportScoreboardCard', () => {
       const config = Cls.getStubConfig();
       expect(Array.isArray(config.sections)).toBe(true);
       expect(config.sections.length).toBeGreaterThan(0);
-      expect(config).toHaveProperty('height');
+      expect(config).not.toHaveProperty('height');
     });
   });
 
@@ -67,15 +67,16 @@ describe('SportScoreboardCard', () => {
       expect(card.getCardSize()).toBe(2);
     });
 
-    it('uses default 475 when height is absent', () => {
+    it('calculates size from sections when height is absent', () => {
       const card = makeCard();
-      card._config = {};
+      card._config = { sections: [{ limit: 10 }, { limit: 5 }] };
+      // 2 headers + 15 rows = 17 rows * 28px = 476px / 50 = ceil(9.52) = 10
       expect(card.getCardSize()).toBe(10);
     });
 
-    it('returns default size when config is null', () => {
+    it('returns 1 when config is null', () => {
       const card = makeCard();
-      expect(card.getCardSize()).toBe(10);
+      expect(card.getCardSize()).toBe(1);
     });
   });
 

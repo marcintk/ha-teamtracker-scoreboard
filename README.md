@@ -76,7 +76,6 @@ Add a **Manual card** to your dashboard and paste:
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
-height: 475px
 sections:
   - name: NBA Scoreboard
     prefix: sensor.nba_
@@ -101,7 +100,7 @@ sections:
 
 | Option     | Type   | Default  | Description                                   |
 | ---------- | ------ | -------- | --------------------------------------------- |
-| `height`   | string | `475px`  | Card height (CSS value)                       |
+| `height`   | string | auto     | Card height (CSS value); omit to fit content  |
 | `sections` | list   | required | One entry per sport/league                    |
 | `colors`   | map    | —        | Override team colours (see [Colors](#colors)) |
 
@@ -178,3 +177,14 @@ npm run format:md      # prettier for markdown files
 
 Source is in `src/`, built output is `dist/card.js`. The dist file is committed so HACS can serve it
 directly without a CI build step.
+
+### Contributing
+
+All changes go through a pull request — push a branch and open a PR against `main`. CI runs
+build, lint, and tests automatically on every PR.
+
+### Releasing
+
+Go to **Actions → Tag Release → Run workflow**, enter the version number (e.g. `1.0.1`).
+The workflow bumps `package.json`, commits, tags, and pushes — which triggers the release
+workflow to build `dist/card.js` and publish a GitHub Release that HACS picks up.
