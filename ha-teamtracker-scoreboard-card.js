@@ -1,7 +1,7 @@
 'use strict';
 
 // =============================================================================
-// sport-scoreboard-card.js
+// ha-teamtracker-scoreboard-card.js
 // Custom Lovelace card for ha-teamtracker sports scoreboards
 // https://github.com/vasqued2/ha-teamtracker
 // =============================================================================
@@ -428,7 +428,7 @@ class SportScoreboardCard extends HTMLElement {
 
   // Minimal visual editor stub — HA shows a JSON fallback when this is absent
   static getConfigElement() {
-    return document.createElement('sport-scoreboard-card-editor');
+    return document.createElement('ha-teamtracker-scoreboard-card-editor');
   }
 
   static getStubConfig() {
@@ -442,13 +442,13 @@ class SportScoreboardCard extends HTMLElement {
   }
 }
 
-customElements.define('sport-scoreboard-card', SportScoreboardCard);
+customElements.define('ha-teamtracker-scoreboard-card', SportScoreboardCard);
 
 // Register with the HA card picker
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type:        'sport-scoreboard-card',
-  name:        'Sport Scoreboard Card',
+  type:        'ha-teamtracker-scoreboard-card',
+  name:        'TeamTracker Scoreboard Card',
   description: 'Compact sports scoreboard powered by ha-teamtracker',
   preview:     false,
 });

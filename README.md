@@ -36,9 +36,9 @@ That's it. This card replaces button-card, config-template-card, stack-in-card, 
 
 ### Manual
 
-1. Copy `sport-scoreboard-card.js` to `<config>/www/sport-scoreboard-card.js`
+1. Copy `ha-teamtracker-scoreboard-card.js` to `<config>/www/ha-teamtracker-scoreboard-card.js`
 2. In Home Assistant → Settings → Dashboards → Resources → **Add resource**
-   - URL: `/local/sport-scoreboard-card.js`
+   - URL: `/local/ha-teamtracker-scoreboard-card.js`
    - Resource type: **JavaScript module**
 3. Reload your browser
 
@@ -47,7 +47,7 @@ That's it. This card replaces button-card, config-template-card, stack-in-card, 
 Add a **Manual card** to your dashboard and paste:
 
 ```yaml
-type: custom:sport-scoreboard-card
+type: custom:ha-teamtracker-scoreboard-card
 height: 475px
 sections:
   - name: NBA Scoreboard
@@ -102,7 +102,7 @@ During non-regular seasons (e.g. playoffs) the card automatically switches to `e
 You can override colours with CSS custom properties in your theme:
 
 ```yaml
-sport-scoreboard-card:
+ha-teamtracker-scoreboard-card:
   --scoreboard-team-color: white        # tracked team name colour
   --scoreboard-opponent-color: "#777"   # opponent name colour
   --scoreboard-special-color: orange    # special_teams highlight colour
