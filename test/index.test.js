@@ -78,6 +78,13 @@ describe('SportScoreboardCard', () => {
       const card = makeCard();
       expect(card.getCardSize()).toBe(1);
     });
+
+    it('defaults section limit to 10 when limit is omitted', () => {
+      const card = makeCard();
+      card._config = { sections: [{ name: 'NBA' }] };
+      // 1 header + 10 default rows = 11 rows * 28px = 308px / 50 = ceil(6.16) = 7
+      expect(card.getCardSize()).toBe(7);
+    });
   });
 
   describe('setConfig', () => {
@@ -278,6 +285,15 @@ describe('SportScoreboardCard', () => {
       card.setConfig({ sections: [nbaSection], refresh: 30 });
       card.disconnectedCallback();
       expect(card._refreshTimer).toBeNull();
+    });
+
+    it('does not render when timer fires before hass is assigned', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 10 });
+      const renderSpy = vi.spyOn(card, '_render');
+
+      vi.advanceTimersByTime(10_000);
+      expect(renderSpy).not.toHaveBeenCalled();
     });
 
     it('does not fire after disconnectedCallback', () => {
