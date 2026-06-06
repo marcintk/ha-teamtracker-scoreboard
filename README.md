@@ -36,7 +36,7 @@ That's it. This card replaces button-card, config-template-card, stack-in-card, 
 
 ### Manual
 
-1. Copy `card.js` to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder if needed)
+1. Copy `dist/card.js` to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder if needed)
 2. In Home Assistant → Settings → Dashboards → Resources → **Add resource**
    - URL: `/local/ha-teamtracker-scoreboard-card/card.js`
    - Resource type: **JavaScript module**
