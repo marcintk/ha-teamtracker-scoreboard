@@ -1,5 +1,7 @@
 # TeamTracker Scoreboard Card
 
+<img src="images/icon.png" alt="TeamTracker Scoreboard Card" width="200" align="right"/>
+
 ![Preview](docs/preview.png)
 
 A compact, auto-generating sports scoreboard card for Home Assistant Lovelace dashboards.
