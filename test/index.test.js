@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '../src/index.js';
 
 const makeHass = (states = {}) => ({ states });
@@ -210,6 +210,85 @@ describe('SportScoreboardCard', () => {
       card._hass = null; // accessing .states throws
       card._render();
       expect(card.shadowRoot.innerHTML).toContain('error');
+    });
+  });
+
+  describe('refresh', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it('does not start a timer when refresh is auto', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 'auto' });
+      expect(card._refreshTimer).toBeNull();
+    });
+
+    it('does not start a timer when refresh is omitted', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      expect(card._refreshTimer).toBeNull();
+    });
+
+    it('starts a timer when refresh is a number', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      expect(card._refreshTimer).not.toBeNull();
+    });
+
+    it('calls _render on each interval tick', () => {
+      const card = makeCard();
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card.setConfig({ sections: [nbaSection], refresh: 10 });
+      const renderSpy = vi.spyOn(card, '_render');
+
+      vi.advanceTimersByTime(10_000);
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+
+      vi.advanceTimersByTime(10_000);
+      expect(renderSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not render via set hass when refresh is a number', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      const renderSpy = vi.spyOn(card, '_render');
+
+      card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      expect(renderSpy).not.toHaveBeenCalled();
+    });
+
+    it('still updates _hass via set hass when refresh is a number', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      const hass = makeHass({ 'sensor.nba_lal': makeState('IN', baseAttrs) });
+      card.hass = hass;
+      expect(card._hass).toBe(hass);
+    });
+
+    it('clears the old timer when setConfig is called again', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      const firstTimer = card._refreshTimer;
+      card.setConfig({ sections: [nbaSection], refresh: 60 });
+      expect(card._refreshTimer).not.toBe(firstTimer);
+    });
+
+    it('clears the timer on disconnectedCallback', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      card.disconnectedCallback();
+      expect(card._refreshTimer).toBeNull();
+    });
+
+    it('does not fire after disconnectedCallback', () => {
+      const card = makeCard();
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card.setConfig({ sections: [nbaSection], refresh: 10 });
+      const renderSpy = vi.spyOn(card, '_render');
+
+      card.disconnectedCallback();
+      vi.advanceTimersByTime(30_000);
+      expect(renderSpy).not.toHaveBeenCalled();
     });
   });
 

@@ -16,10 +16,10 @@ directly without a CI build step.
 
 ## Contributing
 
-All changes go through a pull request — push a branch and open a PR against `main`. CI runs
-build, lint, and tests automatically on every PR.
+All changes go through a pull request — push a branch and open a PR against `main`. CI runs build,
+lint, and tests automatically on every PR.
 
 ## Releasing
 
-Go to **Actions → Publish Release → Run workflow**, enter the version number (e.g. `1.0.1`).
-The workflow builds `dist/card.js`, tags the release, and publishes a GitHub Release that HACS picks up.
+Go to **Actions → Publish Release → Run workflow**, enter the version number (e.g. `1.0.1`). The
+workflow builds `dist/card.js`, tags the release, and publishes a GitHub Release that HACS picks up.
