@@ -80,8 +80,8 @@ export const CARD_STYLES = `
   }
 
   .colon {
-    width: 16px;
-    min-width: 16px;
+    width: 8px;
+    min-width: 8px;
     font-size: 17px;
     font-weight: bold;
     text-align: center;
