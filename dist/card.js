@@ -290,16 +290,15 @@ const CARD_STYLES = `
   }
 
   .score {
-    width: 30px;
-    min-width: 30px;
-    font-size: 17px;
+    width: 34px;
+    min-width: 34px;
+    font-size: 18px;
     font-weight: bold;
     height: 28px;
-    display: flex;
-    align-items: center;
+    line-height: 28px;
   }
-  .score-a { justify-content: flex-end; }
-  .score-b { justify-content: flex-start; }
+  .score-a { text-align: right; }
+  .score-b { text-align: left; }
 
   .colon {
     width: 7px;
