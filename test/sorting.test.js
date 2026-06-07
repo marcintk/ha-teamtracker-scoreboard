@@ -46,6 +46,22 @@ describe('preferHome', () => {
     const result = preferHome(list, states);
     expect(result[0].entityId).toBe('sensor.nba_gsw');
   });
+
+  it('keeps home sensor first when it is already first in the list', () => {
+    // Covers the comparator branch where `a` is home and `b` is away (lines 23-24 true/false).
+    const states = {
+      'sensor.nba_gsw': { attributes: { team_homeaway: 'home' } },
+      'sensor.nba_lal': { attributes: { team_homeaway: 'away' } },
+      'sensor.nba_bos': { attributes: { team_homeaway: 'away' } },
+    };
+    const list = [
+      { entityId: 'sensor.nba_gsw' },
+      { entityId: 'sensor.nba_lal' },
+      { entityId: 'sensor.nba_bos' },
+    ];
+    const result = preferHome(list, states);
+    expect(result[0].entityId).toBe('sensor.nba_gsw');
+  });
 });
 
 describe('deduplicate', () => {
@@ -111,6 +127,37 @@ describe('deduplicate', () => {
     // sensor.wc_missing hits the ?? {} fallback — key becomes "undefined_..."
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(2);
+  });
+
+  it('shows away-only game in correct date position when home sensor is missing', () => {
+    // Bug: old code called preferHome() on the whole list, moving ALL away sensors to the end.
+    // A game whose home sensor is missing/unavailable got pushed past games with home sensors,
+    // so the limit slice cut it off and the game was never shown.
+    const states = {
+      'sensor.wc_early_away': {
+        attributes: {
+          team_homeaway: 'away',
+          date: '2024-03-14',
+          team_abbr: 'fra',
+          opponent_abbr: 'bra',
+        },
+      },
+      'sensor.wc_later_home': {
+        attributes: {
+          team_homeaway: 'home',
+          date: '2024-03-15',
+          team_abbr: 'gsw',
+          opponent_abbr: 'lal',
+        },
+      },
+    };
+    // List is already date-sorted (earlier game first)
+    const list = [{ entityId: 'sensor.wc_early_away' }, { entityId: 'sensor.wc_later_home' }];
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(2);
+    // Date order must be preserved: the early away-only game comes before the later home game.
+    expect(result[0].entityId).toBe('sensor.wc_early_away');
+    expect(result[1].entityId).toBe('sensor.wc_later_home');
   });
 
   it('prefers home sensor when deduplicating', () => {
