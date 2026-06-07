@@ -27,13 +27,33 @@ export function preferHome(list, states) {
 }
 
 // For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.
+// Uses a two-pass approach to preserve the original date order: re-sorting the whole list by
+// home/away would push away-only games (whose home-team sensor is missing) to the end where they
+// get cut off by the limit slice even though a valid sensor is available.
 export function deduplicate(list, rankType, states) {
   if (rankType !== 'by-date') return list;
-  const seen = new Set();
-  return preferHome(list, states).filter(({ entityId }) => {
+
+  const gameKey = (entityId) => {
     const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
-    const key = `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
+    return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
+  };
+
+  // First pass: find which game keys have at least one home-side sensor.
+  const homeKeys = new Set();
+  for (const { entityId } of list) {
+    if (states[entityId]?.attributes?.team_homeaway === 'home') {
+      homeKeys.add(gameKey(entityId));
+    }
+  }
+
+  // Second pass: filter the original (date-sorted) list in place.
+  // Skip an away sensor only when a home sensor exists for the same game.
+  const seen = new Set();
+  return list.filter(({ entityId }) => {
+    const key = gameKey(entityId);
     if (seen.has(key)) return false;
+    const homeaway = states[entityId]?.attributes?.team_homeaway;
+    if (homeKeys.has(key) && homeaway !== 'home') return false;
     seen.add(key);
     return true;
   });
