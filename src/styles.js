@@ -51,18 +51,19 @@ export const CARD_STYLES = `
   }
 
   .logo {
-    width: 26px;
-    min-width: 26px;
+    width: 30px;
+    min-width: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 28px;
+    overflow: hidden;
   }
   .logo-a { padding-right: 3px; }
   .logo-b { padding-left:  3px; }
   .logo img {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     object-fit: contain;
     display: block;
   }
@@ -104,6 +105,31 @@ export const CARD_STYLES = `
     border-radius: 3px;
     padding: 1px 3px;
     white-space: nowrap;
+  }
+  .tv-tooltip {
+    position: relative;
+    cursor: default;
+  }
+  .tv-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 10;
+  }
+  .tv-tooltip:hover::after {
+    opacity: 1;
   }
 
   .message {

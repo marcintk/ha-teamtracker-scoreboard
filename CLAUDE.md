@@ -16,8 +16,17 @@ directly without a CI build step.
 
 ## Contributing
 
-All changes go through a pull request — push a branch and open a PR against `main`. CI runs build,
-lint, and tests automatically on every PR.
+> **Never commit directly to `main`.** Every change — features, bug fixes, docs, config — must go
+> through a pull request. Create a branch first, then open a PR against `main`.
+
+```bash
+git checkout -b feat/my-feature   # or fix/, docs/, chore/ as appropriate
+# ... make changes ...
+git push -u origin feat/my-feature
+gh pr create
+```
+
+CI runs build, lint, and tests automatically on every PR.
 
 Every new feature or bug fix must include associated tests. Coverage thresholds are enforced at 99%
 for statements, branches, functions, and lines — `npm run test:coverage` will fail (and block CI) if
