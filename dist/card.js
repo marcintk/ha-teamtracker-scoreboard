@@ -226,7 +226,6 @@ const CARD_STYLES = `
   ha-card {
     padding: 4px 8px 4px 6px;
     box-sizing: border-box;
-    overflow: hidden;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
     font-size: 14px;
@@ -362,17 +361,14 @@ const CARD_STYLES = `
     justify-content: center;
     font-size: 13px;
     font-weight: bold;
-    line-height: 1.2;
-    overflow: hidden;
+    line-height: 1.1;
     padding-left: 4px;
   }
   .msg-sub {
     font-size: 10px;
     font-weight: normal;
     color: #666; /* dimgray */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.1;
   }
 
   .empty {
