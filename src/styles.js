@@ -70,7 +70,7 @@ export const CARD_STYLES = `
   .score {
     width: 34px;
     min-width: 34px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     height: 28px;
     display: flex;
