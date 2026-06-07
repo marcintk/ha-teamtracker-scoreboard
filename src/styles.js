@@ -76,6 +76,7 @@ export const CARD_STYLES = `
     display: flex;
     flex-direction: row;
     align-items: center;
+    align-self: center;
   }
   .score-a { justify-content: flex-end; }
   .score-b { justify-content: flex-start; }
