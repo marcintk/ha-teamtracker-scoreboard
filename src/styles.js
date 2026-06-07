@@ -74,6 +74,7 @@ export const CARD_STYLES = `
     font-weight: bold;
     height: 28px;
     display: flex;
+    flex-direction: row;
     align-items: center;
   }
   .score-a { justify-content: flex-end; }
