@@ -61,8 +61,8 @@ export const CARD_STYLES = `
   .logo-a { padding-right: 3px; }
   .logo-b { padding-left:  3px; }
   .logo img {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     object-fit: contain;
     display: block;
   }
@@ -72,16 +72,16 @@ export const CARD_STYLES = `
     min-width: 30px;
     font-size: 17px;
     font-weight: bold;
-    text-align: center;
     height: 28px;
     display: flex;
     align-items: center;
-    justify-content: center;
   }
+  .score-a { justify-content: flex-end; }
+  .score-b { justify-content: flex-start; }
 
   .colon {
-    width: 8px;
-    min-width: 8px;
+    width: 7px;
+    min-width: 7px;
     font-size: 17px;
     font-weight: bold;
     text-align: center;
