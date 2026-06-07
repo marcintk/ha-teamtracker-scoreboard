@@ -73,10 +73,11 @@ export const CARD_STYLES = `
     font-size: 18px;
     font-weight: bold;
     height: 28px;
-    line-height: 28px;
+    display: flex;
+    align-items: center;
   }
-  .score-a { text-align: right; }
-  .score-b { text-align: left; }
+  .score-a { justify-content: flex-end; }
+  .score-b { justify-content: flex-start; }
 
   .colon {
     width: 7px;
