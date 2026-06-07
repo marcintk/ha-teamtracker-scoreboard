@@ -10,7 +10,7 @@ network, and series info — one row per game, grouped by sport. Built on top of
 
 ## Preview
 
-[![Preview](https://raw.githubusercontent.com/marcintk/ha-teamtracker-scoreboard-card/main/docs/preview.png)](https://marcintk.github.io/ha-teamtracker-scoreboard-card/)
+[![Preview](https://raw.githubusercontent.com/marcintk/ha-teamtracker-scoreboard-card/main/docs/preview.png)](https://github.com/marcintk/ha-teamtracker-scoreboard-card)
 
 ## Features
 
