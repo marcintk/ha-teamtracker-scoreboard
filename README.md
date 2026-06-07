@@ -1,8 +1,8 @@
 # TeamTracker Scoreboard Card
 
 [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz)
-[![GitHub Release](https://img.shields.io/github/release/marcintk/ha-teamtracker-scoreboard.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard/releases)
-[![CI](https://github.com/marcintk/ha-teamtracker-scoreboard/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard/actions/workflows/build-and-test.yml)
+[![GitHub Release](https://img.shields.io/github/release/marcintk/ha-teamtracker-scoreboard-card.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases)
+[![CI](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml)
 
 Home Assistant custom Lovelace card displaying live scores, pre-game odds, win probability, TV
 network, and series info — one row per game, grouped by sport. Built on top of the
@@ -10,9 +10,7 @@ network, and series info — one row per game, grouped by sport. Built on top of
 
 ## Preview
 
-<picture>
-  <img src="docs/preview.png" alt="TeamTracker Scoreboard Card preview">
-</picture>
+[![Preview](https://raw.githubusercontent.com/marcintk/ha-teamtracker-scoreboard-card/main/docs/preview.png)](https://marcintk.github.io/ha-teamtracker-scoreboard-card/)
 
 ## Features
 
@@ -61,7 +59,7 @@ consistent `<league>_<team>` pattern so the card can group them with a single `p
 ### Via HACS (recommended)
 
 1. In HACS → Frontend → click the three-dot menu → **Custom repositories**
-   - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard` (exact URL)
+   - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard-card` (exact URL)
    - Category: **Dashboard**
 2. Search **TeamTracker Scoreboard Card** → Install
 3. Reload your browser
