@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "preview": "npm run build && npx --yes serve -l 8765 .",
     "build": "rollup -c",
     "build:prod": "NODE_ENV=production rollup -c",
     "dev": "rollup -c --watch",
