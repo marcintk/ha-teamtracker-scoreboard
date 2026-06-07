@@ -30,29 +30,54 @@ network, and series info — one row per game, grouped by sport. Built on top of
 ### Setting up ha-teamtracker sensors
 
 Install [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) via HACS (Integrations), then
-add your team sensors to `configuration.yaml`. The sensor `name` becomes the entity ID prefix used
-in this card's `prefix` field — e.g. `name: nba_bos` → `sensor.nba_bos`.
+add your team sensors to Home Assistant. Each sensor entry creates one entity; the `name` value
+becomes the entity ID — e.g. `name: nba_bos` → `sensor.nba_bos`. The card's `prefix` field groups
+all sensors that share a common prefix, e.g. `sensor.nba_`.
+
+#### Where to add the sensors
+
+**Option A — directly in `configuration.yaml`** (simplest):
 
 ```yaml
+# configuration.yaml
 sensor:
-  # ── NBA ──────────────────────────────────────────
-  # ── ATLANTIC ───────────────────────────────────────────
   - platform: teamtracker
     league_id: "NBA"
     team_id: "BOS"
     name: "nba_bos"
-  - platform: teamtracker
-    league_id: "NBA"
-    team_id: "BKN"
-    name: "nba_bkn"
-  - platform: teamtracker
-    league_id: "NBA"
-    team_id: "NY"
-    name: "nba_ny"
+  # … paste the rest of the league file here …
 ```
 
-Add one entry per team you want to track. The `name` value must be unique and should follow a
-consistent `<league>_<team>` pattern so the card can group them with a single `prefix`.
+**Option B — via a package file** (keeps your main config clean):
+
+```yaml
+# configuration.yaml
+homeassistant:
+  packages: !include_dir_named packages/
+```
+
+```yaml
+# packages/sports.yaml
+sensor:
+  - platform: teamtracker
+    league_id: "NBA"
+    team_id: "BOS"
+    name: "nba_bos"
+  # … paste the rest of the league file here …
+```
+
+After saving, **restart Home Assistant** (or use _Developer Tools → YAML → Check and Restart_).
+
+#### Ready-to-paste sensor lists
+
+Copy the file for each league you want to track and paste its contents under your `sensor:` key (or
+into a package file). Delete any teams you don't need.
+
+| League         | File                                           | Sensors                             |
+| -------------- | ---------------------------------------------- | ----------------------------------- |
+| NBA            | [docs/sensors-nba.yaml](docs/sensors-nba.yaml) | All 30 teams, grouped by division   |
+| NHL            | [docs/sensors-nhl.yaml](docs/sensors-nhl.yaml) | All 32 teams, grouped by division   |
+| FIFA World Cup | [docs/sensors-wc.yaml](docs/sensors-wc.yaml)   | Key national teams by confederation |
 
 ## Installation
 

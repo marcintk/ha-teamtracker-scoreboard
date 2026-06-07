@@ -1,0 +1,141 @@
+# NBA — ha-teamtracker sensor definitions
+#
+# Paste this block under the `sensor:` key in your configuration.yaml,
+# or drop the whole file into your packages/ folder (see README for details).
+# Delete any teams you don't want to track.
+#
+# After saving, restart Home Assistant (or reload YAML configuration).
+# Each entry creates one entity, e.g. sensor.nba_bos, sensor.nba_lal, …
+# Use the shared prefix  sensor.nba_  in the card's `prefix` field.
+
+# ── ATLANTIC ───────────────────────────────────────────
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "BOS"
+  name: "nba_bos"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "BKN"
+  name: "nba_bkn"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "NY"
+  name: "nba_ny"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "PHI"
+  name: "nba_phi"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "TOR"
+  name: "nba_tor"
+
+# ── CENTRAL ────────────────────────────────────────────
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "CHI"
+  name: "nba_chi"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "CLE"
+  name: "nba_cle"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "DET"
+  name: "nba_det"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "IND"
+  name: "nba_ind"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "MIL"
+  name: "nba_mil"
+
+# ── SOUTHEAST ──────────────────────────────────────────
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "ATL"
+  name: "nba_atl"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "CHA"
+  name: "nba_cha"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "MIA"
+  name: "nba_mia"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "ORL"
+  name: "nba_orl"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "WAS"
+  name: "nba_was"
+
+# ── NORTHWEST ──────────────────────────────────────────
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "DEN"
+  name: "nba_den"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "MIN"
+  name: "nba_min"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "OKC"
+  name: "nba_okc"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "POR"
+  name: "nba_por"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "UTA"
+  name: "nba_uta"
+
+# ── PACIFIC ────────────────────────────────────────────
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "GS"
+  name: "nba_gs"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "LAC"
+  name: "nba_lac"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "LAL"
+  name: "nba_lal"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "PHX"
+  name: "nba_phx"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "SAC"
+  name: "nba_sac"
+
+# ── SOUTHWEST ──────────────────────────────────────────
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "DAL"
+  name: "nba_dal"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "HOU"
+  name: "nba_hou"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "MEM"
+  name: "nba_mem"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "NO"
+  name: "nba_no"
+- platform: teamtracker
+  league_id: "NBA"
+  team_id: "SA"
+  name: "nba_sa"
