@@ -303,8 +303,8 @@ const CARD_STYLES = `
   .score-b { justify-content: flex-start; }
 
   .colon {
-    width: 7px;
-    min-width: 7px;
+    width: 9px;
+    min-width: 9px;
     font-size: 17px;
     font-weight: bold;
     text-align: center;
