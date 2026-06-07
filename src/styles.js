@@ -51,18 +51,19 @@ export const CARD_STYLES = `
   }
 
   .logo {
-    width: 26px;
-    min-width: 26px;
+    width: 30px;
+    min-width: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 28px;
+    overflow: hidden;
   }
   .logo-a { padding-right: 3px; }
   .logo-b { padding-left:  3px; }
   .logo img {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     object-fit: contain;
     display: block;
   }
