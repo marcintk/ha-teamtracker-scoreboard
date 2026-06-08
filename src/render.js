@@ -16,7 +16,7 @@ import { deduplicate, sortKeyFor } from './sorting.js';
 import { esc } from './utils.js';
 
 export function rowHtml(stateObj, special, colors = {}) {
-  const gs = stateObj?.state ?? 'NOT_FOUND';
+  const gs = stateObj?.state ?? '';
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
 
@@ -26,11 +26,11 @@ export function rowHtml(stateObj, special, colors = {}) {
     <div class="team-name" style="color:${teamColor('home', attr, special, colors)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
     <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
   </div>
-  <div class="logo logo-a">${logoHtml('home', gs, attr)}</div>
+  <div class="logo logo-a">${logoHtml('home', attr)}</div>
   <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
-  <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs !== 'NOT_FOUND' ? ':' : ''}</div>
+  <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs ? ':' : ''}</div>
   <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
-  <div class="logo logo-b">${logoHtml('away', gs, attr)}</div>
+  <div class="logo logo-b">${logoHtml('away', attr)}</div>
   <div class="team-col team-col-b">
     <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
@@ -50,13 +50,13 @@ export function sectionHtml(section, states, colors = {}) {
 
   // rankType applies to regular season only — auto-switch to by-date outside it
   const firstAttr = states[entities[0]]?.attributes;
-  const sortMode = firstAttr?.season !== 'regular' ? 'by-date' : rankType;
+  const sortMode = firstAttr?.season && firstAttr.season !== 'regular' ? 'by-date' : rankType;
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
     return {
       entityId,
-      teamName: attr?.team_name ?? entityId,
+      teamName: String(attr?.team_name ?? entityId),
       special: special_teams.includes(entityId.replace(prefix, '')),
       key: sortKeyFor(attr, sortMode),
     };

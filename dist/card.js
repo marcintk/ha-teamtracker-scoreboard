@@ -53,7 +53,6 @@ function colonColor(gs) {
 }
 
 function scoreText(side, gs, attr) {
-  if (gs === 'NOT_FOUND') return '';
   if (gs === 'PRE') return '–';
   return isTeamSide(side, attr) ? (attr.team_score ?? '') : (attr.opponent_score ?? '');
 }
@@ -66,8 +65,7 @@ function rankText(side, attr) {
   return isTeamSide(side, attr) ? esc(attr.team_record) : esc(attr.opponent_record);
 }
 
-function logoHtml(side, gs, attr) {
-  if (gs === 'NOT_FOUND') return '';
+function logoHtml(side, attr) {
   const url = safeLogoUrl(isTeamSide(side, attr) ? attr.team_logo : attr.opponent_logo);
   return url ? `<img src="${url}" alt="">` : '';
 }
@@ -90,12 +88,6 @@ function tvHtml(gs, attr, colors = {}) {
 
 function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
-    case 'NOT_FOUND': {
-      const msg = String(attr.api_message ?? 'Unknown')
-        .replace(/^Cached data:\s*/i, '')
-        .replace(/^API_LIMIT hit\.\s*/i, '');
-      return `<span class="msg-sub">${esc(msg)}</span>`;
-    }
     case 'PRE': {
       const kickoff = esc(attr.kickoff_in ?? '');
       const sub = esc(attr.series_summary ?? attr.odds ?? '');
@@ -126,49 +118,71 @@ function messageHtml(gs, attr, colors = {}) {
   }
 }
 
-// rankType: 'win-loss' | 'win-draw-loss'  (by-date is internal only — auto-applied outside regular season)
+// sortMode: 'win-loss' | 'win-draw-loss' | 'win-loss-otl' | 'by-date'
+//   win-loss:      W=2 L=0           (NBA, …)    record: W-L
+//   win-draw-loss: W=3 D=1 L=0      (soccer, …) record: W-D-L
+//   win-loss-otl:  W=2 OTL=1 L=0   (NHL, …)    record: W-L-OTL
+//   by-date: internal — auto-applied outside the regular season
 
-function winRatio(record, rankType) {
+function winRatio(record, sortMode) {
   const pts = String(record ?? '0-0')
     .split('-')
     .map(Number);
-  if (rankType === 'win-draw-loss') {
-    // points = 2W + D, max possible = 2(W+D+L)
+  if (sortMode === 'win-draw-loss') {
+    // points = 3W + D, max possible = 3(W+D+L)
+    const total = pts[0] + pts[1] + pts[2];
+    return total ? (3 * pts[0] + pts[1]) / (3 * total) : 0;
+  }
+  if (sortMode === 'win-loss-otl') {
+    // points = 2W + OTL, max possible = 2(W+L+OTL)  — record order: W-L-OTL
     const total = pts[0] + pts[1] + pts[2];
     return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
   }
-  // win-loss: simple win percentage
-  return pts[0] + pts[1] ? pts[0] / (pts[0] + pts[1]) : 0;
+  // win-loss: W/(W+L)
+  const total = pts[0] + pts[1];
+  return total ? pts[0] / total : 0;
 }
 
-function sortKeyFor(attr, rankType) {
-  if (rankType === 'by-date') return new Date(attr?.date ?? 0).getTime();
-  return winRatio(attr?.team_record, rankType);
-}
-
-function preferHome(list, states) {
-  return [...list].sort((a, b) => {
-    const aHome = states[a.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
-    const bHome = states[b.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
-    return aHome - bHome;
-  });
+function sortKeyFor(attr, sortMode) {
+  if (sortMode === 'by-date') return Date.parse(attr?.date ?? '') || 0;
+  return winRatio(attr?.team_record, sortMode);
 }
 
 // For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.
-function deduplicate(list, rankType, states) {
-  if (rankType !== 'by-date') return list;
-  const seen = new Set();
-  return preferHome(list, states).filter(({ entityId }) => {
+// Uses a two-pass approach to preserve the original date order: re-sorting the whole list by
+// home/away would push away-only games (whose home-team sensor is missing) to the end where they
+// get cut off by the limit slice even though a valid sensor is available.
+function deduplicate(list, sortMode, states) {
+  if (sortMode !== 'by-date') return list;
+
+  const gameKey = (entityId) => {
     const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
-    const key = `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
+    return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
+  };
+
+  // First pass: find which game keys have at least one home-side sensor.
+  const homeKeys = new Set();
+  for (const { entityId } of list) {
+    if (states[entityId]?.attributes?.team_homeaway === 'home') {
+      homeKeys.add(gameKey(entityId));
+    }
+  }
+
+  // Second pass: filter the original (date-sorted) list in place.
+  // Skip an away sensor only when a home sensor exists for the same game.
+  const seen = new Set();
+  return list.filter(({ entityId }) => {
+    const key = gameKey(entityId);
     if (seen.has(key)) return false;
+    const homeaway = states[entityId]?.attributes?.team_homeaway;
+    if (homeKeys.has(key) && homeaway !== 'home') return false;
     seen.add(key);
     return true;
   });
 }
 
 function rowHtml(stateObj, special, colors = {}) {
-  const gs = stateObj?.state ?? 'NOT_FOUND';
+  const gs = stateObj?.state ?? '';
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
 
@@ -178,11 +192,11 @@ function rowHtml(stateObj, special, colors = {}) {
     <div class="team-name" style="color:${teamColor('home', attr, special, colors)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
     <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
   </div>
-  <div class="logo logo-a">${logoHtml('home', gs, attr)}</div>
+  <div class="logo logo-a">${logoHtml('home', attr)}</div>
   <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
-  <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs !== 'NOT_FOUND' ? ':' : ''}</div>
+  <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs ? ':' : ''}</div>
   <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
-  <div class="logo logo-b">${logoHtml('away', gs, attr)}</div>
+  <div class="logo logo-b">${logoHtml('away', attr)}</div>
   <div class="team-col team-col-b">
     <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
     <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
@@ -202,17 +216,26 @@ function sectionHtml(section, states, colors = {}) {
 
   // rankType applies to regular season only — auto-switch to by-date outside it
   const firstAttr = states[entities[0]]?.attributes;
-  const effectiveRankType = firstAttr?.season !== 'regular' ? 'by-date' : rankType;
+  const sortMode = firstAttr?.season && firstAttr.season !== 'regular' ? 'by-date' : rankType;
 
-  const items = entities.map((entityId) => ({
-    entityId,
-    special: special_teams.includes(entityId.replace(prefix, '')),
-    key: sortKeyFor(states[entityId]?.attributes, effectiveRankType),
-  }));
+  const items = entities.map((entityId) => {
+    const attr = states[entityId]?.attributes;
+    return {
+      entityId,
+      teamName: String(attr?.team_name ?? entityId),
+      special: special_teams.includes(entityId.replace(prefix, '')),
+      key: sortKeyFor(attr, sortMode),
+    };
+  });
 
-  items.sort((a, b) => (effectiveRankType === 'by-date' ? a.key - b.key : b.key - a.key));
+  items.sort((a, b) => {
+    const diff = sortMode === 'by-date' ? a.key - b.key : b.key - a.key;
+    if (diff !== 0) return diff;
+    const nameDiff = a.teamName.localeCompare(b.teamName);
+    return nameDiff !== 0 ? nameDiff : a.entityId.localeCompare(b.entityId);
+  });
 
-  const rows = deduplicate(items, effectiveRankType, states)
+  const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
     .map(({ entityId, special }) => rowHtml(states[entityId], special, colors))
     .join('');
@@ -504,7 +527,7 @@ class SportScoreboardCard extends HTMLElement {
           prefix: 'sensor.nhl_',
           limit: 5,
           special_teams: [],
-          rankType: 'win-draw-loss',
+          rankType: 'win-loss-otl',
         },
       ],
     };

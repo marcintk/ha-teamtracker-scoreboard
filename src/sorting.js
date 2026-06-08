@@ -1,20 +1,30 @@
-// sortMode: 'win-loss' | 'win-draw-loss' | 'by-date'  (by-date is internal only — auto-applied outside regular season)
+// sortMode: 'win-loss' | 'win-draw-loss' | 'win-loss-otl' | 'by-date'
+//   win-loss:      W=2 L=0           (NBA, …)    record: W-L
+//   win-draw-loss: W=3 D=1 L=0      (soccer, …) record: W-D-L
+//   win-loss-otl:  W=2 OTL=1 L=0   (NHL, …)    record: W-L-OTL
+//   by-date: internal — auto-applied outside the regular season
 
 export function winRatio(record, sortMode) {
   const pts = String(record ?? '0-0')
     .split('-')
     .map(Number);
   if (sortMode === 'win-draw-loss') {
-    // points = 2W + D, max possible = 2(W+D+L)
+    // points = 3W + D, max possible = 3(W+D+L)
+    const total = pts[0] + pts[1] + pts[2];
+    return total ? (3 * pts[0] + pts[1]) / (3 * total) : 0;
+  }
+  if (sortMode === 'win-loss-otl') {
+    // points = 2W + OTL, max possible = 2(W+L+OTL)  — record order: W-L-OTL
     const total = pts[0] + pts[1] + pts[2];
     return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
   }
-  // win-loss: simple win percentage
-  return pts[0] + pts[1] ? pts[0] / (pts[0] + pts[1]) : 0;
+  // win-loss: W/(W+L)
+  const total = pts[0] + pts[1];
+  return total ? pts[0] / total : 0;
 }
 
 export function sortKeyFor(attr, sortMode) {
-  if (sortMode === 'by-date') return new Date(attr?.date ?? 0).getTime();
+  if (sortMode === 'by-date') return Date.parse(attr?.date ?? '') || 0;
   return winRatio(attr?.team_record, sortMode);
 }
 

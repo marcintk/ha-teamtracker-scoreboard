@@ -202,12 +202,66 @@ describe('sectionHtml', () => {
         season: 'postseason',
       }),
     };
-    const wcSection = { name: 'WC', prefix: 'sensor.wc_', limit: 10, special_teams: [], rankType: 'by-date' };
+    const wcSection = {
+      name: 'WC',
+      prefix: 'sensor.wc_',
+      limit: 10,
+      special_teams: [],
+      rankType: 'by-date',
+    };
     const html1 = sectionHtml(wcSection, states);
     const html2 = sectionHtml(wcSection, states);
     expect(html1).toBe(html2);
     // team name tie-break is alphabetical: AAA < ZZZ
     expect(html1.indexOf('AAA')).toBeLessThan(html1.indexOf('ZZZ'));
+  });
+
+  it('keeps configured rankType when first entity has no season attribute yet', () => {
+    // sensor.nba_aaa is alphabetically first — Object.keys returns it first.
+    // It has no season field, so firstAttr?.season is undefined.
+    // Bug: undefined !== 'regular' → sortMode='by-date', keys all 0, alpha tie-break → Team A first.
+    // Fix: undefined && ... → false → sortMode='win-loss', Team Z (0.833) > Team A (0.167) → Team Z first.
+    const states = {
+      'sensor.nba_aaa': makeState('PRE', { team_name: 'Team A', team_record: '5-25' }),
+      'sensor.nba_zzz': makeState('PRE', {
+        ...baseAttrs,
+        team_name: 'Team Z',
+        team_record: '25-5',
+      }),
+    };
+    const html = sectionHtml({ ...section, rankType: 'win-loss' }, states);
+    expect(html.indexOf('Team Z')).toBeLessThan(html.indexOf('Team A'));
+  });
+
+  it('falls back to entityId as teamName when team_name attribute is absent', () => {
+    // Covers the ?? entityId branch on the teamName assignment (line 59).
+    const states = {
+      'sensor.nba_lal': makeState('PRE', { ...baseAttrs, team_name: undefined }),
+    };
+    expect(() => sectionHtml(section, states)).not.toThrow();
+    expect(sectionHtml(section, states)).toContain('class="game-row"');
+  });
+
+  it('uses entityId as final tie-breaker when team names and sort keys are equal', () => {
+    // Covers the a.entityId.localeCompare branch (line 69): only reached when
+    // nameDiff === 0, i.e. two entities share the same teamName and win ratio.
+    const states = {
+      'sensor.nba_zzz': makeState('PRE', {
+        ...baseAttrs,
+        team_name: 'Lakers',
+        team_record: '10-10',
+        opponent_name: 'Opp-Z',
+      }),
+      'sensor.nba_aaa': makeState('PRE', {
+        ...baseAttrs,
+        team_name: 'Lakers',
+        team_record: '10-10',
+        opponent_name: 'Opp-A',
+      }),
+    };
+    const html = sectionHtml(section, states);
+    // nba_aaa < nba_zzz lexicographically → Opp-A row must come before Opp-Z row.
+    expect(html.indexOf('Opp-A')).toBeLessThan(html.indexOf('Opp-Z'));
   });
 
   it('auto-switches to by-date sort outside regular season', () => {

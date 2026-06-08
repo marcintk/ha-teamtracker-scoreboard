@@ -28,7 +28,7 @@ gh pr create
 
 CI runs build, lint, and tests automatically on every PR.
 
-Every new feature or bug fix must include associated tests. Coverage thresholds are enforced at 99%
+Every new feature or bug fix must include associated tests. Coverage thresholds are enforced at 100%
 for statements, branches, functions, and lines — `npm run test:coverage` will fail (and block CI) if
 coverage drops below that.
 
