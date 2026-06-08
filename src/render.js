@@ -52,15 +52,21 @@ export function sectionHtml(section, states, colors = {}) {
   const firstAttr = states[entities[0]]?.attributes;
   const sortMode = firstAttr?.season !== 'regular' ? 'by-date' : rankType;
 
-  const items = entities.map((entityId) => ({
-    entityId,
-    special: special_teams.includes(entityId.replace(prefix, '')),
-    key: sortKeyFor(states[entityId]?.attributes, sortMode),
-  }));
+  const items = entities.map((entityId) => {
+    const attr = states[entityId]?.attributes;
+    return {
+      entityId,
+      teamName: attr?.team_name ?? entityId,
+      special: special_teams.includes(entityId.replace(prefix, '')),
+      key: sortKeyFor(attr, sortMode),
+    };
+  });
 
   items.sort((a, b) => {
     const diff = sortMode === 'by-date' ? a.key - b.key : b.key - a.key;
-    return diff !== 0 ? diff : a.entityId.localeCompare(b.entityId);
+    if (diff !== 0) return diff;
+    const nameDiff = a.teamName.localeCompare(b.teamName);
+    return nameDiff !== 0 ? nameDiff : a.entityId.localeCompare(b.entityId);
   });
 
   const rows = deduplicate(items, sortMode, states)

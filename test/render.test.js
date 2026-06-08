@@ -176,7 +176,7 @@ describe('sectionHtml', () => {
     const html1 = sectionHtml(section, states);
     const html2 = sectionHtml(section, states);
     expect(html1).toBe(html2);
-    // entityId tie-break is alphabetical: aaa < zzz
+    // team name tie-break is alphabetical: AAA < ZZZ
     expect(html1.indexOf('AAA')).toBeLessThan(html1.indexOf('ZZZ'));
   });
 
@@ -206,6 +206,7 @@ describe('sectionHtml', () => {
     const html1 = sectionHtml(wcSection, states);
     const html2 = sectionHtml(wcSection, states);
     expect(html1).toBe(html2);
+    // team name tie-break is alphabetical: AAA < ZZZ
     expect(html1.indexOf('AAA')).toBeLessThan(html1.indexOf('ZZZ'));
   });
 
