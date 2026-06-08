@@ -7,14 +7,15 @@ export function winRatio(record, sortMode) {
   if (sortMode === 'win-draw-loss') {
     // points = 2W + D, max possible = 2(W+D+L)
     const total = pts[0] + pts[1] + pts[2];
-    return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
+    return total ? (2 * pts[0] + pts[1]) / (2 * total) : 0;
   }
   // win-loss: simple win percentage
-  return pts[0] + pts[1] ? pts[0] / (pts[0] + pts[1]) : 0;
+  const total = pts[0] + pts[1];
+  return total ? pts[0] / total : 0;
 }
 
 export function sortKeyFor(attr, sortMode) {
-  if (sortMode === 'by-date') return new Date(attr?.date ?? 0).getTime();
+  if (sortMode === 'by-date') return Date.parse(attr?.date ?? '') || 0;
   return winRatio(attr?.team_record, sortMode);
 }
 

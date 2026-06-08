@@ -50,13 +50,13 @@ export function sectionHtml(section, states, colors = {}) {
 
   // rankType applies to regular season only — auto-switch to by-date outside it
   const firstAttr = states[entities[0]]?.attributes;
-  const sortMode = firstAttr?.season !== 'regular' ? 'by-date' : rankType;
+  const sortMode = firstAttr?.season && firstAttr.season !== 'regular' ? 'by-date' : rankType;
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
     return {
       entityId,
-      teamName: attr?.team_name ?? entityId,
+      teamName: String(attr?.team_name ?? entityId),
       special: special_teams.includes(entityId.replace(prefix, '')),
       key: sortKeyFor(attr, sortMode),
     };

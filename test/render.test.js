@@ -202,12 +202,35 @@ describe('sectionHtml', () => {
         season: 'postseason',
       }),
     };
-    const wcSection = { name: 'WC', prefix: 'sensor.wc_', limit: 10, special_teams: [], rankType: 'by-date' };
+    const wcSection = {
+      name: 'WC',
+      prefix: 'sensor.wc_',
+      limit: 10,
+      special_teams: [],
+      rankType: 'by-date',
+    };
     const html1 = sectionHtml(wcSection, states);
     const html2 = sectionHtml(wcSection, states);
     expect(html1).toBe(html2);
     // team name tie-break is alphabetical: AAA < ZZZ
     expect(html1.indexOf('AAA')).toBeLessThan(html1.indexOf('ZZZ'));
+  });
+
+  it('keeps configured rankType when first entity has no season attribute yet', () => {
+    // sensor.nba_aaa is alphabetically first — Object.keys returns it first.
+    // It has no season field, so firstAttr?.season is undefined.
+    // Bug: undefined !== 'regular' → sortMode='by-date', keys all 0, alpha tie-break → Team A first.
+    // Fix: undefined && ... → false → sortMode='win-loss', Team Z (0.833) > Team A (0.167) → Team Z first.
+    const states = {
+      'sensor.nba_aaa': makeState('PRE', { team_name: 'Team A', team_record: '5-25' }),
+      'sensor.nba_zzz': makeState('PRE', {
+        ...baseAttrs,
+        team_name: 'Team Z',
+        team_record: '25-5',
+      }),
+    };
+    const html = sectionHtml({ ...section, rankType: 'win-loss' }, states);
+    expect(html.indexOf('Team Z')).toBeLessThan(html.indexOf('Team A'));
   });
 
   it('auto-switches to by-date sort outside regular season', () => {
