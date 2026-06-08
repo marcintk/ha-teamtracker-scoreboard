@@ -126,7 +126,7 @@ class SportScoreboardCard extends HTMLElement {
           prefix: 'sensor.nhl_',
           limit: 5,
           special_teams: [],
-          rankType: 'win-draw-loss',
+          rankType: 'win-loss-otl',
         },
       ],
     };

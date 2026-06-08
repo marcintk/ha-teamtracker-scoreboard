@@ -117,7 +117,7 @@ sections:
     limit: 5
     special_teams:
       - dal
-    rankType: win-draw-loss
+    rankType: win-loss-otl
   - name: World Cup
     prefix: sensor.wc_
     limit: 13
@@ -146,10 +146,11 @@ sections:
 
 ### rankType values
 
-| Value           | Use for                                         |
-| --------------- | ----------------------------------------------- |
-| `win-draw-loss` | Leagues where draws count (NHL, MLS, soccer, …) |
-| `win-loss`      | Leagues with W/L records only (NBA, …)          |
+| Value           | Points system       | Record format | Use for                          |
+| --------------- | ------------------- | ------------- | -------------------------------- |
+| `win-loss`      | W=2, L=0            | `W-L`         | NBA and other W/L-only leagues   |
+| `win-draw-loss` | W=3, D=1, L=0       | `W-D-L`       | Soccer, MLS, World Cup, …        |
+| `win-loss-otl`  | W=2, OTL=1, L=0     | `W-L-OTL`     | NHL and leagues with overtime losses |
 
 `rankType` only applies during the regular season. Outside it (playoffs, cups, tournaments), the
 card automatically sorts by game date regardless of your setting.

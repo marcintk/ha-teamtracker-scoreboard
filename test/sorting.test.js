@@ -8,13 +8,22 @@ describe('winRatio', () => {
     expect(winRatio('0-0', 'win-loss')).toBe(0);
   });
 
-  it('calculates points ratio for win-draw-loss', () => {
-    // 10W 5D 5L → points = 2*10+5 = 25, max = 2*20 = 40 → 0.625
-    expect(winRatio('10-5-5', 'win-draw-loss')).toBeCloseTo(25 / 40);
-    // 10W 3D 7L → points = 2*10+3 = 23, max = 2*20 = 40 → 0.575
+  it('calculates points ratio for win-draw-loss (soccer W=3 D=1 L=0)', () => {
+    // 10W 5D 5L → points = 3*10+5 = 35, max = 3*20 = 60
+    expect(winRatio('10-5-5', 'win-draw-loss')).toBeCloseTo(35 / 60);
+    // 10W 3D 7L → points = 3*10+3 = 33, max = 3*20 = 60
     // Guards against swapping draws (pts[1]) with losses (pts[2]) in the formula.
-    expect(winRatio('10-3-7', 'win-draw-loss')).toBeCloseTo(23 / 40);
+    expect(winRatio('10-3-7', 'win-draw-loss')).toBeCloseTo(33 / 60);
     expect(winRatio('0-0-0', 'win-draw-loss')).toBe(0);
+  });
+
+  it('calculates points ratio for win-loss-otl (NHL W=2 OTL=1 L=0)', () => {
+    // Record format: W-L-OTL
+    // 40W 28L 14OTL → points = 2*40+14 = 94, max = 2*82 = 164
+    expect(winRatio('40-28-14', 'win-loss-otl')).toBeCloseTo(94 / 164);
+    // 35W 33L 14OTL → points = 2*35+14 = 84, max = 2*82 = 164
+    expect(winRatio('35-33-14', 'win-loss-otl')).toBeCloseTo(84 / 164);
+    expect(winRatio('0-0-0', 'win-loss-otl')).toBe(0);
   });
 
   it('handles missing or malformed record', () => {
