@@ -260,8 +260,8 @@ describe('rowHtml inline styles — team name font-weight', () => {
 });
 
 describe('rowHtml inline styles — colon visibility', () => {
-  it('hides the colon for NOT_FOUND state', () => {
-    const html = rowHtml(makeState('NOT_FOUND', baseAttrs), false);
+  it('hides the colon for BYE and other non-game states', () => {
+    const html = rowHtml(makeState('BYE', baseAttrs), false);
     expect(html).toContain('color:transparent');
   });
   it('shows a black colon in PRE state', () => {

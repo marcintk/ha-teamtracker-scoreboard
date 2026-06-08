@@ -79,7 +79,7 @@ describe('scoreBg', () => {
 
   it('returns transparent for POST and other states', () => {
     expect(scoreBg('POST')).toBe('transparent');
-    expect(scoreBg('NOT_FOUND')).toBe('transparent');
+    expect(scoreBg('BYE')).toBe('transparent');
   });
 });
 
@@ -116,15 +116,11 @@ describe('colonColor', () => {
 
   it('is muted for POST and transparent for unknown', () => {
     expect(colonColor('POST')).toBe('#777');
-    expect(colonColor('NOT_FOUND')).toBe('transparent');
+    expect(colonColor('BYE')).toBe('transparent');
   });
 });
 
 describe('scoreText', () => {
-  it('returns empty for NOT_FOUND', () => {
-    expect(scoreText('home', 'NOT_FOUND', homeAttr)).toBe('');
-  });
-
   it('returns dash for PRE', () => {
     expect(scoreText('home', 'PRE', homeAttr)).toBe('–');
     expect(scoreText('away', 'PRE', homeAttr)).toBe('–');
@@ -162,19 +158,15 @@ describe('rankText', () => {
 });
 
 describe('logoHtml', () => {
-  it('returns empty for NOT_FOUND state', () => {
-    expect(logoHtml('home', 'NOT_FOUND', homeAttr)).toBe('');
-  });
-
   it('returns img tag for valid https logo URL', () => {
-    const html = logoHtml('home', 'PRE', homeAttr);
+    const html = logoHtml('home', homeAttr);
     expect(html).toContain('<img');
     expect(html).toContain('https://cdn.example.com/lal.png');
   });
 
   it('rejects non-https logo URLs', () => {
     const attr = { ...homeAttr, team_logo: 'http://insecure.example.com/logo.png' };
-    expect(logoHtml('home', 'PRE', attr)).toBe('');
+    expect(logoHtml('home', attr)).toBe('');
   });
 });
 
@@ -239,18 +231,6 @@ describe('tvHtml', () => {
 });
 
 describe('messageHtml', () => {
-  it('shows cleaned api_message for NOT_FOUND', () => {
-    const html = messageHtml('NOT_FOUND', { api_message: 'Cached data: stale' });
-    expect(html).toContain('stale');
-    expect(html).not.toContain('Cached data');
-  });
-
-  it('strips API_LIMIT prefix from NOT_FOUND message', () => {
-    const html = messageHtml('NOT_FOUND', { api_message: 'API_LIMIT hit. Please wait.' });
-    expect(html).toContain('Please wait');
-    expect(html).not.toContain('API_LIMIT');
-  });
-
   it('shows kickoff and odds for PRE', () => {
     const html = messageHtml('PRE', { kickoff_in: '2h', odds: 'LAL -3.5' });
     expect(html).toContain('2h');

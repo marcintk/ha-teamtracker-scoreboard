@@ -42,7 +42,6 @@ export function colonColor(gs) {
 }
 
 export function scoreText(side, gs, attr) {
-  if (gs === 'NOT_FOUND') return '';
   if (gs === 'PRE') return '–';
   return isTeamSide(side, attr) ? (attr.team_score ?? '') : (attr.opponent_score ?? '');
 }
@@ -55,8 +54,7 @@ export function rankText(side, attr) {
   return isTeamSide(side, attr) ? esc(attr.team_record) : esc(attr.opponent_record);
 }
 
-export function logoHtml(side, gs, attr) {
-  if (gs === 'NOT_FOUND') return '';
+export function logoHtml(side, attr) {
   const url = safeLogoUrl(isTeamSide(side, attr) ? attr.team_logo : attr.opponent_logo);
   return url ? `<img src="${url}" alt="">` : '';
 }
@@ -79,12 +77,6 @@ export function tvHtml(gs, attr, colors = {}) {
 
 export function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
-    case 'NOT_FOUND': {
-      const msg = String(attr.api_message ?? 'Unknown')
-        .replace(/^Cached data:\s*/i, '')
-        .replace(/^API_LIMIT hit\.\s*/i, '');
-      return `<span class="msg-sub">${esc(msg)}</span>`;
-    }
     case 'PRE': {
       const kickoff = esc(attr.kickoff_in ?? '');
       const sub = esc(attr.series_summary ?? attr.odds ?? '');
