@@ -166,6 +166,49 @@ describe('sectionHtml', () => {
     expect(html.indexOf('France')).toBeLessThan(html.indexOf('Brazil'));
   });
 
+  it('produces stable order when two teams have the same win ratio', () => {
+    // Both teams are 5-5 → identical winRatio(0.5). Without a tie-breaker the sort
+    // is non-deterministic and the rows could swap on every render (blinking).
+    const states = {
+      'sensor.nba_zzz': makeState('PRE', { ...baseAttrs, team_name: 'ZZZ', team_record: '5-5' }),
+      'sensor.nba_aaa': makeState('PRE', { ...baseAttrs, team_name: 'AAA', team_record: '5-5' }),
+    };
+    const html1 = sectionHtml(section, states);
+    const html2 = sectionHtml(section, states);
+    expect(html1).toBe(html2);
+    // entityId tie-break is alphabetical: aaa < zzz
+    expect(html1.indexOf('AAA')).toBeLessThan(html1.indexOf('ZZZ'));
+  });
+
+  it('produces stable order when two by-date games have the same kick-off time', () => {
+    // Both games at identical timestamp → same sort key. Without a tie-breaker
+    // the order depends on Object.keys() insertion order → potential blink.
+    const sameTime = '2024-04-20T15:00:00Z';
+    const states = {
+      'sensor.wc_zzz': makeState('PRE', {
+        ...baseAttrs,
+        team_name: 'ZZZ',
+        team_abbr: 'zzz',
+        opponent_abbr: 'yyy',
+        date: sameTime,
+        season: 'postseason',
+      }),
+      'sensor.wc_aaa': makeState('PRE', {
+        ...baseAttrs,
+        team_name: 'AAA',
+        team_abbr: 'aaa',
+        opponent_abbr: 'bbb',
+        date: sameTime,
+        season: 'postseason',
+      }),
+    };
+    const wcSection = { name: 'WC', prefix: 'sensor.wc_', limit: 10, special_teams: [], rankType: 'by-date' };
+    const html1 = sectionHtml(wcSection, states);
+    const html2 = sectionHtml(wcSection, states);
+    expect(html1).toBe(html2);
+    expect(html1.indexOf('AAA')).toBeLessThan(html1.indexOf('ZZZ'));
+  });
+
   it('auto-switches to by-date sort outside regular season', () => {
     const states = {
       'sensor.nba_lal': makeState('PRE', {
