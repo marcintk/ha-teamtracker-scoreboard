@@ -192,7 +192,7 @@ describe('tvHtml', () => {
 
   it('returns red badge for IN state', () => {
     const html = tvHtml('IN', { tv_network: 'ESPN' });
-    expect(html).toContain('ESPN');
+    expect(html).toContain('ESP');
     expect(html).toContain('indianred');
   });
 
@@ -207,14 +207,26 @@ describe('tvHtml', () => {
     expect(html).toContain('#666');
   });
 
-  it('truncates long network names', () => {
+  it('truncates long network names to 3 chars with > suffix', () => {
     const html = tvHtml('PRE', { tv_network: 'VERY_LONG_CHANNEL_NAME' });
+    expect(html).toContain('VER&gt;');
     expect(html).not.toContain('VERY_LONG_CHANNEL_NAME');
+  });
+
+  it('shows > suffix for single network name longer than 3 chars', () => {
+    const html = tvHtml('PRE', { tv_network: 'ESPN' });
+    expect(html).toContain('ESP&gt;');
+  });
+
+  it('shows no suffix for short network name (3 chars or fewer)', () => {
+    const html = tvHtml('PRE', { tv_network: 'TNT' });
+    expect(html).toContain('TNT');
+    expect(html).not.toContain('&gt;');
   });
 
   it('handles multi-network with slash', () => {
     const html = tvHtml('PRE', { tv_network: 'ESPN/ESPN2' });
-    expect(html).toContain('›');
+    expect(html).toContain('&gt;');
   });
 
   it('wraps multi-network badge in tooltip element', () => {

@@ -100,7 +100,7 @@ describe('CARD_STYLES — .team-col', () => {
     expect(cssProp('.team-col', 'flex-direction')).toBe('column');
   });
   it('has constrained width', () => {
-    expect(cssProp('.team-col', 'width')).toBe('100px');
+    expect(cssProp('.team-col', 'width')).toBe('99px');
     expect(cssProp('.team-col', 'min-width')).toBe('60px');
   });
 });
