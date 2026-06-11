@@ -27,12 +27,12 @@ scoreboard entirely in client-side JavaScript — no server round-trips, no fram
 ┌──────────────────────────────────────────────────────────┐
 │ HA Dashboard                                             │
 │  setConfig(config) ──► store config, reset cache,        │
-│                         start timer, render if hass ready │
-│                                                           │
+│                        start timer, render if hass ready │
+│                                                          │
 │  set hass(hass)    ──► build cache (once), check for     │
-│                         relevant change, render if needed  │
-│                                                           │
-│  disconnectedCallback ► stop interval timer               │
+│                        relevant change, render if needed │
+│                                                          │
+│  disconnectedCallback ► stop interval timer              │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -134,8 +134,8 @@ shadowRoot.innerHTML = <style> + <ha-card> + rows
 
 Converts a team record string (`"W-L"`, `"W-D-L"`, `"W-L-OTL"`) to a normalised ratio in `[0, 1]`:
 
-| Mode            | Formula                  |
-| --------------- | ------------------------ |
+| Mode          | Formula                  |
+| ------------- | ------------------------ |
 | `win-loss`      | W / (W+L)                |
 | `win-draw-loss` | (3W + D) / (3 × games)   |
 | `win-loss-otl`  | (2W + OTL) / (2 × games) |
