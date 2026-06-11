@@ -133,6 +133,24 @@ describe('sectionHtml', () => {
     expect(html).not.toContain('scoreboard-special-color');
   });
 
+  it('accepts pre-computed stateKeys without colors', () => {
+    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+    const html = sectionHtml(section, states, Object.keys(states));
+    expect(html).toContain('class="game-row"');
+  });
+
+  it('accepts pre-computed stateKeys and still applies colors', () => {
+    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+    const html = sectionHtml(
+      { ...section, special_teams: ['lal'] },
+      states,
+      Object.keys(states),
+      { special: 'gold' }
+    );
+    expect(html).toContain('gold');
+    expect(html).not.toContain('scoreboard-special-color');
+  });
+
   it('applies config colors to team and opponent', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
     const html = sectionHtml(section, states, { team: 'cyan', opponent: 'dimgray' });
@@ -262,6 +280,31 @@ describe('sectionHtml', () => {
     const html = sectionHtml(section, states);
     // nba_aaa < nba_zzz lexicographically → Opp-A row must come before Opp-Z row.
     expect(html.indexOf('Opp-A')).toBeLessThan(html.indexOf('Opp-Z'));
+  });
+
+  it('preserves special-team highlight when special team plays away against a tracked home opponent', () => {
+    const date = '2024-04-20T00:00:00Z';
+    const states = {
+      'sensor.nba_lal': makeState('PRE', {
+        ...baseAttrs,
+        team_homeaway: 'away',
+        team_abbr: 'LAL',
+        opponent_abbr: 'BOS',
+        date,
+        season: 'playoffs',
+      }),
+      'sensor.nba_bos': makeState('PRE', {
+        ...baseAttrs,
+        team_homeaway: 'home',
+        team_name: 'Celtics',
+        team_abbr: 'BOS',
+        opponent_abbr: 'LAL',
+        date,
+        season: 'playoffs',
+      }),
+    };
+    const html = sectionHtml({ ...section, special_teams: ['lal'] }, states);
+    expect(html).toContain('scoreboard-special-color');
   });
 
   it('auto-switches to by-date sort outside regular season', () => {

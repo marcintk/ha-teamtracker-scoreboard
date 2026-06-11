@@ -55,6 +55,10 @@ describe('teamColor', () => {
     expect(teamColor('home', homeAttr, true)).toBe('var(--scoreboard-special-color, #2196F3)');
   });
 
+  it('returns special color when tracked team is away and special is true', () => {
+    expect(teamColor('away', awayAttr, true)).toBe('var(--scoreboard-special-color, #2196F3)');
+  });
+
   it('returns opponent color when side does not match', () => {
     expect(teamColor('away', homeAttr, false)).toBe('var(--scoreboard-opponent-color, #777)');
     expect(teamColor('away', homeAttr, true)).toBe('var(--scoreboard-opponent-color, #777)');

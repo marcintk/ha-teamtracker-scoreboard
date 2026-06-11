@@ -40,10 +40,18 @@ export function rowHtml(stateObj, special, colors = {}) {
 </div>`;
 }
 
-export function sectionHtml(section, states, colors = {}) {
+export function sectionHtml(section, states, stateKeysOrColors, colors) {
+  let stateKeys, resolvedColors;
+  if (Array.isArray(stateKeysOrColors)) {
+    stateKeys = stateKeysOrColors;
+    resolvedColors = colors ?? {};
+  } else {
+    stateKeys = Object.keys(states);
+    resolvedColors = stateKeysOrColors ?? {};
+  }
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
 
-  const entities = Object.keys(states).filter(
+  const entities = stateKeys.filter(
     (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
   );
   if (!entities.length) return '';
@@ -71,7 +79,7 @@ export function sectionHtml(section, states, colors = {}) {
 
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special }) => rowHtml(states[entityId], special, colors))
+    .map(({ entityId, special }) => rowHtml(states[entityId], special, resolvedColors))
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;

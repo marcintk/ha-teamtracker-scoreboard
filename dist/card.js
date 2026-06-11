@@ -160,22 +160,25 @@ function deduplicate(list, sortMode, states) {
     return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
   };
 
-  // First pass: find which game keys have at least one home-side sensor.
+  // First pass: find which game keys have at least one home-side and/or special sensor.
   const homeKeys = new Set();
-  for (const { entityId } of list) {
-    if (states[entityId]?.attributes?.team_homeaway === 'home') {
-      homeKeys.add(gameKey(entityId));
-    }
+  const specialKeys = new Set();
+  for (const { entityId, special } of list) {
+    const key = gameKey(entityId);
+    if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
+    if (special) specialKeys.add(key);
   }
 
   // Second pass: filter the original (date-sorted) list in place.
-  // Skip an away sensor only when a home sensor exists for the same game.
+  // If a special sensor exists for a game, keep it even when it's the away sensor.
+  // Otherwise skip an away sensor when a home sensor exists for the same game.
   const seen = new Set();
-  return list.filter(({ entityId }) => {
+  return list.filter(({ entityId, special }) => {
     const key = gameKey(entityId);
     if (seen.has(key)) return false;
-    const homeaway = states[entityId]?.attributes?.team_homeaway;
-    if (homeKeys.has(key) && homeaway !== 'home') return false;
+    if (specialKeys.has(key) && !special) return false;
+    if (!specialKeys.has(key) && homeKeys.has(key) &&
+        states[entityId]?.attributes?.team_homeaway !== 'home') return false;
     seen.add(key);
     return true;
   });
@@ -206,10 +209,18 @@ function rowHtml(stateObj, special, colors = {}) {
 </div>`;
 }
 
-function sectionHtml(section, states, colors = {}) {
+function sectionHtml(section, states, stateKeysOrColors, colors) {
+  let stateKeys, resolvedColors;
+  if (Array.isArray(stateKeysOrColors)) {
+    stateKeys = stateKeysOrColors;
+    resolvedColors = colors ?? {};
+  } else {
+    stateKeys = Object.keys(states);
+    resolvedColors = stateKeysOrColors ?? {};
+  }
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
 
-  const entities = Object.keys(states).filter(
+  const entities = stateKeys.filter(
     (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
   );
   if (!entities.length) return '';
@@ -237,7 +248,7 @@ function sectionHtml(section, states, colors = {}) {
 
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special }) => rowHtml(states[entityId], special, colors))
+    .map(({ entityId, special }) => rowHtml(states[entityId], special, resolvedColors))
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;
@@ -475,7 +486,8 @@ class SportScoreboardCard extends HTMLElement {
         return;
       }
 
-      const body = sections.map((s) => sectionHtml(s, states, colors)).join('');
+      const stateKeys = Object.keys(states);
+      const body = sections.map((s) => sectionHtml(s, states, stateKeys, colors)).join('');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
         : '';

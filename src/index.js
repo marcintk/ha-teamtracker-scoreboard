@@ -74,7 +74,8 @@ class SportScoreboardCard extends HTMLElement {
         return;
       }
 
-      const body = sections.map((s) => sectionHtml(s, states, colors)).join('');
+      const stateKeys = Object.keys(states);
+      const body = sections.map((s) => sectionHtml(s, states, stateKeys, colors)).join('');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
         : '';
