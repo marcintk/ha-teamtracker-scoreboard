@@ -67,7 +67,9 @@ export function tvHtml(gs, attr, colors = {}) {
   if (!tv) return '';
   const networks = tv.split('/').map((n) => n.trim());
   const hasMultiple = networks.length > 1;
-  const label = hasMultiple ? `${networks[0].substring(0, 8)}›` : networks[0].substring(0, 8);
+  const first = networks[0];
+  const truncated = first.substring(0, 3);
+  const label = first.length > 3 || hasMultiple ? `${truncated}>` : truncated;
   const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666';
   const badge = `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
   if (hasMultiple) {

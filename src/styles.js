@@ -28,7 +28,7 @@ export const CARD_STYLES = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 100px;
+    width: 99px;
     min-width: 60px;
     overflow: hidden;
   }
@@ -97,14 +97,14 @@ export const CARD_STYLES = `
     flex-shrink: 0;
     text-align: center;
     font-size: 0;
-    padding: 0 3px;
+    padding: 0 2px;
   }
   .tv-badge {
     font-size: 8px;
     font-weight: bold;
     color: white;
     border-radius: 3px;
-    padding: 1px 3px;
+    padding: 1px 2px;
     white-space: nowrap;
   }
   .tv-tooltip {
