@@ -16,9 +16,11 @@ function isTeamSide(side, attr) {
   return side === 'home' ? attr?.team_homeaway === 'home' : attr?.team_homeaway !== 'home';
 }
 
-function teamColor(side, attr, special, colors = {}) {
-  if (!isTeamSide(side, attr))
+function teamColor(side, attr, special, colors = {}, opponentSpecial = false) {
+  if (!isTeamSide(side, attr)) {
+    if (opponentSpecial) return colors.special ?? 'var(--scoreboard-special-color, #2196F3)';
     return colors.opponent ?? 'var(--scoreboard-opponent-color, #777)'; /* gray */
+  }
   if (special)
     return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
   return colors.team ?? 'var(--scoreboard-team-color, white)';
@@ -163,28 +165,43 @@ function deduplicate(list, sortMode, states) {
   // First pass: find which game keys have at least one home-side and/or special sensor.
   const homeKeys = new Set();
   const specialKeys = new Set();
+  const specialAwayKeys = new Set();
   for (const { entityId, special } of list) {
     const key = gameKey(entityId);
     if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
-    if (special) specialKeys.add(key);
+    if (special) {
+      specialKeys.add(key);
+      if (states[entityId]?.attributes?.team_homeaway !== 'home') specialAwayKeys.add(key);
+    }
   }
 
-  // Second pass: filter the original (date-sorted) list in place.
-  // If a special sensor exists for a game, keep it even when it's the away sensor.
-  // Otherwise skip an away sensor when a home sensor exists for the same game.
+  // Second pass: filter the original (date-sorted) list in place, then annotate.
+  // When a special team plays away AND a home sensor also exists, prefer the home sensor
+  // but mark opponentSpecial so the away team still renders highlighted.
+  // Otherwise keep the special sensor (special-plays-away with no home counterpart).
   const seen = new Set();
-  return list.filter(({ entityId, special }) => {
-    const key = gameKey(entityId);
-    if (seen.has(key)) return false;
-    if (specialKeys.has(key) && !special) return false;
-    if (!specialKeys.has(key) && homeKeys.has(key) &&
-        states[entityId]?.attributes?.team_homeaway !== 'home') return false;
-    seen.add(key);
-    return true;
-  });
+  return list
+    .filter(({ entityId, special }) => {
+      const key = gameKey(entityId);
+      if (seen.has(key)) return false;
+      if (special && states[entityId]?.attributes?.team_homeaway !== 'home' && homeKeys.has(key))
+        return false;
+      if (specialKeys.has(key) && !special && (!specialAwayKeys.has(key) || !homeKeys.has(key)))
+        return false;
+      if (!specialKeys.has(key) && homeKeys.has(key) &&
+          states[entityId]?.attributes?.team_homeaway !== 'home') return false;
+      seen.add(key);
+      return true;
+    })
+    .map((item) => {
+      const key = gameKey(item.entityId);
+      if (states[item.entityId]?.attributes?.team_homeaway === 'home' && specialAwayKeys.has(key))
+        return { ...item, opponentSpecial: true };
+      return item;
+    });
 }
 
-function rowHtml(stateObj, special, colors = {}) {
+function rowHtml(stateObj, special, colors = {}, opponentSpecial = false) {
   const gs = stateObj?.state ?? '';
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
@@ -192,8 +209,8 @@ function rowHtml(stateObj, special, colors = {}) {
   return `
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:${teamColor('home', attr, special, colors)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
+    <div class="team-name" style="color:${teamColor('home', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('home', attr, special, colors, opponentSpecial)}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', attr)}</div>
   <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
@@ -201,8 +218,8 @@ function rowHtml(stateObj, special, colors = {}) {
   <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', attr)}</div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
+    <div class="team-name" style="color:${teamColor('away', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('away', attr, special, colors, opponentSpecial)}">${rankText('away', attr)}</div>
   </div>
   <div class="message">${messageHtml(gs, attr, colors)}</div>
   <div class="tv">${tvHtml(gs, attr, colors)}</div>
@@ -248,7 +265,7 @@ function sectionHtml(section, states, stateKeysOrColors, colors) {
 
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special }) => rowHtml(states[entityId], special, resolvedColors))
+    .map(({ entityId, special, opponentSpecial = false }) => rowHtml(states[entityId], special, resolvedColors, opponentSpecial))
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;

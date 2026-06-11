@@ -15,7 +15,7 @@ import {
 import { deduplicate, sortKeyFor } from './sorting.js';
 import { esc } from './utils.js';
 
-export function rowHtml(stateObj, special, colors = {}) {
+export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false) {
   const gs = stateObj?.state ?? '';
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
@@ -23,8 +23,8 @@ export function rowHtml(stateObj, special, colors = {}) {
   return `
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:${teamColor('home', attr, special, colors)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('home', attr, special, colors)}">${rankText('home', attr)}</div>
+    <div class="team-name" style="color:${teamColor('home', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('home', attr, special, colors, opponentSpecial)}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', attr)}</div>
   <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
@@ -32,8 +32,8 @@ export function rowHtml(stateObj, special, colors = {}) {
   <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', attr)}</div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:${teamColor('away', attr, special, colors)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('away', attr, special, colors)}">${rankText('away', attr)}</div>
+    <div class="team-name" style="color:${teamColor('away', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
+    <div class="team-rank" style="color:${teamColor('away', attr, special, colors, opponentSpecial)}">${rankText('away', attr)}</div>
   </div>
   <div class="message">${messageHtml(gs, attr, colors)}</div>
   <div class="tv">${tvHtml(gs, attr, colors)}</div>
@@ -79,7 +79,7 @@ export function sectionHtml(section, states, stateKeysOrColors, colors) {
 
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special }) => rowHtml(states[entityId], special, resolvedColors))
+    .map(({ entityId, special, opponentSpecial = false }) => rowHtml(states[entityId], special, resolvedColors, opponentSpecial))
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;

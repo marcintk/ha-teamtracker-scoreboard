@@ -51,23 +51,38 @@ export function deduplicate(list, sortMode, states) {
   // First pass: find which game keys have at least one home-side and/or special sensor.
   const homeKeys = new Set();
   const specialKeys = new Set();
+  const specialAwayKeys = new Set();
   for (const { entityId, special } of list) {
     const key = gameKey(entityId);
     if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
-    if (special) specialKeys.add(key);
+    if (special) {
+      specialKeys.add(key);
+      if (states[entityId]?.attributes?.team_homeaway !== 'home') specialAwayKeys.add(key);
+    }
   }
 
-  // Second pass: filter the original (date-sorted) list in place.
-  // If a special sensor exists for a game, keep it even when it's the away sensor.
-  // Otherwise skip an away sensor when a home sensor exists for the same game.
+  // Second pass: filter the original (date-sorted) list in place, then annotate.
+  // When a special team plays away AND a home sensor also exists, prefer the home sensor
+  // but mark opponentSpecial so the away team still renders highlighted.
+  // Otherwise keep the special sensor (special-plays-away with no home counterpart).
   const seen = new Set();
-  return list.filter(({ entityId, special }) => {
-    const key = gameKey(entityId);
-    if (seen.has(key)) return false;
-    if (specialKeys.has(key) && !special) return false;
-    if (!specialKeys.has(key) && homeKeys.has(key) &&
-        states[entityId]?.attributes?.team_homeaway !== 'home') return false;
-    seen.add(key);
-    return true;
-  });
+  return list
+    .filter(({ entityId, special }) => {
+      const key = gameKey(entityId);
+      if (seen.has(key)) return false;
+      if (special && states[entityId]?.attributes?.team_homeaway !== 'home' && homeKeys.has(key))
+        return false;
+      if (specialKeys.has(key) && !special && (!specialAwayKeys.has(key) || !homeKeys.has(key)))
+        return false;
+      if (!specialKeys.has(key) && homeKeys.has(key) &&
+          states[entityId]?.attributes?.team_homeaway !== 'home') return false;
+      seen.add(key);
+      return true;
+    })
+    .map((item) => {
+      const key = gameKey(item.entityId);
+      if (states[item.entityId]?.attributes?.team_homeaway === 'home' && specialAwayKeys.has(key))
+        return { ...item, opponentSpecial: true };
+      return item;
+    });
 }

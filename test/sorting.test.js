@@ -175,7 +175,7 @@ describe('deduplicate', () => {
     expect(result[1].entityId).toBe('sensor.wc_later_home');
   });
 
-  it('prefers away sensor when it belongs to a special team', () => {
+  it('prefers home sensor and marks opponentSpecial when away sensor is special', () => {
     const date = '2024-03-15';
     const states = {
       'sensor.wc_fra': {
@@ -191,7 +191,64 @@ describe('deduplicate', () => {
     ];
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(1);
+    expect(result[0].entityId).toBe('sensor.wc_fra');
+    expect(result[0].opponentSpecial).toBe(true);
+  });
+
+  it('prefers home sensor and marks opponentSpecial regardless of list order', () => {
+    const date = '2024-03-15';
+    const states = {
+      'sensor.wc_fra': {
+        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
+      },
+      'sensor.wc_bra': {
+        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
+      },
+    };
+    // away-special sensor appears first in list
+    const list = [
+      { entityId: 'sensor.wc_bra', special: true },
+      { entityId: 'sensor.wc_fra', special: false },
+    ];
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(1);
+    expect(result[0].entityId).toBe('sensor.wc_fra');
+    expect(result[0].opponentSpecial).toBe(true);
+  });
+
+  it('keeps special away sensor when no home sensor exists in the section', () => {
+    const date = '2024-03-15';
+    const states = {
+      'sensor.wc_bra': {
+        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
+      },
+    };
+    const list = [{ entityId: 'sensor.wc_bra', special: true }];
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(1);
     expect(result[0].entityId).toBe('sensor.wc_bra');
+    expect(result[0].opponentSpecial).toBeUndefined();
+  });
+
+  it('drops non-special away sensor when home sensor is the special one', () => {
+    const date = '2024-03-15';
+    const states = {
+      'sensor.wc_fra': {
+        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
+      },
+      'sensor.wc_bra': {
+        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
+      },
+    };
+    // away-non-special sensor appears first to exercise the drop-non-special branch
+    const list = [
+      { entityId: 'sensor.wc_bra', special: false },
+      { entityId: 'sensor.wc_fra', special: true },
+    ];
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(1);
+    expect(result[0].entityId).toBe('sensor.wc_fra');
+    expect(result[0].opponentSpecial).toBeUndefined();
   });
 
   it('prefers home sensor when deduplicating', () => {
