@@ -48,22 +48,25 @@ export function deduplicate(list, sortMode, states) {
     return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
   };
 
-  // First pass: find which game keys have at least one home-side sensor.
+  // First pass: find which game keys have at least one home-side and/or special sensor.
   const homeKeys = new Set();
-  for (const { entityId } of list) {
-    if (states[entityId]?.attributes?.team_homeaway === 'home') {
-      homeKeys.add(gameKey(entityId));
-    }
+  const specialKeys = new Set();
+  for (const { entityId, special } of list) {
+    const key = gameKey(entityId);
+    if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
+    if (special) specialKeys.add(key);
   }
 
   // Second pass: filter the original (date-sorted) list in place.
-  // Skip an away sensor only when a home sensor exists for the same game.
+  // If a special sensor exists for a game, keep it even when it's the away sensor.
+  // Otherwise skip an away sensor when a home sensor exists for the same game.
   const seen = new Set();
-  return list.filter(({ entityId }) => {
+  return list.filter(({ entityId, special }) => {
     const key = gameKey(entityId);
     if (seen.has(key)) return false;
-    const homeaway = states[entityId]?.attributes?.team_homeaway;
-    if (homeKeys.has(key) && homeaway !== 'home') return false;
+    if (specialKeys.has(key) && !special) return false;
+    if (!specialKeys.has(key) && homeKeys.has(key) &&
+        states[entityId]?.attributes?.team_homeaway !== 'home') return false;
     seen.add(key);
     return true;
   });

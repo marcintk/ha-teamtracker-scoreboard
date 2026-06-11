@@ -175,6 +175,25 @@ describe('deduplicate', () => {
     expect(result[1].entityId).toBe('sensor.wc_later_home');
   });
 
+  it('prefers away sensor when it belongs to a special team', () => {
+    const date = '2024-03-15';
+    const states = {
+      'sensor.wc_fra': {
+        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
+      },
+      'sensor.wc_bra': {
+        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
+      },
+    };
+    const list = [
+      { entityId: 'sensor.wc_fra', special: false },
+      { entityId: 'sensor.wc_bra', special: true },
+    ];
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(1);
+    expect(result[0].entityId).toBe('sensor.wc_bra');
+  });
+
   it('prefers home sensor when deduplicating', () => {
     const date = '2024-03-15';
     const states = {
