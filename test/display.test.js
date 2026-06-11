@@ -253,26 +253,19 @@ describe('messageHtml', () => {
     expect(html).not.toContain('msg-sub');
   });
 
-  it('shows clock and win probability for IN', () => {
+  it('shows clock and last_play for IN', () => {
     const html = messageHtml('IN', {
       clock: 'Q3 5:00',
-      team_abbr: 'LAL',
-      team_win_probability: '0.65',
+      last_play: 'Touchdown - LAL',
     });
     expect(html).toContain('Q3 5:00');
-    expect(html).toContain('LAL65.0%');
-    expect(html).not.toContain('(');
+    expect(html).toContain('Touchdown - LAL');
   });
 
-  it('omits win probability span when team_win_probability is null', () => {
-    const html = messageHtml('IN', { clock: 'Q3 5:00', team_win_probability: null });
+  it('omits last_play span when last_play is absent', () => {
+    const html = messageHtml('IN', { clock: 'Q3 5:00' });
     expect(html).toContain('Q3 5:00');
     expect(html).not.toContain('msg-sub');
-  });
-
-  it('omits team_abbr from win probability when abbr is absent', () => {
-    const html = messageHtml('IN', { clock: 'Q2 1:30', team_win_probability: '0.4' });
-    expect(html).toContain('40.0%');
   });
 
   it('shows clock and series summary for POST', () => {
