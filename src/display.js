@@ -89,13 +89,10 @@ export function messageHtml(gs, attr, colors = {}) {
     }
     case 'IN': {
       const clock = esc(attr.clock ?? '');
-      const pct =
-        attr.team_win_probability != null
-          ? esc(`${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%`)
-          : '';
+      const lastPlay = esc(attr.last_play ?? '');
       return (
         `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +
-        (pct ? `<span class="msg-sub">${pct}</span>` : '')
+        (lastPlay ? `<span class="msg-sub">${lastPlay}</span>` : '')
       );
     }
     default: {
