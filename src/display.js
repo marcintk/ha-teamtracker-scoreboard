@@ -91,7 +91,7 @@ export function messageHtml(gs, attr, colors = {}) {
       const clock = esc(attr.clock ?? '');
       const pct =
         attr.team_win_probability != null
-          ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
+          ? esc(`${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%`)
           : '';
       return (
         `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +

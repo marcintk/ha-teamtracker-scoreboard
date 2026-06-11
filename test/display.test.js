@@ -260,7 +260,8 @@ describe('messageHtml', () => {
       team_win_probability: '0.65',
     });
     expect(html).toContain('Q3 5:00');
-    expect(html).toContain('65.0%');
+    expect(html).toContain('LAL65.0%');
+    expect(html).not.toContain('(');
   });
 
   it('omits win probability span when team_win_probability is null', () => {
