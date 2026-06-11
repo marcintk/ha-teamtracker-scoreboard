@@ -48,7 +48,7 @@ describe('isTeamSide', () => {
 
 describe('teamColor', () => {
   it('returns team color when side matches', () => {
-    expect(teamColor('home', homeAttr, false)).toBe('var(--scoreboard-team-color, white)');
+    expect(teamColor('home', homeAttr, false)).toBe('var(--scoreboard-team-color, var(--primary-text-color, white))');
   });
 
   it('returns special color (blue) when side matches and special is true', () => {

@@ -23,7 +23,7 @@ function teamColor(side, attr, special, colors = {}, opponentSpecial = false) {
   }
   if (special)
     return colors.special ?? 'var(--scoreboard-special-color, #2196F3)'; /* Material Blue */
-  return colors.team ?? 'var(--scoreboard-team-color, white)';
+  return colors.team ?? 'var(--scoreboard-team-color, var(--primary-text-color, white))';
 }
 
 function scoreBg(gs) {
