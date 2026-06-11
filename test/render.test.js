@@ -304,7 +304,11 @@ describe('sectionHtml', () => {
       }),
     };
     const html = sectionHtml({ ...section, special_teams: ['lal'] }, states);
+    // LAL (away, special) must still render highlighted even though BOS (home) sensor is used
     expect(html).toContain('scoreboard-special-color');
+    // BOS (home, non-special) must remain bold white — not demoted to opponent gray
+    expect(html).toContain('scoreboard-team-color');
+    expect(html).toContain('font-weight:bold');
   });
 
   it('auto-switches to by-date sort outside regular season', () => {

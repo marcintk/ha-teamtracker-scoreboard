@@ -64,6 +64,12 @@ describe('teamColor', () => {
     expect(teamColor('away', homeAttr, true)).toBe('var(--scoreboard-opponent-color, #777)');
   });
 
+  it('returns special color for opponent side when opponentSpecial is true', () => {
+    expect(teamColor('away', homeAttr, false, {}, true)).toBe('var(--scoreboard-special-color, #2196F3)');
+    const colors = { special: 'gold', opponent: 'gray' };
+    expect(teamColor('away', homeAttr, false, colors, true)).toBe('gold');
+  });
+
   it('uses config colors when provided', () => {
     const colors = { team: 'cyan', special: 'gold', opponent: 'gray' };
     expect(teamColor('home', homeAttr, false, colors)).toBe('cyan');
