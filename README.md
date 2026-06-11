@@ -149,11 +149,11 @@ sections:
 
 ### rankType values
 
-| Value           | Points system       | Record format | Use for                          |
-| --------------- | ------------------- | ------------- | -------------------------------- |
-| `win-loss`      | W=2, L=0            | `W-L`         | NBA and other W/L-only leagues   |
-| `win-draw-loss` | W=3, D=1, L=0       | `W-D-L`       | Soccer, MLS, World Cup, …        |
-| `win-loss-otl`  | W=2, OTL=1, L=0     | `W-L-OTL`     | NHL and leagues with overtime losses |
+| Value           | Points system   | Record format | Use for                              |
+| --------------- | --------------- | ------------- | ------------------------------------ |
+| `win-loss`      | W=2, L=0        | `W-L`         | NBA and other W/L-only leagues       |
+| `win-draw-loss` | W=3, D=1, L=0   | `W-D-L`       | Soccer, MLS, World Cup, …            |
+| `win-loss-otl`  | W=2, OTL=1, L=0 | `W-L-OTL`     | NHL and leagues with overtime losses |
 
 `rankType` only applies during the regular season. Outside it (playoffs, cups, tournaments), the
 card automatically sorts by game date regardless of your setting.
