@@ -87,6 +87,31 @@ describe('SportScoreboardCard', () => {
     });
   });
 
+  describe('_buildTrackedIds', () => {
+    it('populates _trackedIds with entity IDs matching configured prefixes', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._buildTrackedIds(['sensor.nba_lal', 'sensor.nhl_bos', 'sensor.weather_london']);
+      expect(card._trackedIds.has('sensor.nba_lal')).toBe(true);
+      expect(card._trackedIds.has('sensor.nhl_bos')).toBe(false);
+      expect(card._trackedIds.has('sensor.weather_london')).toBe(false);
+    });
+
+    it('produces an empty set when no prefix matches', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._buildTrackedIds(['sensor.weather_london', 'sensor.sun']);
+      expect(card._trackedIds.size).toBe(0);
+    });
+
+    it('produces an empty set when config has no sections', () => {
+      const card = makeCard();
+      card._config = {};
+      card._buildTrackedIds(['sensor.nba_lal']);
+      expect(card._trackedIds.size).toBe(0);
+    });
+  });
+
   describe('setConfig', () => {
     it('stores the provided config', () => {
       const card = makeCard();
@@ -106,6 +131,13 @@ describe('SportScoreboardCard', () => {
       card.setConfig({ sections: [nbaSection] });
       expect(card.shadowRoot.innerHTML).toBe('');
     });
+
+    it('invalidates _trackedIds so it is rebuilt on the next hass push', () => {
+      const card = makeCard();
+      card._trackedIds = new Set(['sensor.nba_lal']);
+      card.setConfig({ sections: [nbaSection] });
+      expect(card._trackedIds).toBeNull();
+    });
   });
 
   describe('set hass', () => {
@@ -120,6 +152,35 @@ describe('SportScoreboardCard', () => {
       const card = makeCard();
       card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       expect(card.shadowRoot.innerHTML).toBe('');
+    });
+
+    it('builds _trackedIds on first assignment', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      expect(card._trackedIds).toBeInstanceOf(Set);
+      expect(card._trackedIds.has('sensor.nba_lal')).toBe(true);
+    });
+
+    it('refreshes _trackedIds on render so newly-added sensors are picked up', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._trackedIds = new Set(); // simulate stale empty cache
+      card._render();
+      expect(card._trackedIds.has('sensor.nba_lal')).toBe(true);
+    });
+
+    it('skips _trackedIds rebuild when already populated and no render follows', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const stateObj = makeState('PRE', baseAttrs);
+      // first push: builds _trackedIds and renders
+      card.hass = makeHass({ 'sensor.nba_lal': stateObj });
+      const setAfterRender = card._trackedIds;
+      // second push: same state reference — no change, no render, guard skipped
+      card.hass = makeHass({ 'sensor.nba_lal': stateObj });
+      expect(card._trackedIds).toBe(setAfterRender);
     });
 
     it('skips render when no relevant entity changed', () => {

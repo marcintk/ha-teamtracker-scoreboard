@@ -9,15 +9,19 @@ class SportScoreboardCard extends HTMLElement {
     this._config = null;
     this._hass = null;
     this._refreshTimer = null;
+    this._trackedIds = null;
   }
 
   setConfig(config) {
     this._config = config;
+    this._trackedIds = null;
     this._startRefreshTimer();
     if (this._hass) this._render();
   }
 
   set hass(hass) {
+    if (!this._trackedIds) this._buildTrackedIds(Object.keys(hass.states));
+
     const isAuto =
       !this._config || this._config.refresh === undefined || this._config.refresh === 'auto';
 
@@ -54,14 +58,17 @@ class SportScoreboardCard extends HTMLElement {
     this._stopRefreshTimer();
   }
 
+  _buildTrackedIds(stateKeys) {
+    const prefixes = (this._config?.sections ?? []).map((s) => s.prefix);
+    this._trackedIds = new Set(stateKeys.filter((id) => prefixes.some((p) => id.startsWith(p))));
+  }
+
   _hasRelevantChange(newHass) {
     if (!this._hass || !this._config) return true;
-    const prefixes = (this._config.sections ?? []).map((s) => s.prefix);
-    return prefixes.some((prefix) =>
-      Object.keys(newHass.states).some(
-        (id) => id.startsWith(prefix) && newHass.states[id] !== this._hass.states[id]
-      )
-    );
+    for (const id of this._trackedIds) {
+      if (newHass.states[id] !== this._hass.states[id]) return true;
+    }
+    return false;
   }
 
   _render() {
@@ -75,6 +82,7 @@ class SportScoreboardCard extends HTMLElement {
       }
 
       const stateKeys = Object.keys(states);
+      this._buildTrackedIds(stateKeys);
       const body = sections.map((s) => sectionHtml(s, states, stateKeys, colors)).join('');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
