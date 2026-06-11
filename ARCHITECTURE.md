@@ -130,24 +130,8 @@ shadowRoot.innerHTML = <style> + <ha-card> + rows
 
 ## Sorting & Deduplication
 
-### `winRatio(record, sortMode)`
-
-Converts a team record string (`"W-L"`, `"W-D-L"`, `"W-L-OTL"`) to a normalised ratio in `[0, 1]`:
-
-| Mode          | Formula                  |
-| ------------- | ------------------------ |
-| `win-loss`      | W / (W+L)                |
-| `win-draw-loss` | (3W + D) / (3 × games)   |
-| `win-loss-otl`  | (2W + OTL) / (2 × games) |
-
-### `sortKeyFor(attr, sortMode)`
-
-Returns `Date.parse(attr.date)` for `by-date`, or `winRatio(attr.team_record, sortMode)` otherwise.
-
-### Season auto-detection
-
-If the first entity's `season` attribute is not `"regular"`, the sort mode switches to `by-date`
-automatically, regardless of `rankType`.
+Entities are sorted by win ratio (regular season) or game date (playoffs/off-season), with the mode
+auto-detected from the `season` attribute. See `src/sorting.js` for the ranking formulas.
 
 ### `deduplicate(list, sortMode, states)`
 
