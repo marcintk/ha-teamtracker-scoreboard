@@ -22,6 +22,7 @@ export const CARD_STYLES = `
     height: 28px;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     gap: 0;
+    position: relative;
   }
 
   .team-col {
@@ -94,10 +95,10 @@ export const CARD_STYLES = `
   }
 
   .tv {
-    flex-shrink: 0;
-    text-align: center;
+    position: absolute;
+    top: 2px;
+    right: 2px;
     font-size: 0;
-    padding: 0 2px;
   }
   .tv-badge {
     font-size: 8px;
