@@ -91,11 +91,16 @@ export function messageHtml(gs, attr, colors = {}) {
     }
     case 'IN': {
       const clock = esc(attr.clock ?? '');
-      const lastPlay = esc(attr.last_play ?? '');
-      return (
-        `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +
-        (lastPlay ? `<span class="msg-sub">${lastPlay}</span>` : '')
-      );
+      const raw = String(attr.last_play ?? '');
+      let subHtml = '';
+      if (raw) {
+        if (raw.length > 50) {
+          subHtml = `<span class="msg-sub tv-tooltip" data-tooltip="${esc(raw)}">${esc(raw.substring(0, 50) + '>')}</span>`;
+        } else {
+          subHtml = `<span class="msg-sub">${esc(raw)}</span>`;
+        }
+      }
+      return `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` + subHtml;
     }
     default: {
       const clock = esc(attr.clock ?? '');
