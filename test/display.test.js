@@ -266,18 +266,34 @@ describe('messageHtml', () => {
   });
 
   it('shows clock and last_play for IN', () => {
-    const html = messageHtml('IN', {
-      clock: 'Q3 5:00',
-      last_play: 'Touchdown - LAL',
-    });
+    const html = messageHtml('IN', { clock: 'Q3 5:00', last_play: 'Touchdown - LAL' });
     expect(html).toContain('Q3 5:00');
     expect(html).toContain('Touchdown - LAL');
+    expect(html).not.toContain('tv-tooltip');
   });
 
   it('omits last_play span when last_play is absent', () => {
     const html = messageHtml('IN', { clock: 'Q3 5:00' });
     expect(html).toContain('Q3 5:00');
     expect(html).not.toContain('msg-sub');
+  });
+
+  it('truncates last_play longer than 50 chars and adds > with tooltip', () => {
+    const long = 'A'.repeat(51);
+    const html = messageHtml('IN', { clock: 'Q3 5:00', last_play: long });
+    expect(html).toContain('A'.repeat(50));
+    expect(html).toContain('&gt;');
+    expect(html).toContain('tv-tooltip');
+    expect(html).toContain(`data-tooltip="${long}"`);
+    expect(html).not.toContain(`>${'A'.repeat(51)}<`);
+  });
+
+  it('does not truncate last_play of exactly 50 chars', () => {
+    const exact = 'B'.repeat(50);
+    const html = messageHtml('IN', { clock: 'Q2 1:00', last_play: exact });
+    expect(html).toContain(exact);
+    expect(html).not.toContain('tv-tooltip');
+    expect(html).not.toContain('&gt;');
   });
 
   it('shows clock and series summary for POST', () => {
