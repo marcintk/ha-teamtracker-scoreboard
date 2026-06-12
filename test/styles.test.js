@@ -46,6 +46,9 @@ describe('CARD_STYLES — .game-row', () => {
   it('has a fixed 28px height', () => {
     expect(cssProp('.game-row', 'height')).toBe('28px');
   });
+  it('is a positioning context for the tv overlay', () => {
+    expect(cssProp('.game-row', 'position')).toBe('relative');
+  });
 });
 
 describe('CARD_STYLES — .score', () => {
