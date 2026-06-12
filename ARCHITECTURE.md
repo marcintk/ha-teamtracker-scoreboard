@@ -46,10 +46,13 @@ already available.
 
 Called by HA whenever **any** entity in the dashboard changes. The card:
 
-1. Lazily builds `_trackedIds` on the first call (see below).
-2. In **auto** mode (default): calls `_hasRelevantChange()` — if no tracked entity changed, updates
-   the `_hass` reference silently without re-rendering.
-3. In **numeric** mode (`refresh: 30`): skips the change check; the interval timer drives renders.
+1. Lazily builds `_trackedIds` and sets up the WebSocket subscription on the first call (see below).
+2. In **auto** mode (default): if the WS subscription is active, the flag `_needsRender` (set by the
+   WS callback) gates re-renders — no O(m) scan needed. If no subscription is available yet,
+   `_hasRelevantChange()` is used as a fallback.
+3. If the `connection` object changes (HA reconnect), the old subscription is torn down and a new
+   one is established immediately.
+4. In **numeric** mode (`refresh: 30`): skips all change detection; the interval timer drives renders.
 
 ### `disconnectedCallback()`
 
@@ -59,29 +62,52 @@ Clears the interval timer to prevent memory leaks when the card is removed from 
 
 ## Entity Update Mechanism & Caching
 
-### `_trackedIds` — the key optimisation
+### `_trackedIds` — entity filter set
 
 HA fires `set hass` on every state change in the entire dashboard (potentially hundreds of
-entities). Without filtering this would re-render the card far too often.
-
-`_buildTrackedIds(stateKeys)` runs **once per config**:
+entities). `_buildTrackedIds(stateKeys)` runs **once per config** to build a Set of relevant IDs:
 
 ```js
 const prefixes = config.sections.map((s) => s.prefix);
 this._trackedIds = new Set(stateKeys.filter((id) => prefixes.some((p) => id.startsWith(p))));
 ```
 
-`_hasRelevantChange(newHass)` then does an O(1) reference comparison per tracked entity:
+The Set is reset when `setConfig` is called (e.g. on config edit) and rebuilt lazily on the next
+`set hass`. It is also rebuilt on every `_render()` call so newly-added sensors are picked up.
+
+### WebSocket subscription
+
+On the first `set hass` call (auto mode only), the card subscribes to `state_changed` events:
+
+```js
+hass.connection.subscribeEvents(callback, 'state_changed')
+```
+
+The callback does an O(1) check:
+
+```js
+if (this._trackedIds?.has(event.data.entity_id)) {
+  this._needsRender = true;
+}
+```
+
+HA also calls `set hass` with the updated state; the card checks `_needsRender` there and renders
+if the flag is set. This two-step coordination ensures rendering always uses the freshest
+`_hass.states` rather than the partial event payload. The subscription is torn down in
+`disconnectedCallback` and rebuilt whenever the HA connection object changes (reconnect) or
+`setConfig` is called with a new prefix list.
+
+`_hasRelevantChange(newHass, prevHass)` remains as a fallback for the brief window before the async
+subscription resolves:
 
 ```js
 for (const id of this._trackedIds) {
-  if (newHass.states[id] !== this._hass.states[id]) return true;
+  if (newHass.states[id] !== prevHass.states[id]) return true;
 }
 ```
 
 HA replaces the entire state object reference when an entity updates, so reference inequality is
-sufficient — no deep diffing needed. The Set is reset when `setConfig` is called (e.g. on config
-edit) and rebuilt lazily on the next `set hass`.
+sufficient — no deep diffing needed.
 
 ---
 
@@ -149,14 +175,3 @@ tracked. Deduplication collapses these into one row using a two-pass algorithm:
 The two-pass design preserves the original date order — re-sorting by home/away would push away-only
 games beyond the `limit` slice even when a valid sensor exists.
 
----
-
-## Planned Improvements
-
-### WebSocket entity subscription
-
-Replace `_hasRelevantChange` / `set hass` diffing with
-`hass.connection.subscribeEntities(entityIds, callback)`. Subscribe once in `connectedCallback`
-(after `_trackedIds` is built), unsubscribe in `disconnectedCallback`. The callback receives only
-the changed entities and calls `_render()` directly — no full-state scan, no `_trackedIds` Set
-needed. The numeric `refresh` timer can stay alongside for the polling mode.

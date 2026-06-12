@@ -78,7 +78,9 @@ function tvHtml(gs, attr, colors = {}) {
   if (!tv) return '';
   const networks = tv.split('/').map((n) => n.trim());
   const hasMultiple = networks.length > 1;
-  const label = hasMultiple ? `${networks[0].substring(0, 8)}›` : networks[0].substring(0, 8);
+  const first = networks[0];
+  const truncated = first.substring(0, 3);
+  const label = first.length > 3 || hasMultiple ? `${truncated}>` : truncated;
   const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666';
   const badge = `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
   if (hasMultiple) {
@@ -100,14 +102,16 @@ function messageHtml(gs, attr, colors = {}) {
     }
     case 'IN': {
       const clock = esc(attr.clock ?? '');
-      const pct =
-        attr.team_win_probability != null
-          ? esc(`(${attr.team_abbr ?? ''}${(Number(attr.team_win_probability) * 100).toFixed(1)}%)`)
-          : '';
-      return (
-        `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` +
-        (pct ? `<span class="msg-sub">${pct}</span>` : '')
-      );
+      const raw = String(attr.last_play ?? '');
+      let subHtml = '';
+      if (raw) {
+        if (raw.length > 50) {
+          subHtml = `<span class="msg-sub tv-tooltip" data-tooltip="${esc(raw)}">${esc(raw.substring(0, 50) + '>')}</span>`;
+        } else {
+          subHtml = `<span class="msg-sub">${esc(raw)}</span>`;
+        }
+      }
+      return `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` + subHtml;
     }
     default: {
       const clock = esc(attr.clock ?? '');
@@ -188,8 +192,12 @@ function deduplicate(list, sortMode, states) {
         return false;
       if (specialKeys.has(key) && !special && (!specialAwayKeys.has(key) || !homeKeys.has(key)))
         return false;
-      if (!specialKeys.has(key) && homeKeys.has(key) &&
-          states[entityId]?.attributes?.team_homeaway !== 'home') return false;
+      if (
+        !specialKeys.has(key) &&
+        homeKeys.has(key) &&
+        states[entityId]?.attributes?.team_homeaway !== 'home'
+      )
+        return false;
       seen.add(key);
       return true;
     })
@@ -265,7 +273,9 @@ function sectionHtml(section, states, stateKeysOrColors, colors) {
 
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special, opponentSpecial = false }) => rowHtml(states[entityId], special, resolvedColors, opponentSpecial))
+    .map(({ entityId, special, opponentSpecial = false }) =>
+      rowHtml(states[entityId], special, resolvedColors, opponentSpecial)
+    )
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;
@@ -295,13 +305,14 @@ const CARD_STYLES = `
     height: 28px;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     gap: 0;
+    position: relative;
   }
 
   .team-col {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 100px;
+    width: 99px;
     min-width: 60px;
     overflow: hidden;
   }
@@ -367,17 +378,17 @@ const CARD_STYLES = `
   }
 
   .tv {
-    flex-shrink: 0;
-    text-align: center;
+    position: absolute;
+    top: 2px;
+    right: 2px;
     font-size: 0;
-    padding: 0 3px;
   }
   .tv-badge {
     font-size: 8px;
     font-weight: bold;
     color: white;
     border-radius: 3px;
-    padding: 1px 3px;
+    padding: 1px 2px;
     white-space: nowrap;
   }
   .tv-tooltip {
@@ -439,31 +450,71 @@ class SportScoreboardCard extends HTMLElement {
     this._hass = null;
     this._refreshTimer = null;
     this._trackedIds = null;
+    this._unsubscribe = null;
+    this._needsRender = false;
   }
 
   setConfig(config) {
     this._config = config;
+    this._clearSubscription();
     this._trackedIds = null;
     this._startRefreshTimer();
-    if (this._hass) this._render();
+    if (this._hass) {
+      this._render();
+      this._subscribe();
+    }
   }
 
   set hass(hass) {
-    if (!this._trackedIds) this._buildTrackedIds(Object.keys(hass.states));
+    const isFirstCall = !this._trackedIds;
+    const connectionChanged = !isFirstCall && this._hass?.connection !== hass.connection;
+    const prevHass = this._hass;
+    this._hass = hass;
 
     const isAuto =
       !this._config || this._config.refresh === undefined || this._config.refresh === 'auto';
 
-    if (isAuto) {
-      if (this._hasRelevantChange(hass)) {
-        this._hass = hass;
-        if (this._config) this._render();
-      } else {
-        this._hass = hass;
-      }
-    } else {
-      this._hass = hass;
+    if (isFirstCall || connectionChanged) {
+      if (connectionChanged) this._clearSubscription();
+      this._buildTrackedIds(Object.keys(hass.states));
+      if (this._config && isAuto) this._render();
+      this._subscribe();
+      return;
     }
+    if (!isAuto) return;
+
+    if (this._needsRender) {
+      this._needsRender = false;
+      this._render();
+      return;
+    }
+
+    if (!this._unsubscribe && this._hasRelevantChange(hass, prevHass) && this._config) {
+      this._render();
+    }
+  }
+
+  _subscribe() {
+    if (!this._config) return;
+    const isAuto = !this._config.refresh || this._config.refresh === 'auto';
+    if (!isAuto || !this._hass?.connection?.subscribeEvents) return;
+
+    this._hass.connection
+      .subscribeEvents((event) => {
+        if (this._trackedIds?.has(event.data.entity_id)) {
+          this._needsRender = true;
+        }
+      }, 'state_changed')
+      .then((unsub) => {
+        this._unsubscribe = unsub;
+      })
+      .catch(() => {});
+  }
+
+  _clearSubscription() {
+    this._unsubscribe?.();
+    this._unsubscribe = null;
+    this._needsRender = false;
   }
 
   _startRefreshTimer() {
@@ -485,6 +536,7 @@ class SportScoreboardCard extends HTMLElement {
 
   disconnectedCallback() {
     this._stopRefreshTimer();
+    this._clearSubscription();
   }
 
   _buildTrackedIds(stateKeys) {
@@ -492,10 +544,10 @@ class SportScoreboardCard extends HTMLElement {
     this._trackedIds = new Set(stateKeys.filter((id) => prefixes.some((p) => id.startsWith(p))));
   }
 
-  _hasRelevantChange(newHass) {
-    if (!this._hass || !this._config) return true;
+  _hasRelevantChange(newHass, prevHass) {
+    if (!prevHass || !this._config) return true;
     for (const id of this._trackedIds) {
-      if (newHass.states[id] !== this._hass.states[id]) return true;
+      if (newHass.states[id] !== prevHass.states[id]) return true;
     }
     return false;
   }
