@@ -85,6 +85,14 @@ describe('SportScoreboardCard', () => {
       // 1 header + 10 default rows = 11 rows * 28px = 308px / 50 = ceil(6.16) = 7
       expect(card.getCardSize()).toBe(7);
     });
+
+    it('falls back to section-based size when height is non-numeric', () => {
+      const card = makeCard();
+      card._config = { height: 'auto', sections: [{ limit: 10 }] };
+      const size = card.getCardSize();
+      expect(Number.isFinite(size)).toBe(true);
+      expect(size).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe('_hasRelevantChange', () => {
@@ -525,6 +533,21 @@ describe('SportScoreboardCard', () => {
       expect(unsub).toHaveBeenCalledTimes(1);
       await Promise.resolve();
       expect(connection.subscribeEvents).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retain stale subscription handle when clearSubscription fires before promise resolves', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, unsub } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      // clear before the promise resolves — simulates rapid setConfig or disconnect
+      card._clearSubscription();
+      await Promise.resolve();
+      // stale .then() must call unsub() to clean up, not store it
+      expect(unsub).toHaveBeenCalledTimes(1);
+      expect(card._unsubscribe).toBeNull();
     });
 
     it('silently ignores subscribeEvents rejection and falls back to diffing', async () => {

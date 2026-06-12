@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deduplicate, preferHome, sortKeyFor, winRatio } from '../src/sorting.js';
+import { deduplicate, sortKeyFor, winRatio } from '../src/sorting.js';
 
 describe('winRatio', () => {
   it('calculates win percentage for win-loss', () => {
@@ -48,34 +48,6 @@ describe('sortKeyFor', () => {
 
   it('returns win ratio for win-loss', () => {
     expect(sortKeyFor({ team_record: '30-10' }, 'win-loss')).toBeCloseTo(0.75);
-  });
-});
-
-describe('preferHome', () => {
-  it('puts home sensor before away sensor', () => {
-    const states = {
-      'sensor.nba_lal': { attributes: { team_homeaway: 'away' } },
-      'sensor.nba_gsw': { attributes: { team_homeaway: 'home' } },
-    };
-    const list = [{ entityId: 'sensor.nba_lal' }, { entityId: 'sensor.nba_gsw' }];
-    const result = preferHome(list, states);
-    expect(result[0].entityId).toBe('sensor.nba_gsw');
-  });
-
-  it('keeps home sensor first when it is already first in the list', () => {
-    // Covers the comparator branch where `a` is home and `b` is away (lines 23-24 true/false).
-    const states = {
-      'sensor.nba_gsw': { attributes: { team_homeaway: 'home' } },
-      'sensor.nba_lal': { attributes: { team_homeaway: 'away' } },
-      'sensor.nba_bos': { attributes: { team_homeaway: 'away' } },
-    };
-    const list = [
-      { entityId: 'sensor.nba_gsw' },
-      { entityId: 'sensor.nba_lal' },
-      { entityId: 'sensor.nba_bos' },
-    ];
-    const result = preferHome(list, states);
-    expect(result[0].entityId).toBe('sensor.nba_gsw');
   });
 });
 

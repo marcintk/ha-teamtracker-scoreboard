@@ -126,7 +126,7 @@ describe('sectionHtml', () => {
 
   it('applies config colors to special teams', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
-    const html = sectionHtml({ ...section, special_teams: ['lal'] }, states, {
+    const html = sectionHtml({ ...section, special_teams: ['lal'] }, states, Object.keys(states), {
       special: 'gold',
     });
     expect(html).toContain('gold');
@@ -150,7 +150,10 @@ describe('sectionHtml', () => {
 
   it('applies config colors to team and opponent', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
-    const html = sectionHtml(section, states, { team: 'cyan', opponent: 'dimgray' });
+    const html = sectionHtml(section, states, Object.keys(states), {
+      team: 'cyan',
+      opponent: 'dimgray',
+    });
     expect(html).toContain('cyan');
     expect(html).toContain('dimgray');
   });

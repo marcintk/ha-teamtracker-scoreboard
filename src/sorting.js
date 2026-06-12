@@ -28,14 +28,6 @@ export function sortKeyFor(attr, sortMode) {
   return winRatio(attr?.team_record, sortMode);
 }
 
-export function preferHome(list, states) {
-  return [...list].sort((a, b) => {
-    const aHome = states[a.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
-    const bHome = states[b.entityId]?.attributes?.team_homeaway === 'home' ? 0 : 1;
-    return aHome - bHome;
-  });
-}
-
 // For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.
 // Uses a two-pass approach to preserve the original date order: re-sorting the whole list by
 // home/away would push away-only games (whose home-team sensor is missing) to the end where they
@@ -48,12 +40,14 @@ export function deduplicate(list, sortMode, states) {
     return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
   };
 
+  const keyMap = new Map(list.map(({ entityId }) => [entityId, gameKey(entityId)]));
+
   // First pass: find which game keys have at least one home-side and/or special sensor.
   const homeKeys = new Set();
   const specialKeys = new Set();
   const specialAwayKeys = new Set();
   for (const { entityId, special } of list) {
-    const key = gameKey(entityId);
+    const key = keyMap.get(entityId);
     if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
     if (special) {
       specialKeys.add(key);
@@ -68,7 +62,7 @@ export function deduplicate(list, sortMode, states) {
   const seen = new Set();
   return list
     .filter(({ entityId, special }) => {
-      const key = gameKey(entityId);
+      const key = keyMap.get(entityId);
       if (seen.has(key)) return false;
       if (special && states[entityId]?.attributes?.team_homeaway !== 'home' && homeKeys.has(key))
         return false;
@@ -84,7 +78,7 @@ export function deduplicate(list, sortMode, states) {
       return true;
     })
     .map((item) => {
-      const key = gameKey(item.entityId);
+      const key = keyMap.get(item.entityId);
       if (states[item.entityId]?.attributes?.team_homeaway === 'home' && specialAwayKeys.has(key))
         return { ...item, opponentSpecial: true };
       return item;
