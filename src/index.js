@@ -10,31 +10,71 @@ class SportScoreboardCard extends HTMLElement {
     this._hass = null;
     this._refreshTimer = null;
     this._trackedIds = null;
+    this._unsubscribe = null;
+    this._needsRender = false;
   }
 
   setConfig(config) {
     this._config = config;
+    this._clearSubscription();
     this._trackedIds = null;
     this._startRefreshTimer();
-    if (this._hass) this._render();
+    if (this._hass) {
+      this._render();
+      this._subscribe();
+    }
   }
 
   set hass(hass) {
-    if (!this._trackedIds) this._buildTrackedIds(Object.keys(hass.states));
+    const isFirstCall = !this._trackedIds;
+    const connectionChanged = !isFirstCall && this._hass?.connection !== hass.connection;
+    const prevHass = this._hass;
+    this._hass = hass;
 
     const isAuto =
       !this._config || this._config.refresh === undefined || this._config.refresh === 'auto';
 
-    if (isAuto) {
-      if (this._hasRelevantChange(hass)) {
-        this._hass = hass;
-        if (this._config) this._render();
-      } else {
-        this._hass = hass;
-      }
-    } else {
-      this._hass = hass;
+    if (isFirstCall || connectionChanged) {
+      if (connectionChanged) this._clearSubscription();
+      this._buildTrackedIds(Object.keys(hass.states));
+      if (this._config && isAuto) this._render();
+      this._subscribe();
+      return;
     }
+    if (!isAuto) return;
+
+    if (this._needsRender) {
+      this._needsRender = false;
+      this._render();
+      return;
+    }
+
+    if (!this._unsubscribe && this._hasRelevantChange(hass, prevHass) && this._config) {
+      this._render();
+    }
+  }
+
+  _subscribe() {
+    if (!this._config) return;
+    const isAuto = !this._config.refresh || this._config.refresh === 'auto';
+    if (!isAuto || !this._hass?.connection?.subscribeEvents) return;
+
+    this._hass.connection
+      .subscribeEvents((event) => {
+        if (this._trackedIds?.has(event.data.entity_id)) {
+          this._needsRender = true;
+        }
+      }, 'state_changed')
+      .then((unsub) => {
+        this._unsubscribe = unsub;
+      })
+      .catch(() => {});
+  }
+
+  _clearSubscription() {
+    this._unsubscribe?.();
+    this._unsubscribe = null;
+    this._needsRender = false;
   }
 
   _startRefreshTimer() {
@@ -56,6 +96,7 @@ class SportScoreboardCard extends HTMLElement {
 
   disconnectedCallback() {
     this._stopRefreshTimer();
+    this._clearSubscription();
   }
 
   _buildTrackedIds(stateKeys) {
@@ -63,10 +104,10 @@ class SportScoreboardCard extends HTMLElement {
     this._trackedIds = new Set(stateKeys.filter((id) => prefixes.some((p) => id.startsWith(p))));
   }
 
-  _hasRelevantChange(newHass) {
-    if (!this._hass || !this._config) return true;
+  _hasRelevantChange(newHass, prevHass) {
+    if (!prevHass || !this._config) return true;
     for (const id of this._trackedIds) {
-      if (newHass.states[id] !== this._hass.states[id]) return true;
+      if (newHass.states[id] !== prevHass.states[id]) return true;
     }
     return false;
   }

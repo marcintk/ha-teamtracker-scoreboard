@@ -79,7 +79,9 @@ export function sectionHtml(section, states, stateKeysOrColors, colors) {
 
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special, opponentSpecial = false }) => rowHtml(states[entityId], special, resolvedColors, opponentSpecial))
+    .map(({ entityId, special, opponentSpecial = false }) =>
+      rowHtml(states[entityId], special, resolvedColors, opponentSpecial)
+    )
     .join('');
 
   return `<div class="section-header">${esc(name)}</div>${rows}`;

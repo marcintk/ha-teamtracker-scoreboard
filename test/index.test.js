@@ -87,6 +87,23 @@ describe('SportScoreboardCard', () => {
     });
   });
 
+  describe('_hasRelevantChange', () => {
+    it('returns true when prevHass is null (no prior state to compare)', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._trackedIds = new Set(['sensor.nba_lal']);
+      expect(card._hasRelevantChange(makeHass({}), null)).toBe(true);
+    });
+
+    it('returns true when config is null', () => {
+      const card = makeCard();
+      card._config = null;
+      card._trackedIds = new Set(['sensor.nba_lal']);
+      const hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      expect(card._hasRelevantChange(hass, hass)).toBe(true);
+    });
+  });
+
   describe('_buildTrackedIds', () => {
     it('populates _trackedIds with entity IDs matching configured prefixes', () => {
       const card = makeCard();
@@ -186,26 +203,32 @@ describe('SportScoreboardCard', () => {
     it('skips render when no relevant entity changed', () => {
       const card = makeCard();
       const stateObj = makeState('PRE', baseAttrs);
-      card._hass = makeHass({ 'sensor.nba_lal': stateObj });
-      card._config = { sections: [nbaSection] };
-      // same state object reference — no change detected
+      card.setConfig({ sections: [nbaSection] });
+      card.hass = makeHass({ 'sensor.nba_lal': stateObj }); // first call: builds _trackedIds
+      const renderSpy = vi.spyOn(card, '_render');
+      // same state object reference — fallback diffing returns false, no render
       card.hass = makeHass({ 'sensor.nba_lal': stateObj });
-      expect(card.shadowRoot.innerHTML).toBe('');
+      expect(renderSpy).not.toHaveBeenCalled();
     });
 
     it('treats missing sections as empty prefix list when checking relevance', () => {
       const card = makeCard();
+      // pre-set _trackedIds so the first-call branch is bypassed
+      card._trackedIds = new Set(); // empty — no sections to match
       card._hass = makeHass({});
       card._config = {}; // no sections key — hits the ?? [] fallback
+      const renderSpy = vi.spyOn(card, '_render');
       card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      // no prefixes to match, so no render triggered
-      expect(card.shadowRoot.innerHTML).toBe('');
+      // empty _trackedIds → _hasRelevantChange returns false → no render
+      expect(renderSpy).not.toHaveBeenCalled();
     });
 
     it('re-renders when a relevant entity state changes', () => {
       const card = makeCard();
-      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card._config = { sections: [nbaSection] };
+      card.setConfig({ sections: [nbaSection] });
+      // first call: builds _trackedIds; makeHass has no connection so _unsubscribe stays null
+      card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      // second call: different state ref → fallback diffing triggers render
       card.hass = makeHass({ 'sensor.nba_lal': makeState('IN', baseAttrs) });
       expect(card.shadowRoot.innerHTML).toContain('ha-card');
     });
@@ -333,6 +356,15 @@ describe('SportScoreboardCard', () => {
       expect(card._hass).toBe(hass);
     });
 
+    it('does not render on second set hass call in numeric refresh mode', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      const renderSpy = vi.spyOn(card, '_render');
+      card.hass = makeHass({ 'sensor.nba_lal': makeState('IN', baseAttrs) });
+      expect(renderSpy).not.toHaveBeenCalled();
+    });
+
     it('clears the old timer when setConfig is called again', () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection], refresh: 30 });
@@ -366,6 +398,162 @@ describe('SportScoreboardCard', () => {
       card.disconnectedCallback();
       vi.advanceTimersByTime(30_000);
       expect(renderSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('subscription', () => {
+    const makeHassWithConnection = (states = {}) => {
+      const unsub = vi.fn();
+      const connection = { subscribeEvents: vi.fn().mockResolvedValue(unsub) };
+      return { hass: { states, connection }, unsub, connection };
+    };
+
+    it('calls subscribeEvents on first hass assignment in auto mode', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      expect(connection.subscribeEvents).toHaveBeenCalledWith(
+        expect.any(Function),
+        'state_changed'
+      );
+    });
+
+    it('does not subscribe in numeric refresh mode', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      const { hass, connection } = makeHassWithConnection({});
+      card.hass = hass;
+      await Promise.resolve();
+      expect(connection.subscribeEvents).not.toHaveBeenCalled();
+    });
+
+    it('stores the unsubscribe function after subscription resolves', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, unsub } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      expect(card._unsubscribe).toBe(unsub);
+    });
+
+    it('WS callback sets _needsRender for a tracked entity', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      expect(card._needsRender).toBe(true);
+    });
+
+    it('WS callback does not set _needsRender for an untracked entity', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      callback({ data: { entity_id: 'sensor.weather_london' } });
+      expect(card._needsRender).toBe(false);
+    });
+
+    it('set hass renders and clears _needsRender when flag is set', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      const renderSpy = vi.spyOn(card, '_render');
+      card.hass = { ...hass };
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+      expect(card._needsRender).toBe(false);
+    });
+
+    it('_clearSubscription calls unsub, nulls _unsubscribe, clears _needsRender', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, unsub } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      card._needsRender = true;
+      card._clearSubscription();
+      expect(unsub).toHaveBeenCalledTimes(1);
+      expect(card._unsubscribe).toBeNull();
+      expect(card._needsRender).toBe(false);
+    });
+
+    it('disconnectedCallback unsubscribes from WS', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, unsub } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      card.disconnectedCallback();
+      expect(unsub).toHaveBeenCalledTimes(1);
+      expect(card._unsubscribe).toBeNull();
+    });
+
+    it('setConfig with active subscription unsubscribes then re-subscribes', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, unsub, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      expect(unsub).not.toHaveBeenCalled();
+      card.setConfig({ sections: [nbaSection] });
+      expect(unsub).toHaveBeenCalledTimes(1);
+      await Promise.resolve();
+      expect(connection.subscribeEvents).toHaveBeenCalledTimes(2);
+    });
+
+    it('silently ignores subscribeEvents rejection and falls back to diffing', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const connection = { subscribeEvents: vi.fn().mockRejectedValue(new Error('ws error')) };
+      card.hass = { states: { 'sensor.nba_lal': makeState('PRE', baseAttrs) }, connection };
+      await Promise.resolve();
+      await Promise.resolve(); // let rejection propagate through .catch
+      expect(card._unsubscribe).toBeNull();
+    });
+
+    it('new connection object triggers re-subscribe (HA reconnect)', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass: hass1, unsub: unsub1 } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass1;
+      await Promise.resolve();
+
+      const { hass: hass2, connection: conn2 } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('IN', baseAttrs),
+      });
+      card.hass = hass2;
+      await Promise.resolve();
+
+      expect(unsub1).toHaveBeenCalledTimes(1);
+      expect(conn2.subscribeEvents).toHaveBeenCalledOnce();
     });
   });
 

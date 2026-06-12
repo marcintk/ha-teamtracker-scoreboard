@@ -141,12 +141,9 @@ describe('sectionHtml', () => {
 
   it('accepts pre-computed stateKeys and still applies colors', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
-    const html = sectionHtml(
-      { ...section, special_teams: ['lal'] },
-      states,
-      Object.keys(states),
-      { special: 'gold' }
-    );
+    const html = sectionHtml({ ...section, special_teams: ['lal'] }, states, Object.keys(states), {
+      special: 'gold',
+    });
     expect(html).toContain('gold');
     expect(html).not.toContain('scoreboard-special-color');
   });

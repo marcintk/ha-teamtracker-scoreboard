@@ -74,8 +74,12 @@ export function deduplicate(list, sortMode, states) {
         return false;
       if (specialKeys.has(key) && !special && (!specialAwayKeys.has(key) || !homeKeys.has(key)))
         return false;
-      if (!specialKeys.has(key) && homeKeys.has(key) &&
-          states[entityId]?.attributes?.team_homeaway !== 'home') return false;
+      if (
+        !specialKeys.has(key) &&
+        homeKeys.has(key) &&
+        states[entityId]?.attributes?.team_homeaway !== 'home'
+      )
+        return false;
       seen.add(key);
       return true;
     })
