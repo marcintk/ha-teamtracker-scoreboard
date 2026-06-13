@@ -1,6 +1,6 @@
 export class DebugMetrics {
   constructor() {
-    this._data = { notifications: [], accepted: [], renders: [] };
+    this._data = { events: [], accepted: [], renders: [] };
   }
 
   track(key) {
@@ -53,7 +53,7 @@ export class DebugMetrics {
         })()
       : '--';
     const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:red">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
-    return `<table style="border-collapse:collapse;width:100%">${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table>`;
+    return `<table style="border-collapse:collapse;width:100%">${row('events', 'events')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table>`;
   }
 
   html() {

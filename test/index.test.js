@@ -633,7 +633,7 @@ describe('SportScoreboardCard', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
-    it('WS event increments notifications metric when debug is true', async () => {
+    it('WS event increments events metric when debug is true', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection], debug: true });
       const { hass, connection } = makeHassWithConnection({
@@ -643,10 +643,10 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       const callback = connection.subscribeEvents.mock.calls[0][0];
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      expect(card._debug._data.notifications).toHaveLength(1);
+      expect(card._debug._data.events).toHaveLength(1);
     });
 
-    it('WS event does not increment notifications when debug is false', async () => {
+    it('WS event does not increment events when debug is false', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
       const { hass, connection } = makeHassWithConnection({
@@ -656,7 +656,7 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       const callback = connection.subscribeEvents.mock.calls[0][0];
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      expect(card._debug._data.notifications).toHaveLength(0);
+      expect(card._debug._data.events).toHaveLength(0);
     });
 
     it('_scheduleRender increments accepted when debug is true and no timer is active', () => {

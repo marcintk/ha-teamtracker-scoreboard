@@ -8,11 +8,11 @@ describe('DebugMetrics', () => {
   describe('track / counts', () => {
     it('records timestamps and returns correct window counts', () => {
       const d = new DebugMetrics();
-      d.track('notifications');
-      d.track('notifications');
+      d.track('events');
+      d.track('events');
       vi.advanceTimersByTime(30_000);
-      d.track('notifications');
-      const c = d.counts('notifications');
+      d.track('events');
+      const c = d.counts('events');
       expect(c.min1).toBe(3);
       expect(c.min5).toBe(3);
       expect(c.min15).toBe(3);
@@ -22,10 +22,10 @@ describe('DebugMetrics', () => {
 
     it('excludes entries outside the 1-minute window', () => {
       const d = new DebugMetrics();
-      d.track('notifications');
+      d.track('events');
       vi.advanceTimersByTime(61_000);
-      d.track('notifications');
-      const c = d.counts('notifications');
+      d.track('events');
+      const c = d.counts('events');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(2);
       expect(c.min15).toBe(2);
@@ -35,10 +35,10 @@ describe('DebugMetrics', () => {
 
     it('excludes entries outside the 5-minute window', () => {
       const d = new DebugMetrics();
-      d.track('notifications');
+      d.track('events');
       vi.advanceTimersByTime(301_000);
-      d.track('notifications');
-      const c = d.counts('notifications');
+      d.track('events');
+      const c = d.counts('events');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
       expect(c.min15).toBe(2);
@@ -48,10 +48,10 @@ describe('DebugMetrics', () => {
 
     it('excludes entries outside the 15-minute window', () => {
       const d = new DebugMetrics();
-      d.track('notifications');
+      d.track('events');
       vi.advanceTimersByTime(900_001);
-      d.track('notifications');
-      const c = d.counts('notifications');
+      d.track('events');
+      const c = d.counts('events');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
       expect(c.min15).toBe(1);
@@ -62,10 +62,10 @@ describe('DebugMetrics', () => {
 
     it('excludes entries outside the 30-minute window', () => {
       const d = new DebugMetrics();
-      d.track('notifications');
+      d.track('events');
       vi.advanceTimersByTime(1_800_001);
-      d.track('notifications');
-      const c = d.counts('notifications');
+      d.track('events');
+      const c = d.counts('events');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
       expect(c.min15).toBe(1);
@@ -76,10 +76,10 @@ describe('DebugMetrics', () => {
 
     it('excludes entries outside the 1-hour window', () => {
       const d = new DebugMetrics();
-      d.track('notifications');
+      d.track('events');
       vi.advanceTimersByTime(3_600_001);
-      d.track('notifications');
-      const c = d.counts('notifications');
+      d.track('events');
+      const c = d.counts('events');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
       expect(c.min15).toBe(1);
