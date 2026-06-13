@@ -13,6 +13,7 @@ class SportScoreboardCard extends HTMLElement {
     this._trackedIds = null;
     this._unsubscribe = null;
     this._subscribeGen = 0;
+    this._metrics = { notifications: [], accepted: [], renders: [] };
   }
 
   setConfig(config) {
@@ -55,8 +56,38 @@ class SportScoreboardCard extends HTMLElement {
     };
   }
 
+  _trackMetric(key) {
+    const now = Date.now();
+    const arr = this._metrics[key];
+    arr.push(now);
+    const cutoff = now - 86_400_000;
+    let i = 0;
+    while (i < arr.length && arr[i] < cutoff) i++;
+    if (i) arr.splice(0, i);
+  }
+
+  _metricCounts(key) {
+    const now = Date.now();
+    const arr = this._metrics[key];
+    return {
+      min: arr.filter((t) => now - t <= 60_000).length,
+      hour: arr.filter((t) => now - t <= 3_600_000).length,
+      day: arr.length,
+    };
+  }
+
+  _debugHtml() {
+    const cell = (n) => `<td style="padding-right:10px;text-align:right">${n}</td>`;
+    const row = (label, key) => {
+      const c = this._metricCounts(key);
+      return `<tr><td style="padding-right:14px;color:#999">${label}</td>${cell(c.min)}${cell(c.hour)}${cell(c.day)}</tr>`;
+    };
+    return `<div style="position:absolute;top:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.85);color:#00e676;font-family:monospace;font-size:10px;padding:4px 8px;pointer-events:none;"><table style="border-collapse:collapse;width:100%"><tr style="color:#444;font-size:9px"><td style="padding-right:14px"></td><td style="padding-right:10px;text-align:right">1m</td><td style="padding-right:10px;text-align:right">1h</td><td style="text-align:right">24h</td></tr>${row('notif', 'notifications')}${row('accept', 'accepted')}${row('render', 'renders')}</table></div>`;
+  }
+
   _scheduleRender() {
     if (this._renderTimer) return;
+    if (this._config?.debug) this._trackMetric('accepted');
     const { lazyMs } = this._getRefreshConfig();
     if (lazyMs === 0) {
       this._render();
@@ -82,6 +113,7 @@ class SportScoreboardCard extends HTMLElement {
     this._hass.connection
       .subscribeEvents((event) => {
         if (this._subscribeGen === gen && this._trackedIds?.has(event.data.entity_id)) {
+          if (this._config?.debug) this._trackMetric('notifications');
           this._scheduleRender();
         }
       }, 'state_changed')
@@ -138,8 +170,9 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _render() {
+    if (this._config?.debug) this._trackMetric('renders');
     try {
-      const { sections, height, colors = {} } = this._config;
+      const { sections, height, colors = {}, debug } = this._config;
       const states = this._hass.states;
       const stateKeys = Object.keys(states);
       this._buildTrackedIds(stateKeys);
@@ -158,7 +191,8 @@ class SportScoreboardCard extends HTMLElement {
 
       this.shadowRoot.innerHTML = `
         <style>${CARD_STYLES}${headerOverride}</style>
-        <ha-card style="${heightStyle}">
+        <ha-card style="${heightStyle}${debug ? 'position:relative;' : ''}">
+          ${debug ? this._debugHtml() : ''}
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>
       `;
