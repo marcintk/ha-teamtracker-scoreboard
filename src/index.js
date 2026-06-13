@@ -60,7 +60,7 @@ class SportScoreboardCard extends HTMLElement {
     const now = Date.now();
     const arr = this._metrics[key];
     arr.push(now);
-    const cutoff = now - 86_400_000;
+    const cutoff = now - 21_600_000;
     let i = 0;
     while (i < arr.length && arr[i] < cutoff) i++;
     if (i) arr.splice(0, i);
@@ -72,8 +72,9 @@ class SportScoreboardCard extends HTMLElement {
     return {
       min1: arr.filter((t) => now - t <= 60_000).length,
       min5: arr.filter((t) => now - t <= 300_000).length,
-      hour: arr.filter((t) => now - t <= 3_600_000).length,
-      day: arr.length,
+      min30: arr.filter((t) => now - t <= 1_800_000).length,
+      hour3: arr.filter((t) => now - t <= 10_800_000).length,
+      hour6: arr.length,
     };
   }
 
@@ -81,9 +82,12 @@ class SportScoreboardCard extends HTMLElement {
     const cell = (n) => `<td style="padding-right:8px;text-align:right">${n}</td>`;
     const row = (label, key) => {
       const c = this._metricCounts(key);
-      return `<tr><td style="padding-right:10px;color:#999">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.hour)}${cell(c.day)}</tr>`;
+      return `<tr><td style="padding-right:10px;color:#999">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min30)}${cell(c.hour3)}${cell(c.hour6)}</tr>`;
     };
-    return `<div style="position:absolute;top:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:9px;line-height:1.3;padding:2px 6px;pointer-events:none;"><table style="border-collapse:collapse;width:100%"><tr style="color:#555;font-size:8px"><td style="padding-right:10px"></td><td style="padding-right:8px;text-align:right">1m</td><td style="padding-right:8px;text-align:right">5m</td><td style="padding-right:8px;text-align:right">1h</td><td style="text-align:right">24h</td></tr>${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}</table></div>`;
+    const ts = this._metrics.renders.length
+      ? new Date(this._metrics.renders.at(-1)).toISOString().slice(11, 23)
+      : '--';
+    return `<div style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:9px;line-height:1.3;padding:2px 6px;pointer-events:none;"><table style="border-collapse:collapse;width:100%"><tr style="color:#555;font-size:8px"><td style="padding-right:10px">${ts}</td><td style="padding-right:8px;text-align:right">1m</td><td style="padding-right:8px;text-align:right">5m</td><td style="padding-right:8px;text-align:right">30m</td><td style="padding-right:8px;text-align:right">3h</td><td style="text-align:right">6h</td></tr>${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}</table></div>`;
   }
 
   _scheduleRender() {
