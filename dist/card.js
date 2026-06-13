@@ -452,10 +452,10 @@ class SportScoreboardCard extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this._config = null;
     this._hass = null;
-    this._refreshTimer = null;
+    this._staticTimer = null;
+    this._renderTimer = null;
     this._trackedIds = null;
     this._unsubscribe = null;
-    this._needsRender = false;
     this._subscribeGen = 0;
   }
 
@@ -463,7 +463,7 @@ class SportScoreboardCard extends HTMLElement {
     this._config = config;
     this._clearSubscription();
     this._trackedIds = null;
-    this._startRefreshTimer();
+    this._startStaticTimer();
     if (this._hass) {
       this._render();
       this._subscribe();
@@ -476,12 +476,11 @@ class SportScoreboardCard extends HTMLElement {
     const prevHass = this._hass;
     this._hass = hass;
 
-    const isAuto =
-      !this._config || this._config.refresh === undefined || this._config.refresh === 'auto';
+    const { subscribe } = this._getRefreshConfig();
 
     if (isFirstCall || connectionChanged) {
       if (connectionChanged) this._clearSubscription();
-      if (this._config && isAuto) {
+      if (this._config && subscribe) {
         this._render();
       } else {
         this._buildTrackedIds(Object.keys(hass.states));
@@ -489,29 +488,56 @@ class SportScoreboardCard extends HTMLElement {
       this._subscribe();
       return;
     }
-    if (!isAuto) return;
+    if (!subscribe) return;
 
-    if (this._needsRender) {
-      this._needsRender = false;
+    if (!this._unsubscribe && this._hasRelevantChange(hass, prevHass) && this._config) {
+      this._scheduleRender();
+    }
+  }
+
+  _getRefreshConfig() {
+    const r = this._config?.refresh;
+    if (typeof r === 'number') {
+      // Legacy numeric refresh: static timer only, no WebSocket subscription
+      return { lazyMs: 0, staticMs: r * 1000, subscribe: false };
+    }
+    return {
+      lazyMs: this._config?.lazyRefresh ?? 500,
+      staticMs: this._config?.staticRefresh ?? 300_000,
+      subscribe: true,
+    };
+  }
+
+  _scheduleRender() {
+    if (this._renderTimer) return;
+    const { lazyMs } = this._getRefreshConfig();
+    if (lazyMs === 0) {
       this._render();
       return;
     }
+    this._renderTimer = setTimeout(() => {
+      this._renderTimer = null;
+      if (this._hass && this._config) this._render();
+    }, lazyMs);
+  }
 
-    if (!this._unsubscribe && this._hasRelevantChange(hass, prevHass) && this._config) {
-      this._render();
+  _cancelRenderTimer() {
+    if (this._renderTimer) {
+      clearTimeout(this._renderTimer);
+      this._renderTimer = null;
     }
   }
 
   _subscribe() {
     if (!this._config) return;
-    const isAuto = this._config.refresh === undefined || this._config.refresh === 'auto';
-    if (!isAuto || !this._hass?.connection?.subscribeEvents) return;
+    const { subscribe } = this._getRefreshConfig();
+    if (!subscribe || !this._hass?.connection?.subscribeEvents) return;
 
     const gen = this._subscribeGen;
     this._hass.connection
       .subscribeEvents((event) => {
         if (this._subscribeGen === gen && this._trackedIds?.has(event.data.entity_id)) {
-          this._needsRender = true;
+          this._scheduleRender();
         }
       }, 'state_changed')
       .then((unsub) => {
@@ -528,28 +554,28 @@ class SportScoreboardCard extends HTMLElement {
     this._subscribeGen++;
     this._unsubscribe?.();
     this._unsubscribe = null;
-    this._needsRender = false;
+    this._cancelRenderTimer();
   }
 
-  _startRefreshTimer() {
-    this._stopRefreshTimer();
-    const interval = this._config?.refresh;
-    if (typeof interval === 'number' && interval > 0) {
-      this._refreshTimer = setInterval(() => {
+  _startStaticTimer() {
+    this._stopStaticTimer();
+    const { staticMs } = this._getRefreshConfig();
+    if (staticMs > 0) {
+      this._staticTimer = setInterval(() => {
         if (this._hass && this._config) this._render();
-      }, interval * 1000);
+      }, staticMs);
     }
   }
 
-  _stopRefreshTimer() {
-    if (this._refreshTimer) {
-      clearInterval(this._refreshTimer);
-      this._refreshTimer = null;
+  _stopStaticTimer() {
+    if (this._staticTimer) {
+      clearInterval(this._staticTimer);
+      this._staticTimer = null;
     }
   }
 
   disconnectedCallback() {
-    this._stopRefreshTimer();
+    this._stopStaticTimer();
     this._clearSubscription();
   }
 

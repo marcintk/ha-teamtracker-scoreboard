@@ -8,10 +8,10 @@ class SportScoreboardCard extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this._config = null;
     this._hass = null;
-    this._refreshTimer = null;
+    this._fixedTimer = null;
+    this._renderTimer = null;
     this._trackedIds = null;
     this._unsubscribe = null;
-    this._needsRender = false;
     this._subscribeGen = 0;
   }
 
@@ -19,7 +19,7 @@ class SportScoreboardCard extends HTMLElement {
     this._config = config;
     this._clearSubscription();
     this._trackedIds = null;
-    this._startRefreshTimer();
+    this._startFixedTimer();
     if (this._hass) {
       this._render();
       this._subscribe();
@@ -32,12 +32,9 @@ class SportScoreboardCard extends HTMLElement {
     const prevHass = this._hass;
     this._hass = hass;
 
-    const isAuto =
-      !this._config || this._config.refresh === undefined || this._config.refresh === 'auto';
-
     if (isFirstCall || connectionChanged) {
       if (connectionChanged) this._clearSubscription();
-      if (this._config && isAuto) {
+      if (this._config) {
         this._render();
       } else {
         this._buildTrackedIds(Object.keys(hass.states));
@@ -45,29 +42,47 @@ class SportScoreboardCard extends HTMLElement {
       this._subscribe();
       return;
     }
-    if (!isAuto) return;
 
-    if (this._needsRender) {
-      this._needsRender = false;
+    if (!this._unsubscribe && this._hasRelevantChange(hass, prevHass) && this._config) {
+      this._scheduleRender();
+    }
+  }
+
+  _getRefreshConfig() {
+    return {
+      lazyMs: this._config?.lazyRefresh ?? 500,
+      fixedMs: this._config?.fixedRefresh ?? 300_000,
+    };
+  }
+
+  _scheduleRender() {
+    if (this._renderTimer) return;
+    const { lazyMs } = this._getRefreshConfig();
+    if (lazyMs === 0) {
       this._render();
       return;
     }
+    this._renderTimer = setTimeout(() => {
+      this._renderTimer = null;
+      if (this._hass && this._config) this._render();
+    }, lazyMs);
+  }
 
-    if (!this._unsubscribe && this._hasRelevantChange(hass, prevHass) && this._config) {
-      this._render();
+  _cancelRenderTimer() {
+    if (this._renderTimer) {
+      clearTimeout(this._renderTimer);
+      this._renderTimer = null;
     }
   }
 
   _subscribe() {
-    if (!this._config) return;
-    const isAuto = this._config.refresh === undefined || this._config.refresh === 'auto';
-    if (!isAuto || !this._hass?.connection?.subscribeEvents) return;
+    if (!this._config || !this._hass?.connection?.subscribeEvents) return;
 
     const gen = this._subscribeGen;
     this._hass.connection
       .subscribeEvents((event) => {
         if (this._subscribeGen === gen && this._trackedIds?.has(event.data.entity_id)) {
-          this._needsRender = true;
+          this._scheduleRender();
         }
       }, 'state_changed')
       .then((unsub) => {
@@ -84,28 +99,28 @@ class SportScoreboardCard extends HTMLElement {
     this._subscribeGen++;
     this._unsubscribe?.();
     this._unsubscribe = null;
-    this._needsRender = false;
+    this._cancelRenderTimer();
   }
 
-  _startRefreshTimer() {
-    this._stopRefreshTimer();
-    const interval = this._config?.refresh;
-    if (typeof interval === 'number' && interval > 0) {
-      this._refreshTimer = setInterval(() => {
+  _startFixedTimer() {
+    this._stopFixedTimer();
+    const { fixedMs } = this._getRefreshConfig();
+    if (fixedMs > 0) {
+      this._fixedTimer = setInterval(() => {
         if (this._hass && this._config) this._render();
-      }, interval * 1000);
+      }, fixedMs);
     }
   }
 
-  _stopRefreshTimer() {
-    if (this._refreshTimer) {
-      clearInterval(this._refreshTimer);
-      this._refreshTimer = null;
+  _stopFixedTimer() {
+    if (this._fixedTimer) {
+      clearInterval(this._fixedTimer);
+      this._fixedTimer = null;
     }
   }
 
   disconnectedCallback() {
-    this._stopRefreshTimer();
+    this._stopFixedTimer();
     this._clearSubscription();
   }
 
