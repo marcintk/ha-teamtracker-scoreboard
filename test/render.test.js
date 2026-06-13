@@ -133,13 +133,13 @@ describe('sectionHtml', () => {
     expect(html).not.toContain('scoreboard-special-color');
   });
 
-  it('accepts pre-computed stateKeys without colors', () => {
+  it('accepts pre-filtered entity IDs without colors', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
     const html = sectionHtml(section, states, Object.keys(states));
     expect(html).toContain('class="game-row"');
   });
 
-  it('accepts pre-computed stateKeys and still applies colors', () => {
+  it('accepts pre-filtered entity IDs and still applies colors', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
     const html = sectionHtml({ ...section, special_teams: ['lal'] }, states, Object.keys(states), {
       special: 'gold',

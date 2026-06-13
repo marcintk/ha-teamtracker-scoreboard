@@ -52,7 +52,7 @@ export class DebugMetrics {
           return `${time} (${ago} ago)`;
         })()
       : '--';
-    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:red">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
+    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:indianred">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
     return `<table style="border-collapse:collapse;width:100%">${row('events', 'events')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table>`;
   }
 

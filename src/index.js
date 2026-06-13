@@ -11,8 +11,11 @@ class SportScoreboardCard extends HTMLElement {
     this._config = null;
     this._hass = null;
     this._fixedTimer = null;
+    this._debugTimer = null;
     this._renderTimer = null;
     this._trackedIds = null;
+    this._trackedByPrefix = null;
+    this._stateKeyCount = 0;
     this._subscription = new SubscriptionManager();
     this._debug = new DebugMetrics();
   }
@@ -21,6 +24,8 @@ class SportScoreboardCard extends HTMLElement {
     this._config = config;
     this._clearSubscription();
     this._trackedIds = null;
+    this._trackedByPrefix = null;
+    this._stateKeyCount = 0;
     this._startFixedTimer();
     if (this._hass) {
       this._render();
@@ -52,8 +57,8 @@ class SportScoreboardCard extends HTMLElement {
 
   _getRefreshConfig() {
     return {
-      lazyMs: this._config?.lazyRefresh ?? 500,
-      fixedMs: this._config?.fixedRefresh ?? 300_000,
+      lazyMs: (this._config?.lazyRefresh ?? 1) * 1000,
+      fixedMs: (this._config?.fixedRefresh ?? 60) * 1000,
     };
   }
 
@@ -98,15 +103,14 @@ class SportScoreboardCard extends HTMLElement {
 
   _startFixedTimer() {
     this._stopFixedTimer();
-    if (this._config?.debug) {
-      this._fixedTimer = setInterval(() => this._updateDebugOverlay(), 1000);
-      return;
-    }
     const { fixedMs } = this._getRefreshConfig();
     if (fixedMs > 0) {
       this._fixedTimer = setInterval(() => {
         if (this._hass && this._config) this._render();
       }, fixedMs);
+    }
+    if (this._config?.debug) {
+      this._debugTimer = setInterval(() => this._updateDebugOverlay(), 1000);
     }
   }
 
@@ -114,6 +118,10 @@ class SportScoreboardCard extends HTMLElement {
     if (this._fixedTimer) {
       clearInterval(this._fixedTimer);
       this._fixedTimer = null;
+    }
+    if (this._debugTimer) {
+      clearInterval(this._debugTimer);
+      this._debugTimer = null;
     }
   }
 
@@ -123,8 +131,20 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _buildTrackedIds(stateKeys) {
+    if (stateKeys.length === this._stateKeyCount) return;
+    this._stateKeyCount = stateKeys.length;
     const prefixes = (this._config?.sections ?? []).map((s) => s.prefix);
-    this._trackedIds = new Set(stateKeys.filter((id) => prefixes.some((p) => id.startsWith(p))));
+    this._trackedIds = new Set();
+    this._trackedByPrefix = new Map(prefixes.map((p) => [p, []]));
+    for (const id of stateKeys) {
+      for (const p of prefixes) {
+        if (id.startsWith(p)) {
+          this._trackedIds.add(id);
+          this._trackedByPrefix.get(p).push(id);
+          break;
+        }
+      }
+    }
   }
 
   _hasRelevantChange(newHass, prevHass) {
@@ -147,7 +167,9 @@ class SportScoreboardCard extends HTMLElement {
         this._showError('Add at least one section to your card config.');
         return;
       }
-      const body = sections.map((s) => sectionHtml(s, states, stateKeys, colors)).join('');
+      const body = sections
+        .map((s) => sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix), colors))
+        .join('');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
         : '';

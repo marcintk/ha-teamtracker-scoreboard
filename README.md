@@ -68,14 +68,14 @@ sections:
 
 ### Options
 
-| Option         | Type    | Default  | Description                                                                           |
-| -------------- | ------- | -------- | ------------------------------------------------------------------------------------- |
-| `height`       | string  | auto     | Card height (CSS value); omit to fit content                                          |
-| `lazyRefresh`  | number  | `500`    | Milliseconds to hold before rendering after the first event; `0` = render immediately |
-| `fixedRefresh` | number  | `300000` | Re-render every N milliseconds regardless of events; `0` = disabled                   |
-| `sections`     | list    | required | One entry per sport/league                                                            |
-| `colors`       | map     | —        | Override team colours (see [Colors](#colors))                                         |
-| `debug`        | boolean | `false`  | Show performance overlay (see [Debug overlay](#debug-overlay))                        |
+| Option         | Type    | Default  | Description                                                                      |
+| -------------- | ------- | -------- | -------------------------------------------------------------------------------- |
+| `height`       | string  | auto     | Card height (CSS value); omit to fit content                                     |
+| `lazyRefresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately |
+| `fixedRefresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                   |
+| `sections`     | list    | required | One entry per sport/league                                                       |
+| `colors`       | map     | —        | Override team colours (see [Colors](#colors))                                    |
+| `debug`        | boolean | `false`  | Show performance overlay (see [Debug overlay](#debug-overlay))                   |
 
 ### Section options
 
