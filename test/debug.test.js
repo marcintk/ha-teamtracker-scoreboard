@@ -150,6 +150,72 @@ describe('DebugMetrics', () => {
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(d.tableHtml()).toContain(expected);
     });
+
+    it('appends "(Xs ago)" when render was seconds ago', () => {
+      const d = new DebugMetrics();
+      vi.setSystemTime(new Date('2026-06-13T10:00:00.000Z'));
+      d.track('renders');
+      vi.advanceTimersByTime(10_000);
+      expect(d.tableHtml()).toContain('(10s ago)');
+    });
+
+    it('appends "(Xm ago)" when render was minutes ago', () => {
+      const d = new DebugMetrics();
+      vi.setSystemTime(new Date('2026-06-13T10:00:00.000Z'));
+      d.track('renders');
+      vi.advanceTimersByTime(120_000);
+      expect(d.tableHtml()).toContain('(2m ago)');
+    });
+
+    it('appends "(Xh ago)" when render was hours ago', () => {
+      const d = new DebugMetrics();
+      vi.setSystemTime(new Date('2026-06-13T10:00:00.000Z'));
+      d.track('renders');
+      vi.advanceTimersByTime(7_200_000);
+      expect(d.tableHtml()).toContain('(2h ago)');
+    });
+
+    it('shows no "ago" when no render has been tracked', () => {
+      const d = new DebugMetrics();
+      expect(d.tableHtml()).not.toContain('ago');
+    });
+  });
+
+  describe('_timeAgo', () => {
+    it('formats seconds as "Xs"', () => {
+      const d = new DebugMetrics();
+      expect(d._timeAgo(10_000)).toBe('10s');
+    });
+
+    it('formats 59 seconds as "59s"', () => {
+      const d = new DebugMetrics();
+      expect(d._timeAgo(59_999)).toBe('59s');
+    });
+
+    it('formats 60 seconds as "1m"', () => {
+      const d = new DebugMetrics();
+      expect(d._timeAgo(60_000)).toBe('1m');
+    });
+
+    it('formats minutes as "Xm"', () => {
+      const d = new DebugMetrics();
+      expect(d._timeAgo(150_000)).toBe('2m');
+    });
+
+    it('formats 41 minutes as "41m"', () => {
+      const d = new DebugMetrics();
+      expect(d._timeAgo(2_460_000)).toBe('41m');
+    });
+
+    it('formats 3600 seconds as "1h"', () => {
+      const d = new DebugMetrics();
+      expect(d._timeAgo(3_600_000)).toBe('1h');
+    });
+
+    it('formats hours as "Xh"', () => {
+      const d = new DebugMetrics();
+      expect(d._timeAgo(7_200_000)).toBe('2h');
+    });
   });
 
   describe('html', () => {

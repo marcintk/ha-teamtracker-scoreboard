@@ -8,6 +8,7 @@ export class DebugMetrics {
     const arr = this._data[key];
     arr.push(now);
     const cutoff = now - 10_800_000;
+    // arr is sorted oldest→newest (push appends); scan from front where expired entries live
     let i = 0;
     while (i < arr.length && arr[i] < cutoff) i++;
     if (i) arr.splice(0, i);
@@ -26,6 +27,12 @@ export class DebugMetrics {
     };
   }
 
+  _timeAgo(ms) {
+    if (ms < 60_000) return `${Math.floor(ms / 1_000)}s`;
+    if (ms < 3_600_000) return `${Math.floor(ms / 60_000)}m`;
+    return `${Math.floor(ms / 3_600_000)}h`;
+  }
+
   tableHtml() {
     const cell = (n) => `<td style="padding-right:8px;text-align:right">${n}</td>`;
     const hcell = (label) =>
@@ -38,8 +45,11 @@ export class DebugMetrics {
     const pad = (n, w = 2) => String(n).padStart(w, '0');
     const ts = renders.length
       ? (() => {
-          const d = new Date(renders.at(-1));
-          return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+          const last = renders.at(-1);
+          const d = new Date(last);
+          const time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+          const ago = this._timeAgo(Date.now() - last);
+          return `${time} (${ago} ago)`;
         })()
       : '--';
     const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:red">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
