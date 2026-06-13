@@ -26,7 +26,7 @@ describe('CARD_STYLES — ha-card', () => {
     expect(cssProp('ha-card', 'font-size')).toBe('14px');
   });
   it('has compact padding', () => {
-    expect(cssProp('ha-card', 'padding')).toBe('4px 8px 4px 6px');
+    expect(cssProp('ha-card', 'padding')).toBe('4px 2px');
   });
 });
 
