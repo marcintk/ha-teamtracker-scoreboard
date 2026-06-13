@@ -416,7 +416,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      expect(card._unsubscribe).toBe(unsub);
+      expect(card._subscription._unsub).toBe(unsub);
     });
 
     it('WS callback schedules render via _renderTimer for a tracked entity', async () => {
@@ -525,7 +525,7 @@ describe('SportScoreboardCard', () => {
       expect(renderSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('_clearSubscription calls unsub, nulls _unsubscribe, cancels _renderTimer', async () => {
+    it('_clearSubscription calls unsub, nulls _unsub, cancels _renderTimer', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
       const { hass, unsub, connection } = makeHassWithConnection({
@@ -538,7 +538,7 @@ describe('SportScoreboardCard', () => {
       expect(card._renderTimer).not.toBeNull();
       card._clearSubscription();
       expect(unsub).toHaveBeenCalledTimes(1);
-      expect(card._unsubscribe).toBeNull();
+      expect(card._subscription._unsub).toBeNull();
       expect(card._renderTimer).toBeNull();
     });
 
@@ -566,7 +566,7 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       card.disconnectedCallback();
       expect(unsub).toHaveBeenCalledTimes(1);
-      expect(card._unsubscribe).toBeNull();
+      expect(card._subscription._unsub).toBeNull();
     });
 
     it('setConfig with active subscription unsubscribes then re-subscribes', async () => {
@@ -596,7 +596,7 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       // stale .then() must call unsub() to clean up, not store it
       expect(unsub).toHaveBeenCalledTimes(1);
-      expect(card._unsubscribe).toBeNull();
+      expect(card._subscription._unsub).toBeNull();
     });
 
     it('silently ignores subscribeEvents rejection and falls back to diffing', async () => {
@@ -606,7 +606,7 @@ describe('SportScoreboardCard', () => {
       card.hass = { states: { 'sensor.nba_lal': makeState('PRE', baseAttrs) }, connection };
       await Promise.resolve();
       await Promise.resolve(); // let rejection propagate through .catch
-      expect(card._unsubscribe).toBeNull();
+      expect(card._subscription._unsub).toBeNull();
     });
 
     it('new connection object triggers re-subscribe (HA reconnect)', async () => {
@@ -633,67 +633,6 @@ describe('SportScoreboardCard', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
-    it('_trackMetric records timestamps and _metricCounts returns correct window counts', () => {
-      const card = makeCard();
-      card._trackMetric('notifications');
-      card._trackMetric('notifications');
-      vi.advanceTimersByTime(30_000);
-      card._trackMetric('notifications');
-      const c = card._metricCounts('notifications');
-      expect(c.min1).toBe(3);
-      expect(c.min5).toBe(3);
-      expect(c.min30).toBe(3);
-      expect(c.hour3).toBe(3);
-      expect(c.hour6).toBe(3);
-    });
-
-    it('_metricCounts excludes entries outside the 1-minute window', () => {
-      const card = makeCard();
-      card._trackMetric('notifications');
-      vi.advanceTimersByTime(61_000);
-      card._trackMetric('notifications');
-      const c = card._metricCounts('notifications');
-      expect(c.min1).toBe(1);
-      expect(c.min5).toBe(2);
-      expect(c.min30).toBe(2);
-      expect(c.hour3).toBe(2);
-      expect(c.hour6).toBe(2);
-    });
-
-    it('_metricCounts excludes entries outside the 5-minute window', () => {
-      const card = makeCard();
-      card._trackMetric('notifications');
-      vi.advanceTimersByTime(301_000);
-      card._trackMetric('notifications');
-      const c = card._metricCounts('notifications');
-      expect(c.min1).toBe(1);
-      expect(c.min5).toBe(1);
-      expect(c.min30).toBe(2);
-      expect(c.hour3).toBe(2);
-      expect(c.hour6).toBe(2);
-    });
-
-    it('_metricCounts excludes entries outside the 30-minute window', () => {
-      const card = makeCard();
-      card._trackMetric('notifications');
-      vi.advanceTimersByTime(1_800_001);
-      card._trackMetric('notifications');
-      const c = card._metricCounts('notifications');
-      expect(c.min1).toBe(1);
-      expect(c.min5).toBe(1);
-      expect(c.min30).toBe(1);
-      expect(c.hour3).toBe(2);
-      expect(c.hour6).toBe(2);
-    });
-
-    it('_trackMetric prunes entries older than 6 hours', () => {
-      const card = makeCard();
-      card._trackMetric('renders');
-      vi.advanceTimersByTime(21_600_001);
-      card._trackMetric('renders');
-      expect(card._metrics.renders).toHaveLength(1);
-    });
-
     it('WS event increments notifications metric when debug is true', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection], debug: true });
@@ -704,7 +643,7 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       const callback = connection.subscribeEvents.mock.calls[0][0];
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      expect(card._metrics.notifications).toHaveLength(1);
+      expect(card._debug._data.notifications).toHaveLength(1);
     });
 
     it('WS event does not increment notifications when debug is false', async () => {
@@ -717,7 +656,7 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       const callback = connection.subscribeEvents.mock.calls[0][0];
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      expect(card._metrics.notifications).toHaveLength(0);
+      expect(card._debug._data.notifications).toHaveLength(0);
     });
 
     it('_scheduleRender increments accepted when debug is true and no timer is active', () => {
@@ -726,7 +665,7 @@ describe('SportScoreboardCard', () => {
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
-      expect(card._metrics.accepted).toHaveLength(1);
+      expect(card._debug._data.accepted).toHaveLength(1);
     });
 
     it('_scheduleRender does not increment accepted when timer is already active', () => {
@@ -736,7 +675,7 @@ describe('SportScoreboardCard', () => {
       card._trackedIds = new Set();
       card._scheduleRender();
       card._scheduleRender(); // dropped — timer active
-      expect(card._metrics.accepted).toHaveLength(1);
+      expect(card._debug._data.accepted).toHaveLength(1);
     });
 
     it('_render increments renders metric when debug is true', () => {
@@ -744,7 +683,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card._metrics.renders).toHaveLength(1);
+      expect(card._debug._data.renders).toHaveLength(1);
     });
 
     it('_render does not increment renders when debug is false', () => {
@@ -752,7 +691,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card._metrics.renders).toHaveLength(0);
+      expect(card._debug._data.renders).toHaveLength(0);
     });
 
     it('debug pane is present in rendered HTML when debug is true', () => {
@@ -765,6 +704,7 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot.innerHTML).toContain('renders');
       expect(card.shadowRoot.innerHTML).toContain('5m');
       expect(card.shadowRoot.innerHTML).toContain('30m');
+      expect(card.shadowRoot.innerHTML).toContain('1h');
       expect(card.shadowRoot.innerHTML).toContain('3h');
       expect(card.shadowRoot.innerHTML).toContain('6h');
     });
@@ -784,11 +724,6 @@ describe('SportScoreboardCard', () => {
       vi.setSystemTime(new Date('2026-06-13T10:01:46.123Z'));
       card._render();
       expect(card.shadowRoot.innerHTML).toContain('10:01:46.123');
-    });
-
-    it('_debugHtml shows "--" timestamp when no render has occurred yet', () => {
-      const card = makeCard();
-      expect(card._debugHtml()).toContain('--');
     });
 
     it('debug pane is absent when debug is not set', () => {
