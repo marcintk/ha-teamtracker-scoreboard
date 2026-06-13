@@ -133,6 +133,21 @@ describe('DebugMetrics', () => {
       expect(d.html()).toContain('bottom:0');
     });
 
+    it('outer font size is 11px', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('font-size:11px');
+    });
+
+    it('footer font size is 10px', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('font-size:10px');
+    });
+
+    it('line-height is 1 for minimum row spacing', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('line-height:1;');
+    });
+
     it('has pointer-events:none so it does not block interaction', () => {
       const d = new DebugMetrics();
       expect(d.html()).toContain('pointer-events:none');
