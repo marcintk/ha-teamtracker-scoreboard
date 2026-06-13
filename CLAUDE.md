@@ -71,7 +71,8 @@ coverage drops below that.
 - **Never push or merge without explicit permission.** Do not run `git push`, `gh pr create`, or
   merge a PR unless the user explicitly asks to open or merge it for that session.
 - **Release cadence.** After three to five merged PRs, recommend cutting a release via **Actions →
-  Publish Release → Run workflow**.
+  Publish Release → Run workflow**. Never trigger the release workflow autonomously — propose the
+  next version number and wait for explicit user approval.
 
 ## TDD Workflow
 
