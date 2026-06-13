@@ -91,8 +91,17 @@ class SportScoreboardCard extends HTMLElement {
     this._cancelRenderTimer();
   }
 
+  _updateDebugOverlay() {
+    const overlay = this.shadowRoot?.querySelector('#sc-debug');
+    if (overlay) overlay.innerHTML = this._debug.tableHtml();
+  }
+
   _startFixedTimer() {
     this._stopFixedTimer();
+    if (this._config?.debug) {
+      this._fixedTimer = setInterval(() => this._updateDebugOverlay(), 1000);
+      return;
+    }
     const { fixedMs } = this._getRefreshConfig();
     if (fixedMs > 0) {
       this._fixedTimer = setInterval(() => {
