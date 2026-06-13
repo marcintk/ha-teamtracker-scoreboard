@@ -35,8 +35,14 @@ export class DebugMetrics {
       return `<tr><td style="padding-right:10px;color:#999">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min30)}${cell(c.hour1)}${cell(c.hour3)}${cell(c.hour6)}</tr>`;
     };
     const renders = this._data.renders;
-    const ts = renders.length ? new Date(renders.at(-1)).toISOString().slice(11, 23) : '--';
-    const footer = `<tr style="font-size:8px"><td style="padding-right:10px;color:red">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}${hcell('6h')}</tr>`;
-    return `<div style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:9px;line-height:1.3;padding:2px 6px;pointer-events:none;"><table style="border-collapse:collapse;width:100%">${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table></div>`;
+    const pad = (n, w = 2) => String(n).padStart(w, '0');
+    const ts = renders.length
+      ? (() => {
+          const d = new Date(renders.at(-1));
+          return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+        })()
+      : '--';
+    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:red">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}${hcell('6h')}</tr>`;
+    return `<div style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:11px;line-height:1;padding:2px 6px;pointer-events:none;"><table style="border-collapse:collapse;width:100%">${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table></div>`;
   }
 }

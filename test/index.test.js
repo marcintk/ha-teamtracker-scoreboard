@@ -721,9 +721,12 @@ describe('SportScoreboardCard', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      vi.setSystemTime(new Date('2026-06-13T10:01:46.123Z'));
+      const fixed = new Date('2026-06-13T10:01:46.123Z');
+      vi.setSystemTime(fixed);
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('10:01:46.123');
+      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
+      expect(card.shadowRoot.innerHTML).toContain(expected);
     });
 
     it('debug pane is absent when debug is not set', () => {

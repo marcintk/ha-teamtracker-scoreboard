@@ -91,9 +91,22 @@ describe('DebugMetrics', () => {
 
     it('shows the last tracked render timestamp', () => {
       const d = new DebugMetrics();
-      vi.setSystemTime(new Date('2026-06-13T10:01:46.123Z'));
+      const fixed = new Date('2026-06-13T10:01:46.123Z');
+      vi.setSystemTime(fixed);
       d.track('renders');
-      expect(d.html()).toContain('10:01:46.123');
+      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
+      expect(d.html()).toContain(expected);
+    });
+
+    it('timestamp uses local time, not UTC', () => {
+      const d = new DebugMetrics();
+      const fixed = new Date('2026-06-13T10:01:46.123Z');
+      vi.setSystemTime(fixed);
+      d.track('renders');
+      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
+      expect(d.html()).toContain(expected);
     });
 
     it('contains all column headers', () => {
@@ -120,6 +133,21 @@ describe('DebugMetrics', () => {
       expect(d.html()).toContain('bottom:0');
     });
 
+    it('outer font size is 11px', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('font-size:11px');
+    });
+
+    it('footer font size is 10px', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('font-size:10px');
+    });
+
+    it('line-height is 1 for minimum row spacing', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('line-height:1;');
+    });
+
     it('has pointer-events:none so it does not block interaction', () => {
       const d = new DebugMetrics();
       expect(d.html()).toContain('pointer-events:none');
@@ -143,10 +171,13 @@ describe('DebugMetrics', () => {
 
     it('timestamp is the first cell of the footer row, before the column labels', () => {
       const d = new DebugMetrics();
-      vi.setSystemTime(new Date('2026-06-13T10:01:46.123Z'));
+      const fixed = new Date('2026-06-13T10:01:46.123Z');
+      vi.setSystemTime(fixed);
       d.track('renders');
+      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const ts = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       const h = d.html();
-      expect(h.indexOf('10:01:46.123')).toBeLessThan(h.indexOf('1m'));
+      expect(h.indexOf(ts)).toBeLessThan(h.indexOf('1m'));
     });
 
     it('-- placeholder is the first cell of the footer row, before the column labels', () => {
