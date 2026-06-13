@@ -37,6 +37,7 @@ export function deduplicate(list, sortMode, states) {
 
   const gameKey = (entityId) => {
     const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
+    if (date == null) return entityId; // can't identify the game — keep row as unique
     return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
   };
 

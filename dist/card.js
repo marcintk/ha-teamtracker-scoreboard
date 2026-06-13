@@ -163,15 +163,18 @@ function deduplicate(list, sortMode, states) {
 
   const gameKey = (entityId) => {
     const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
+    if (date == null) return entityId; // can't identify the game — keep row as unique
     return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
   };
+
+  const keyMap = new Map(list.map(({ entityId }) => [entityId, gameKey(entityId)]));
 
   // First pass: find which game keys have at least one home-side and/or special sensor.
   const homeKeys = new Set();
   const specialKeys = new Set();
   const specialAwayKeys = new Set();
   for (const { entityId, special } of list) {
-    const key = gameKey(entityId);
+    const key = keyMap.get(entityId);
     if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
     if (special) {
       specialKeys.add(key);
@@ -186,7 +189,7 @@ function deduplicate(list, sortMode, states) {
   const seen = new Set();
   return list
     .filter(({ entityId, special }) => {
-      const key = gameKey(entityId);
+      const key = keyMap.get(entityId);
       if (seen.has(key)) return false;
       if (special && states[entityId]?.attributes?.team_homeaway !== 'home' && homeKeys.has(key))
         return false;
@@ -202,7 +205,7 @@ function deduplicate(list, sortMode, states) {
       return true;
     })
     .map((item) => {
-      const key = gameKey(item.entityId);
+      const key = keyMap.get(item.entityId);
       if (states[item.entityId]?.attributes?.team_homeaway === 'home' && specialAwayKeys.has(key))
         return { ...item, opponentSpecial: true };
       return item;
@@ -214,11 +217,14 @@ function rowHtml(stateObj, special, colors = {}, opponentSpecial = false) {
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
 
+  const homeColor = teamColor('home', attr, special, colors, opponentSpecial);
+  const awayColor = teamColor('away', attr, special, colors, opponentSpecial);
+
   return `
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:${teamColor('home', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('home', attr, special, colors, opponentSpecial)}">${rankText('home', attr)}</div>
+    <div class="team-name" style="color:${homeColor};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
+    <div class="team-rank" style="color:${homeColor}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', attr)}</div>
   <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
@@ -226,33 +232,31 @@ function rowHtml(stateObj, special, colors = {}, opponentSpecial = false) {
   <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', attr)}</div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:${teamColor('away', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('away', attr, special, colors, opponentSpecial)}">${rankText('away', attr)}</div>
+    <div class="team-name" style="color:${awayColor};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
+    <div class="team-rank" style="color:${awayColor}">${rankText('away', attr)}</div>
   </div>
   <div class="message">${messageHtml(gs, attr, colors)}</div>
   <div class="tv">${tvHtml(gs, attr, colors)}</div>
 </div>`;
 }
 
-function sectionHtml(section, states, stateKeysOrColors, colors) {
-  let stateKeys, resolvedColors;
-  if (Array.isArray(stateKeysOrColors)) {
-    stateKeys = stateKeysOrColors;
-    resolvedColors = colors ?? {};
-  } else {
-    stateKeys = Object.keys(states);
-    resolvedColors = stateKeysOrColors ?? {};
-  }
+function sectionHtml(section, states, stateKeys, colors = {}) {
+  const resolvedKeys = stateKeys ?? Object.keys(states);
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
 
-  const entities = stateKeys.filter(
+  const entities = resolvedKeys.filter(
     (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
   );
   if (!entities.length) return '';
 
-  // rankType applies to regular season only — auto-switch to by-date outside it
-  const firstAttr = states[entities[0]]?.attributes;
-  const sortMode = firstAttr?.season && firstAttr.season !== 'regular' ? 'by-date' : rankType;
+  // Use by-date when any entity explicitly reports a non-regular season (playoffs, off-season, …).
+  // Undefined season (e.g. during HA startup) is treated as regular so rankType is preserved.
+  const sortMode = entities.some((id) => {
+    const s = states[id]?.attributes?.season;
+    return s && s !== 'regular';
+  })
+    ? 'by-date'
+    : rankType;
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
@@ -274,7 +278,7 @@ function sectionHtml(section, states, stateKeysOrColors, colors) {
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
     .map(({ entityId, special, opponentSpecial = false }) =>
-      rowHtml(states[entityId], special, resolvedColors, opponentSpecial)
+      rowHtml(states[entityId], special, colors, opponentSpecial)
     )
     .join('');
 
@@ -452,6 +456,7 @@ class SportScoreboardCard extends HTMLElement {
     this._trackedIds = null;
     this._unsubscribe = null;
     this._needsRender = false;
+    this._subscribeGen = 0;
   }
 
   setConfig(config) {
@@ -476,8 +481,11 @@ class SportScoreboardCard extends HTMLElement {
 
     if (isFirstCall || connectionChanged) {
       if (connectionChanged) this._clearSubscription();
-      this._buildTrackedIds(Object.keys(hass.states));
-      if (this._config && isAuto) this._render();
+      if (this._config && isAuto) {
+        this._render();
+      } else {
+        this._buildTrackedIds(Object.keys(hass.states));
+      }
       this._subscribe();
       return;
     }
@@ -496,22 +504,28 @@ class SportScoreboardCard extends HTMLElement {
 
   _subscribe() {
     if (!this._config) return;
-    const isAuto = !this._config.refresh || this._config.refresh === 'auto';
+    const isAuto = this._config.refresh === undefined || this._config.refresh === 'auto';
     if (!isAuto || !this._hass?.connection?.subscribeEvents) return;
 
+    const gen = this._subscribeGen;
     this._hass.connection
       .subscribeEvents((event) => {
-        if (this._trackedIds?.has(event.data.entity_id)) {
+        if (this._subscribeGen === gen && this._trackedIds?.has(event.data.entity_id)) {
           this._needsRender = true;
         }
       }, 'state_changed')
       .then((unsub) => {
-        this._unsubscribe = unsub;
+        if (this._subscribeGen === gen) {
+          this._unsubscribe = unsub;
+        } else {
+          unsub();
+        }
       })
       .catch(() => {});
   }
 
   _clearSubscription() {
+    this._subscribeGen++;
     this._unsubscribe?.();
     this._unsubscribe = null;
     this._needsRender = false;
@@ -556,14 +570,13 @@ class SportScoreboardCard extends HTMLElement {
     try {
       const { sections, height, colors = {} } = this._config;
       const states = this._hass.states;
+      const stateKeys = Object.keys(states);
+      this._buildTrackedIds(stateKeys);
 
       if (!Array.isArray(sections) || !sections.length) {
         this._showError('Add at least one section to your card config.');
         return;
       }
-
-      const stateKeys = Object.keys(states);
-      this._buildTrackedIds(stateKeys);
       const body = sections.map((s) => sectionHtml(s, states, stateKeys, colors)).join('');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
@@ -596,7 +609,10 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize() {
-    if (this._config?.height) return Math.ceil(parseInt(this._config.height, 10) / 50);
+    if (this._config?.height) {
+      const px = parseInt(this._config.height, 10);
+      if (Number.isFinite(px)) return Math.ceil(px / 50);
+    }
     const rows = (this._config?.sections ?? []).reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
     return Math.max(1, Math.ceil((rows * 28) / 50));
   }

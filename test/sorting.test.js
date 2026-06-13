@@ -111,7 +111,21 @@ describe('deduplicate', () => {
         },
       },
     };
-    // sensor.wc_missing hits the ?? {} fallback — key becomes "undefined_..."
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(2);
+  });
+
+  it('keeps both rows when two sensors have no date attribute (no false dedup collision)', () => {
+    // Both sensors lack a date — previously both produced "undefined_undefined_undefined"
+    // and the second was silently dropped by seen.has(key).
+    const list = [
+      { entityId: 'sensor.wc_fra' },
+      { entityId: 'sensor.wc_bra' },
+    ];
+    const states = {
+      'sensor.wc_fra': { attributes: { team_homeaway: 'home' } }, // no date/abbr
+      'sensor.wc_bra': { attributes: { team_homeaway: 'home' } }, // no date/abbr
+    };
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(2);
   });

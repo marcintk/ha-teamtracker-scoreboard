@@ -60,13 +60,13 @@ class SportScoreboardCard extends HTMLElement {
 
   _subscribe() {
     if (!this._config) return;
-    const isAuto = !this._config.refresh || this._config.refresh === 'auto';
+    const isAuto = this._config.refresh === undefined || this._config.refresh === 'auto';
     if (!isAuto || !this._hass?.connection?.subscribeEvents) return;
 
     const gen = this._subscribeGen;
     this._hass.connection
       .subscribeEvents((event) => {
-        if (this._trackedIds?.has(event.data.entity_id)) {
+        if (this._subscribeGen === gen && this._trackedIds?.has(event.data.entity_id)) {
           this._needsRender = true;
         }
       }, 'state_changed')

@@ -439,6 +439,15 @@ describe('SportScoreboardCard', () => {
       expect(connection.subscribeEvents).not.toHaveBeenCalled();
     });
 
+    it('does not subscribe when refresh is 0 (falsy number, not auto mode)', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 0 });
+      const { hass, connection } = makeHassWithConnection({});
+      card.hass = hass;
+      await Promise.resolve();
+      expect(connection.subscribeEvents).not.toHaveBeenCalled();
+    });
+
     it('stores the unsubscribe function after subscription resolves', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
@@ -504,6 +513,20 @@ describe('SportScoreboardCard', () => {
       card._clearSubscription();
       expect(unsub).toHaveBeenCalledTimes(1);
       expect(card._unsubscribe).toBeNull();
+      expect(card._needsRender).toBe(false);
+    });
+
+    it('stale callback does not set _needsRender after _clearSubscription', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const staleCallback = connection.subscribeEvents.mock.calls[0][0];
+      card._clearSubscription(); // increments gen, resets _needsRender
+      staleCallback({ data: { entity_id: 'sensor.nba_lal' } }); // stale callback fires
       expect(card._needsRender).toBe(false);
     });
 

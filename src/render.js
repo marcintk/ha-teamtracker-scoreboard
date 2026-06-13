@@ -52,10 +52,14 @@ export function sectionHtml(section, states, stateKeys, colors = {}) {
   );
   if (!entities.length) return '';
 
-  // Use rankType when any entity reports regular season; fall back to by-date otherwise.
-  const sortMode = entities.some((id) => states[id]?.attributes?.season === 'regular')
-    ? rankType
-    : 'by-date';
+  // Use by-date when any entity explicitly reports a non-regular season (playoffs, off-season, …).
+  // Undefined season (e.g. during HA startup) is treated as regular so rankType is preserved.
+  const sortMode = entities.some((id) => {
+    const s = states[id]?.attributes?.season;
+    return s && s !== 'regular';
+  })
+    ? 'by-date'
+    : rankType;
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
