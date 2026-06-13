@@ -323,7 +323,7 @@ describe('SportScoreboardCard', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
-    it('starts fixedTimer with default 5-minute interval when refresh is omitted', () => {
+    it('starts fixedTimer with default 60-second interval when refresh is omitted', () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
       expect(card._fixedTimer).not.toBeNull();
@@ -337,14 +337,14 @@ describe('SportScoreboardCard', () => {
 
     it('starts fixedTimer at custom fixedRefresh interval', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 60_000 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 60 });
       expect(card._fixedTimer).not.toBeNull();
     });
 
     it('fixedTimer calls _render at fixedRefresh interval', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 10_000 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
 
       vi.advanceTimersByTime(10_000);
@@ -356,22 +356,22 @@ describe('SportScoreboardCard', () => {
 
     it('clears the old timer when setConfig is called again', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 30_000 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 30 });
       const firstTimer = card._fixedTimer;
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 60_000 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 60 });
       expect(card._fixedTimer).not.toBe(firstTimer);
     });
 
     it('clears the timer on disconnectedCallback', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 30_000 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 30 });
       card.disconnectedCallback();
       expect(card._fixedTimer).toBeNull();
     });
 
     it('does not render when timer fires before hass is assigned', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 10_000 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
 
       vi.advanceTimersByTime(10_000);
@@ -381,7 +381,7 @@ describe('SportScoreboardCard', () => {
     it('does not fire after disconnectedCallback', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 10_000 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
 
       card.disconnectedCallback();
@@ -447,7 +447,7 @@ describe('SportScoreboardCard', () => {
 
     it('lazyRefresh timer triggers render after configured delay', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 200 });
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 1 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
@@ -457,7 +457,7 @@ describe('SportScoreboardCard', () => {
       const renderSpy = vi.spyOn(card, '_render');
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(renderSpy).not.toHaveBeenCalled();
-      vi.advanceTimersByTime(200);
+      vi.advanceTimersByTime(1000);
       expect(renderSpy).toHaveBeenCalledTimes(1);
       expect(card._renderTimer).toBeNull();
     });
@@ -479,20 +479,20 @@ describe('SportScoreboardCard', () => {
 
     it('lazyRefresh timer skips render if hass is null when it fires', () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], lazyRefresh: 300 };
+      card._config = { sections: [nbaSection], lazyRefresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
       card._hass = null;
       const renderSpy = vi.spyOn(card, '_render');
-      vi.advanceTimersByTime(300);
+      vi.advanceTimersByTime(1000);
       expect(renderSpy).not.toHaveBeenCalled();
       expect(card._renderTimer).toBeNull();
     });
 
     it('multiple events within lazyRefresh window trigger only one render', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 300 });
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 1 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
@@ -503,13 +503,13 @@ describe('SportScoreboardCard', () => {
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      vi.advanceTimersByTime(300);
+      vi.advanceTimersByTime(1000);
       expect(renderSpy).toHaveBeenCalledTimes(1);
     });
 
     it('second event after lazyRefresh window closes schedules a new render', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 300 });
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 1 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
@@ -518,10 +518,10 @@ describe('SportScoreboardCard', () => {
       const callback = connection.subscribeEvents.mock.calls[0][0];
       const renderSpy = vi.spyOn(card, '_render');
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      vi.advanceTimersByTime(300);
+      vi.advanceTimersByTime(1000);
       expect(renderSpy).toHaveBeenCalledTimes(1);
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      vi.advanceTimersByTime(300);
+      vi.advanceTimersByTime(1000);
       expect(renderSpy).toHaveBeenCalledTimes(2);
     });
 
@@ -661,7 +661,7 @@ describe('SportScoreboardCard', () => {
 
     it('_scheduleRender increments accepted when debug is true and no timer is active', () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 500 };
+      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
@@ -670,7 +670,7 @@ describe('SportScoreboardCard', () => {
 
     it('_scheduleRender does not increment accepted when timer is already active', () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 500 };
+      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
@@ -732,7 +732,7 @@ describe('SportScoreboardCard', () => {
     it('in debug mode 1s overlay timer fires every second regardless of fixedRefresh', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 300_000 });
+      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 300 });
       const updateSpy = vi.spyOn(card, '_updateDebugOverlay');
       vi.advanceTimersByTime(1_000);
       expect(updateSpy).toHaveBeenCalledTimes(1);
@@ -754,7 +754,7 @@ describe('SportScoreboardCard', () => {
     it('in debug mode fixedRefresh timer also triggers _render', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 10_000 });
+      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
       vi.advanceTimersByTime(10_000);
       expect(renderSpy).toHaveBeenCalledTimes(1);

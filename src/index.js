@@ -57,8 +57,8 @@ class SportScoreboardCard extends HTMLElement {
 
   _getRefreshConfig() {
     return {
-      lazyMs: this._config?.lazyRefresh ?? 500,
-      fixedMs: this._config?.fixedRefresh ?? 300_000,
+      lazyMs: (this._config?.lazyRefresh ?? 1) * 1000,
+      fixedMs: (this._config?.fixedRefresh ?? 60) * 1000,
     };
   }
 

@@ -303,9 +303,9 @@ describe('DebugMetrics', () => {
       expect(d.html()).toContain('color:orange');
     });
 
-    it('timestamp is colored red', () => {
+    it('timestamp is colored indianred', () => {
       const d = new DebugMetrics();
-      expect(d.html()).toContain('color:red');
+      expect(d.html()).toContain('color:indianred');
     });
 
     it('data rows appear before the column header row', () => {

@@ -70,16 +70,22 @@ coverage drops below that.
   branches before opening PRs.
 - **Never push or merge without explicit permission.** Do not run `git push`, `gh pr create`, or
   merge a PR unless the user explicitly asks to open or merge it for that session.
+- **Verify docs before every PR.** Before opening a PR, check that `README.md` and `CLAUDE.md`
+  reflect any behavior changes made in that session — updated option defaults, new config keys,
+  changed architecture, new modules. Never open a PR with stale docs.
 - **Release cadence.** After three to five merged PRs, recommend cutting a release via **Actions →
   Publish Release → Run workflow**. Never trigger the release workflow autonomously — propose the
   next version number and wait for explicit user approval.
 
 **Why:** Clean, reviewable history and no unilateral publishing actions. Splitting concerns keeps
-PRs easy to revert independently.
+PRs easy to revert independently. Docs that lag behind the code require readers to diff both to
+understand what the card actually does.
 
 **How to apply:** If a session touches multiple concerns, flag it and offer to split before opening
-PRs. Never run `git push` or `gh pr create` until explicitly asked for that session. Track merged PR
-count; after 3–5, proactively suggest a release.
+PRs. Never run `git push` or `gh pr create` until explicitly asked for that session. Immediately
+before running `gh pr create`, scan README.md options tables and CLAUDE.md architecture notes for
+anything that no longer matches the implementation. Track merged PR count; after 3–5, proactively
+suggest a release.
 
 ## TDD Workflow
 
