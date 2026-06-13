@@ -729,7 +729,7 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot.innerHTML).toContain(expected);
     });
 
-    it('in debug mode fixedTimer fires every 1 second regardless of fixedRefresh', () => {
+    it('in debug mode 1s overlay timer fires every second regardless of fixedRefresh', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 300_000 });
@@ -740,7 +740,7 @@ describe('SportScoreboardCard', () => {
       expect(updateSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('in debug mode fixedTimer calls _updateDebugOverlay not _render', () => {
+    it('in debug mode 1s overlay timer calls _updateDebugOverlay not _render', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card.setConfig({ sections: [nbaSection], debug: true });
@@ -749,6 +749,23 @@ describe('SportScoreboardCard', () => {
       vi.advanceTimersByTime(1_000);
       expect(updateSpy).toHaveBeenCalledTimes(1);
       expect(renderSpy).not.toHaveBeenCalled();
+    });
+
+    it('in debug mode fixedRefresh timer also triggers _render', () => {
+      const card = makeCard();
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 10_000 });
+      const renderSpy = vi.spyOn(card, '_render');
+      vi.advanceTimersByTime(10_000);
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('clears _debugTimer on disconnectedCallback in debug mode', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], debug: true });
+      expect(card._debugTimer).not.toBeNull();
+      card.disconnectedCallback();
+      expect(card._debugTimer).toBeNull();
     });
 
     it('_updateDebugOverlay updates #sc-debug element innerHTML when present', () => {

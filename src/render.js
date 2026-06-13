@@ -43,13 +43,10 @@ export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false)
 </div>`;
 }
 
-export function sectionHtml(section, states, stateKeys, colors = {}) {
-  const resolvedKeys = stateKeys ?? Object.keys(states);
+export function sectionHtml(section, states, entityIds, colors = {}) {
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
-
-  const entities = resolvedKeys.filter(
-    (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
-  );
+  const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
+  const entities = resolvedIds.filter((id) => VALID_STATES.has(states[id]?.state));
   if (!entities.length) return '';
 
   // Use by-date when any entity explicitly reports a non-regular season (playoffs, off-season, …).
