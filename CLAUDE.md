@@ -74,10 +74,23 @@ coverage drops below that.
   Publish Release → Run workflow**. Never trigger the release workflow autonomously — propose the
   next version number and wait for explicit user approval.
 
+**Why:** Clean, reviewable history and no unilateral publishing actions. Splitting concerns keeps
+PRs easy to revert independently.
+
+**How to apply:** If a session touches multiple concerns, flag it and offer to split before opening
+PRs. Never run `git push` or `gh pr create` until explicitly asked for that session. Track merged PR
+count; after 3–5, proactively suggest a release.
+
 ## TDD Workflow
 
 For every fix or feature: **write the failing test first**, confirm it fails (`npm test`), then
 implement the fix/feature until it passes.
+
+**Why:** A test written after the fact tends to mirror the implementation rather than specify
+behaviour — red-first keeps tests honest.
+
+**How to apply:** Before touching `src/`, add the test to the matching `test/*.test.js`. Run
+`npm test` and confirm the new assertion fails. Only then write the implementation.
 
 ## Releasing
 
