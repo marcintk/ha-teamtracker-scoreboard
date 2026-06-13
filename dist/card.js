@@ -1,7 +1,9 @@
-/* ha-teamtracker-scoreboard-card */
+/* ha-teamtracker-scoreboard-card v1.0.0 */
+const __CARD_VERSION__ = '1.0.0';
+
 class DebugMetrics {
   constructor() {
-    this._data = { notifications: [], accepted: [], renders: [] };
+    this._data = { events: [], accepted: [], renders: [] };
   }
 
   track(key) {
@@ -9,6 +11,7 @@ class DebugMetrics {
     const arr = this._data[key];
     arr.push(now);
     const cutoff = now - 10_800_000;
+    // arr is sorted oldest→newest (push appends); scan from front where expired entries live
     let i = 0;
     while (i < arr.length && arr[i] < cutoff) i++;
     if (i) arr.splice(0, i);
@@ -27,6 +30,12 @@ class DebugMetrics {
     };
   }
 
+  _timeAgo(ms) {
+    if (ms < 60_000) return `${Math.floor(ms / 1_000)}s`;
+    if (ms < 3_600_000) return `${Math.floor(ms / 60_000)}m`;
+    return `${Math.floor(ms / 3_600_000)}h`;
+  }
+
   tableHtml() {
     const cell = (n) => `<td style="padding-right:8px;text-align:right">${n}</td>`;
     const hcell = (label) =>
@@ -39,12 +48,15 @@ class DebugMetrics {
     const pad = (n, w = 2) => String(n).padStart(w, '0');
     const ts = renders.length
       ? (() => {
-          const d = new Date(renders.at(-1));
-          return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+          const last = renders.at(-1);
+          const d = new Date(last);
+          const time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+          const ago = this._timeAgo(Date.now() - last);
+          return `${time} (${ago} ago)`;
         })()
       : '--';
-    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:red">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
-    return `<table style="border-collapse:collapse;width:100%">${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table>`;
+    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:indianred">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
+    return `<table style="border-collapse:collapse;width:100%">${row('events', 'events')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table>`;
   }
 
   html() {
@@ -293,13 +305,10 @@ function rowHtml(stateObj, special, colors = {}, opponentSpecial = false) {
 </div>`;
 }
 
-function sectionHtml(section, states, stateKeys, colors = {}) {
-  const resolvedKeys = stateKeys ?? Object.keys(states);
+function sectionHtml(section, states, entityIds, colors = {}) {
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
-
-  const entities = resolvedKeys.filter(
-    (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
-  );
+  const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
+  const entities = resolvedIds.filter((id) => VALID_STATES.has(states[id]?.state));
   if (!entities.length) return '';
 
   // Use by-date when any entity explicitly reports a non-regular season (playoffs, off-season, …).
@@ -342,7 +351,7 @@ const CARD_STYLES = `
   :host { display: block; }
 
   ha-card {
-    padding: 4px 8px 4px 6px;
+    padding: 4px 2px;
     box-sizing: border-box;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
@@ -538,8 +547,12 @@ class SportScoreboardCard extends HTMLElement {
     this._config = null;
     this._hass = null;
     this._fixedTimer = null;
+    this._debugTimer = null;
     this._renderTimer = null;
     this._trackedIds = null;
+    this._trackedByPrefix = null;
+    this._stateKeyCount = 0;
+    this._lastBody = null;
     this._subscription = new SubscriptionManager();
     this._debug = new DebugMetrics();
   }
@@ -548,6 +561,9 @@ class SportScoreboardCard extends HTMLElement {
     this._config = config;
     this._clearSubscription();
     this._trackedIds = null;
+    this._trackedByPrefix = null;
+    this._stateKeyCount = 0;
+    this._lastBody = null;
     this._startFixedTimer();
     if (this._hass) {
       this._render();
@@ -579,8 +595,8 @@ class SportScoreboardCard extends HTMLElement {
 
   _getRefreshConfig() {
     return {
-      lazyMs: this._config?.lazyRefresh ?? 500,
-      fixedMs: this._config?.fixedRefresh ?? 300_000,
+      lazyMs: (this._config?.lazyRefresh ?? 1) * 1000,
+      fixedMs: (this._config?.fixedRefresh ?? 60) * 1000,
     };
   }
 
@@ -608,7 +624,7 @@ class SportScoreboardCard extends HTMLElement {
   _subscribe() {
     if (!this._config || !this._hass?.connection) return;
     this._subscription.subscribe(this._hass.connection, this._trackedIds, () => {
-      if (this._config?.debug) this._debug.track('notifications');
+      if (this._config?.debug) this._debug.track('events');
       this._scheduleRender();
     });
   }
@@ -625,15 +641,14 @@ class SportScoreboardCard extends HTMLElement {
 
   _startFixedTimer() {
     this._stopFixedTimer();
-    if (this._config?.debug) {
-      this._fixedTimer = setInterval(() => this._updateDebugOverlay(), 1000);
-      return;
-    }
     const { fixedMs } = this._getRefreshConfig();
     if (fixedMs > 0) {
       this._fixedTimer = setInterval(() => {
         if (this._hass && this._config) this._render();
       }, fixedMs);
+    }
+    if (this._config?.debug) {
+      this._debugTimer = setInterval(() => this._updateDebugOverlay(), 1000);
     }
   }
 
@@ -641,6 +656,10 @@ class SportScoreboardCard extends HTMLElement {
     if (this._fixedTimer) {
       clearInterval(this._fixedTimer);
       this._fixedTimer = null;
+    }
+    if (this._debugTimer) {
+      clearInterval(this._debugTimer);
+      this._debugTimer = null;
     }
   }
 
@@ -650,8 +669,20 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _buildTrackedIds(stateKeys) {
+    if (stateKeys.length === this._stateKeyCount) return;
+    this._stateKeyCount = stateKeys.length;
     const prefixes = (this._config?.sections ?? []).map((s) => s.prefix);
-    this._trackedIds = new Set(stateKeys.filter((id) => prefixes.some((p) => id.startsWith(p))));
+    this._trackedIds = new Set();
+    this._trackedByPrefix = new Map(prefixes.map((p) => [p, []]));
+    for (const id of stateKeys) {
+      for (const p of prefixes) {
+        if (id.startsWith(p)) {
+          this._trackedIds.add(id);
+          this._trackedByPrefix.get(p).push(id);
+          break;
+        }
+      }
+    }
   }
 
   _hasRelevantChange(newHass, prevHass) {
@@ -663,7 +694,6 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _render() {
-    if (this._config?.debug) this._debug.track('renders');
     try {
       const { sections, height, colors = {}, debug } = this._config;
       const states = this._hass.states;
@@ -674,7 +704,14 @@ class SportScoreboardCard extends HTMLElement {
         this._showError('Add at least one section to your card config.');
         return;
       }
-      const body = sections.map((s) => sectionHtml(s, states, stateKeys, colors)).join('');
+      const body = sections
+        .map((s) => sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix), colors))
+        .join('');
+
+      if (body === this._lastBody) return;
+      this._lastBody = body;
+
+      if (debug) this._debug.track('renders');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
         : '';
@@ -686,6 +723,7 @@ class SportScoreboardCard extends HTMLElement {
         <style>${CARD_STYLES}${headerOverride}</style>
         <ha-card style="${heightStyle}${debug ? 'position:relative;' : ''}">
           ${debug ? this._debug.html() : ''}
+          ${debug ? `<div id="sc-version" style="position:absolute;top:2px;right:4px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>` : ''}
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>
       `;
