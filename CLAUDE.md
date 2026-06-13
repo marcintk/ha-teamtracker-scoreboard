@@ -36,8 +36,8 @@ test file.
 - **Shadow DOM / full replacement**: `shadowRoot.innerHTML` is fully replaced on every render — no
   diffing. Fast enough for ~30 rows max.
 - **WebSocket subscription**: card subscribes to `state_changed` events on first `set hass`;
-  callback sets `_needsRender` flag (O(1) check). Rendering always uses `_hass.states`, not the
-  event payload.
+  callback calls `_scheduleRender()`, which arms a debounce timer (`_renderTimer`). Rendering always
+  uses `_hass.states`, not the event payload.
 - **Entity filter**: `_trackedIds` (Set) is built once per config from section prefixes; reset on
   `setConfig`, rebuilt lazily on next `set hass`.
 - **Security**: all user-supplied strings go through `esc()` before HTML insertion; logo URLs

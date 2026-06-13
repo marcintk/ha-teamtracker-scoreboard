@@ -81,7 +81,7 @@ class SportScoreboardCard extends HTMLElement {
   _subscribe() {
     if (!this._config || !this._hass?.connection) return;
     this._subscription.subscribe(this._hass.connection, this._trackedIds, () => {
-      if (this._config?.debug) this._debug.track('notifications');
+      if (this._config?.debug) this._debug.track('events');
       this._scheduleRender();
     });
   }
