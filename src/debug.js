@@ -28,12 +28,14 @@ export class DebugMetrics {
 
   html() {
     const cell = (n) => `<td style="padding-right:8px;text-align:right">${n}</td>`;
+    const hcell = (label) =>
+      `<td style="padding-right:8px;text-align:right;color:orange">${label}</td>`;
     const row = (label, key) => {
       const c = this.counts(key);
-      return `<tr><td style="padding-right:10px;color:#999">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min30)}${cell(c.hour1)}${cell(c.hour3)}${cell(c.hour6)}</tr>`;
+      return `<tr><td style="padding-right:10px;color:#999">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min30)}${cell(c.hour1)}${cell(c.hour3)}${cell(c.hour6)}<td></td></tr>`;
     };
     const renders = this._data.renders;
     const ts = renders.length ? new Date(renders.at(-1)).toISOString().slice(11, 23) : '--';
-    return `<div style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:9px;line-height:1.3;padding:2px 6px;pointer-events:none;"><table style="border-collapse:collapse;width:100%"><tr style="color:#555;font-size:8px"><td style="padding-right:10px">${ts}</td><td style="padding-right:8px;text-align:right">1m</td><td style="padding-right:8px;text-align:right">5m</td><td style="padding-right:8px;text-align:right">30m</td><td style="padding-right:8px;text-align:right">1h</td><td style="padding-right:8px;text-align:right">3h</td><td style="text-align:right">6h</td></tr>${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}</table></div>`;
+    return `<div style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:9px;line-height:1.3;padding:2px 6px;pointer-events:none;"><table style="border-collapse:collapse;width:100%"><tr style="font-size:8px"><td></td>${hcell('1m')}${hcell('5m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}${hcell('6h')}<td style="padding-left:8px;color:red">${ts}</td></tr>${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}</table></div>`;
   }
 }
