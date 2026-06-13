@@ -16,27 +16,34 @@ directly without a CI build step.
 
 ## Module Map
 
-Every `src/*.js` module has a corresponding `test/*.test.js`. New source files must ship with their test file.
+Every `src/*.js` module has a corresponding `test/*.test.js`. New source files must ship with their
+test file.
 
-| Source file            | Test file                    | Responsibility                                                                  |
-| ---------------------- | ---------------------------- | ------------------------------------------------------------------------------- |
-| `src/index.js`         | `test/index.test.js`         | Custom element class, HA lifecycle hooks, entity cache, render orchestration    |
-| `src/debug.js`         | `test/debug.test.js`         | `DebugMetrics` — timestamp tracking, windowed counts, overlay HTML              |
-| `src/subscription.js`  | `test/subscription.test.js`  | `SubscriptionManager` — WebSocket subscribe/unsubscribe with stale-gen guard    |
-| `src/render.js`        | `test/render.test.js`        | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows |
-| `src/display.js`       | `test/display.test.js`       | Stateless display helpers: colors, text snippets, TV badge, message column      |
-| `src/sorting.js`       | `test/sorting.test.js`       | `winRatio()`, `sortKeyFor()`, `deduplicate()` — ranking and dedup logic         |
-| `src/styles.js`        | `test/styles.test.js`        | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render   |
-| `src/utils.js`         | *(covered via render/index)* | `esc()` — HTML escaping; `safeLogoUrl()` — HTTPS-only URL guard                 |
-| `src/constants.js`     | *(covered via render/index)* | `VALID_STATES` set: `PRE`, `IN`, `POST`, `BYE`                                  |
+| Source file           | Test file                    | Responsibility                                                                  |
+| --------------------- | ---------------------------- | ------------------------------------------------------------------------------- |
+| `src/index.js`        | `test/index.test.js`         | Custom element class, HA lifecycle hooks, entity cache, render orchestration    |
+| `src/debug.js`        | `test/debug.test.js`         | `DebugMetrics` — timestamp tracking, windowed counts, overlay HTML              |
+| `src/subscription.js` | `test/subscription.test.js`  | `SubscriptionManager` — WebSocket subscribe/unsubscribe with stale-gen guard    |
+| `src/render.js`       | `test/render.test.js`        | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows |
+| `src/display.js`      | `test/display.test.js`       | Stateless display helpers: colors, text snippets, TV badge, message column      |
+| `src/sorting.js`      | `test/sorting.test.js`       | `winRatio()`, `sortKeyFor()`, `deduplicate()` — ranking and dedup logic         |
+| `src/styles.js`       | `test/styles.test.js`        | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render   |
+| `src/utils.js`        | _(covered via render/index)_ | `esc()` — HTML escaping; `safeLogoUrl()` — HTTPS-only URL guard                 |
+| `src/constants.js`    | _(covered via render/index)_ | `VALID_STATES` set: `PRE`, `IN`, `POST`, `BYE`                                  |
 
 ## Architecture Notes
 
-- **Shadow DOM / full replacement**: `shadowRoot.innerHTML` is fully replaced on every render — no diffing. Fast enough for ~30 rows max.
-- **WebSocket subscription**: card subscribes to `state_changed` events on first `set hass`; callback sets `_needsRender` flag (O(1) check). Rendering always uses `_hass.states`, not the event payload.
-- **Entity filter**: `_trackedIds` (Set) is built once per config from section prefixes; reset on `setConfig`, rebuilt lazily on next `set hass`.
-- **Security**: all user-supplied strings go through `esc()` before HTML insertion; logo URLs validated HTTPS via `safeLogoUrl()`.
-- **Deduplication** (`by-date` mode only): two-pass algorithm — pass 1 builds home/special key sets, pass 2 filters keeping home sensor > away sensor per game key.
+- **Shadow DOM / full replacement**: `shadowRoot.innerHTML` is fully replaced on every render — no
+  diffing. Fast enough for ~30 rows max.
+- **WebSocket subscription**: card subscribes to `state_changed` events on first `set hass`;
+  callback sets `_needsRender` flag (O(1) check). Rendering always uses `_hass.states`, not the
+  event payload.
+- **Entity filter**: `_trackedIds` (Set) is built once per config from section prefixes; reset on
+  `setConfig`, rebuilt lazily on next `set hass`.
+- **Security**: all user-supplied strings go through `esc()` before HTML insertion; logo URLs
+  validated HTTPS via `safeLogoUrl()`.
+- **Deduplication** (`by-date` mode only): two-pass algorithm — pass 1 builds home/special key sets,
+  pass 2 filters keeping home sensor > away sensor per game key.
 
 ## Contributing
 
@@ -63,12 +70,13 @@ coverage drops below that.
   branches before opening PRs.
 - **Never push or merge without explicit permission.** Do not run `git push`, `gh pr create`, or
   merge a PR unless the user explicitly asks to open or merge it for that session.
-- **Release cadence.** After three to five merged PRs, recommend cutting a release via
-  **Actions → Publish Release → Run workflow**.
+- **Release cadence.** After three to five merged PRs, recommend cutting a release via **Actions →
+  Publish Release → Run workflow**.
 
 ## TDD Workflow
 
-For every fix or feature: **write the failing test first**, confirm it fails (`npm test`), then implement the fix/feature until it passes.
+For every fix or feature: **write the failing test first**, confirm it fails (`npm test`), then
+implement the fix/feature until it passes.
 
 ## Releasing
 
