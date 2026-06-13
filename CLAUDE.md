@@ -16,15 +16,19 @@ directly without a CI build step.
 
 ## Module Map
 
-| File               | Responsibility                                                                  |
-| ------------------ | ------------------------------------------------------------------------------- |
-| `src/index.js`     | Custom element class, HA lifecycle hooks, entity cache, render orchestration    |
-| `src/render.js`    | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows |
-| `src/display.js`   | Stateless display helpers: colors, text snippets, TV badge, message column      |
-| `src/sorting.js`   | `winRatio()`, `sortKeyFor()`, `deduplicate()` — ranking and dedup logic         |
-| `src/styles.js`    | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render   |
-| `src/utils.js`     | `esc()` — HTML escaping; `safeLogoUrl()` — HTTPS-only URL guard                 |
-| `src/constants.js` | `VALID_STATES` set: `PRE`, `IN`, `POST`, `BYE`                                  |
+Every `src/*.js` module has a corresponding `test/*.test.js`. New source files must ship with their test file.
+
+| Source file            | Test file                    | Responsibility                                                                  |
+| ---------------------- | ---------------------------- | ------------------------------------------------------------------------------- |
+| `src/index.js`         | `test/index.test.js`         | Custom element class, HA lifecycle hooks, entity cache, render orchestration    |
+| `src/debug.js`         | `test/debug.test.js`         | `DebugMetrics` — timestamp tracking, windowed counts, overlay HTML              |
+| `src/subscription.js`  | `test/subscription.test.js`  | `SubscriptionManager` — WebSocket subscribe/unsubscribe with stale-gen guard    |
+| `src/render.js`        | `test/render.test.js`        | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows |
+| `src/display.js`       | `test/display.test.js`       | Stateless display helpers: colors, text snippets, TV badge, message column      |
+| `src/sorting.js`       | `test/sorting.test.js`       | `winRatio()`, `sortKeyFor()`, `deduplicate()` — ranking and dedup logic         |
+| `src/styles.js`        | `test/styles.test.js`        | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render   |
+| `src/utils.js`         | *(covered via render/index)* | `esc()` — HTML escaping; `safeLogoUrl()` — HTTPS-only URL guard                 |
+| `src/constants.js`     | *(covered via render/index)* | `VALID_STATES` set: `PRE`, `IN`, `POST`, `BYE`                                  |
 
 ## Architecture Notes
 
@@ -51,6 +55,16 @@ CI runs build, lint, and tests automatically on every PR.
 Every new feature or bug fix must include associated tests. Coverage thresholds are enforced at 100%
 for statements, branches, functions, and lines — `npm run test:coverage` will fail (and block CI) if
 coverage drops below that.
+
+### PR discipline
+
+- **One concern per PR.** A refactor PR must not bundle feature changes; a feature PR must not
+  include unrelated refactors. If a session drifts across multiple concerns, split into separate
+  branches before opening PRs.
+- **Never push or merge without explicit permission.** Do not run `git push`, `gh pr create`, or
+  merge a PR unless the user explicitly asks to open or merge it for that session.
+- **Release cadence.** After three to five merged PRs, recommend cutting a release via
+  **Actions → Publish Release → Run workflow**.
 
 ## TDD Workflow
 

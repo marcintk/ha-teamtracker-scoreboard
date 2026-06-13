@@ -130,13 +130,14 @@ sections:
 
 ### Options
 
-| Option          | Type   | Default  | Description                                                                |
-| --------------- | ------ | -------- | -------------------------------------------------------------------------- |
-| `height`        | string | auto     | Card height (CSS value); omit to fit content                               |
-| `lazyRefresh`   | number | `500`    | Milliseconds to hold before rendering after the first event; `0` = render on every event immediately |
-| `fixedRefresh` | number | `300000` | Re-render every N milliseconds regardless of events; `0` = disabled       |
-| `sections`      | list   | required | One entry per sport/league                                                 |
-| `colors`        | map    | —        | Override team colours (see [Colors](#colors))                              |
+| Option         | Type    | Default   | Description                                                                            |
+| -------------- | ------- | --------- | -------------------------------------------------------------------------------------- |
+| `height`       | string  | auto      | Card height (CSS value); omit to fit content                                           |
+| `lazyRefresh`  | number  | `500`     | Milliseconds to hold before rendering after the first event; `0` = render immediately  |
+| `fixedRefresh` | number  | `300000`  | Re-render every N milliseconds regardless of events; `0` = disabled                   |
+| `sections`     | list    | required  | One entry per sport/league                                                             |
+| `colors`       | map     | —         | Override team colours (see [Colors](#colors))                                          |
+| `debug`        | boolean | `false`   | Show performance overlay (see [Debug overlay](#debug-overlay))                         |
 
 ### Refresh behaviour
 
@@ -144,9 +145,9 @@ The card subscribes to `state_changed` events; `lazyRefresh` and `fixedRefresh` 
 
 | `lazyRefresh` | `fixedRefresh` | Behaviour                                                      |
 | ------------- | -------------- | -------------------------------------------------------------- |
-| `500`         | `300000`       | Default — batch events into 500 ms windows + 5 min safety net |
 | `0`           | `0`            | Render only on events, immediately, no periodic refresh        |
 | `0`           | `60000`        | Re-render every minute, plus immediately on every event        |
+| `500`         | `300000`       | Default — batch events into 500 ms windows + 5 min safety net |
 | `500`         | `0`            | Batch events only, no periodic refresh                         |
 
 ### Section options
@@ -169,6 +170,32 @@ The card subscribes to `state_changed` events; `lazyRefresh` and `fixedRefresh` 
 
 `rankType` only applies during the regular season. Outside it (playoffs, cups, tournaments), the
 card automatically sorts by game date regardless of your setting.
+
+## Debug overlay
+
+Add `debug: true` to your card config to enable a live performance overlay pinned to the bottom of the card:
+
+```yaml
+type: custom:ha-teamtracker-scoreboard-card
+debug: true
+sections:
+  - ...
+```
+
+The overlay shows three counters — **events** (raw WebSocket notifications received), **accepted** (events that passed the entity filter and were scheduled for a render), and **renders** (actual DOM updates performed) — across six rolling time windows:
+
+| Column | Window |
+| ------ | ------ |
+| `1m`   | Last 1 minute |
+| `5m`   | Last 5 minutes |
+| `30m`  | Last 30 minutes |
+| `1h`   | Last 1 hour |
+| `3h`   | Last 3 hours |
+| `6h`   | Last 6 hours |
+
+The timestamp in the top-left shows when the last render completed (`HH:MM:SS.mmm`). The overlay is read-only and does not intercept clicks or touches.
+
+Remove `debug: true` (or set it to `false`) to hide the overlay in production.
 
 ## Colors
 
