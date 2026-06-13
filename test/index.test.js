@@ -477,6 +477,19 @@ describe('SportScoreboardCard', () => {
       expect(card._renderTimer).toBeNull();
     });
 
+    it('lazyRefresh timer skips render if hass is null when it fires', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], lazyRefresh: 300 };
+      card._hass = makeHass({});
+      card._trackedIds = new Set();
+      card._scheduleRender();
+      card._hass = null;
+      const renderSpy = vi.spyOn(card, '_render');
+      vi.advanceTimersByTime(300);
+      expect(renderSpy).not.toHaveBeenCalled();
+      expect(card._renderTimer).toBeNull();
+    });
+
     it('multiple events within lazyRefresh window trigger only one render', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection], lazyRefresh: 300 });
