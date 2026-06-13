@@ -124,5 +124,35 @@ describe('DebugMetrics', () => {
       const d = new DebugMetrics();
       expect(d.html()).toContain('pointer-events:none');
     });
+
+    it('column headers are colored orange', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('color:orange');
+    });
+
+    it('timestamp is colored red', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('color:red');
+    });
+
+    it('data rows appear before the column header row', () => {
+      const d = new DebugMetrics();
+      const h = d.html();
+      expect(h.indexOf('renders')).toBeLessThan(h.indexOf('1m'));
+    });
+
+    it('timestamp is the first cell of the footer row, before the column labels', () => {
+      const d = new DebugMetrics();
+      vi.setSystemTime(new Date('2026-06-13T10:01:46.123Z'));
+      d.track('renders');
+      const h = d.html();
+      expect(h.indexOf('10:01:46.123')).toBeLessThan(h.indexOf('1m'));
+    });
+
+    it('-- placeholder is the first cell of the footer row, before the column labels', () => {
+      const d = new DebugMetrics();
+      const h = d.html();
+      expect(h.indexOf('--')).toBeLessThan(h.indexOf('1m'));
+    });
   });
 });
