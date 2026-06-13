@@ -642,8 +642,9 @@ describe('SportScoreboardCard', () => {
       const c = card._metricCounts('notifications');
       expect(c.min1).toBe(3);
       expect(c.min5).toBe(3);
-      expect(c.hour).toBe(3);
-      expect(c.day).toBe(3);
+      expect(c.min30).toBe(3);
+      expect(c.hour3).toBe(3);
+      expect(c.hour6).toBe(3);
     });
 
     it('_metricCounts excludes entries outside the 1-minute window', () => {
@@ -654,8 +655,9 @@ describe('SportScoreboardCard', () => {
       const c = card._metricCounts('notifications');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(2);
-      expect(c.hour).toBe(2);
-      expect(c.day).toBe(2);
+      expect(c.min30).toBe(2);
+      expect(c.hour3).toBe(2);
+      expect(c.hour6).toBe(2);
     });
 
     it('_metricCounts excludes entries outside the 5-minute window', () => {
@@ -666,14 +668,28 @@ describe('SportScoreboardCard', () => {
       const c = card._metricCounts('notifications');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
-      expect(c.hour).toBe(2);
-      expect(c.day).toBe(2);
+      expect(c.min30).toBe(2);
+      expect(c.hour3).toBe(2);
+      expect(c.hour6).toBe(2);
     });
 
-    it('_trackMetric prunes entries older than 24 hours', () => {
+    it('_metricCounts excludes entries outside the 30-minute window', () => {
+      const card = makeCard();
+      card._trackMetric('notifications');
+      vi.advanceTimersByTime(1_800_001);
+      card._trackMetric('notifications');
+      const c = card._metricCounts('notifications');
+      expect(c.min1).toBe(1);
+      expect(c.min5).toBe(1);
+      expect(c.min30).toBe(1);
+      expect(c.hour3).toBe(2);
+      expect(c.hour6).toBe(2);
+    });
+
+    it('_trackMetric prunes entries older than 6 hours', () => {
       const card = makeCard();
       card._trackMetric('renders');
-      vi.advanceTimersByTime(86_400_001);
+      vi.advanceTimersByTime(21_600_001);
       card._trackMetric('renders');
       expect(card._metrics.renders).toHaveLength(1);
     });
@@ -748,6 +764,31 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot.innerHTML).toContain('accepted');
       expect(card.shadowRoot.innerHTML).toContain('renders');
       expect(card.shadowRoot.innerHTML).toContain('5m');
+      expect(card.shadowRoot.innerHTML).toContain('30m');
+      expect(card.shadowRoot.innerHTML).toContain('3h');
+      expect(card.shadowRoot.innerHTML).toContain('6h');
+    });
+
+    it('debug pane is positioned at the bottom', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).toContain('bottom:0');
+    });
+
+    it('debug pane shows last render timestamp', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      vi.setSystemTime(new Date('2026-06-13T10:01:46.123Z'));
+      card._render();
+      expect(card.shadowRoot.innerHTML).toContain('10:01:46.123');
+    });
+
+    it('_debugHtml shows "--" timestamp when no render has occurred yet', () => {
+      const card = makeCard();
+      expect(card._debugHtml()).toContain('--');
     });
 
     it('debug pane is absent when debug is not set', () => {
