@@ -772,24 +772,26 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot.innerHTML).toContain(expected);
     });
 
-    it('in debug mode 1s overlay timer fires every second regardless of fixedRefresh', () => {
+    it('in debug mode 5s overlay timer fires every 5 seconds regardless of fixedRefresh', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 300 });
       const updateSpy = vi.spyOn(card, '_updateDebugOverlay');
-      vi.advanceTimersByTime(1_000);
+      vi.advanceTimersByTime(4_999);
+      expect(updateSpy).toHaveBeenCalledTimes(0);
+      vi.advanceTimersByTime(1);
       expect(updateSpy).toHaveBeenCalledTimes(1);
-      vi.advanceTimersByTime(1_000);
+      vi.advanceTimersByTime(5_000);
       expect(updateSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('in debug mode 1s overlay timer calls _updateDebugOverlay not _render', () => {
+    it('in debug mode 5s overlay timer calls _updateDebugOverlay not _render', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card.setConfig({ sections: [nbaSection], debug: true });
       const renderSpy = vi.spyOn(card, '_render');
       const updateSpy = vi.spyOn(card, '_updateDebugOverlay');
-      vi.advanceTimersByTime(1_000);
+      vi.advanceTimersByTime(5_000);
       expect(updateSpy).toHaveBeenCalledTimes(1);
       expect(renderSpy).not.toHaveBeenCalled();
     });

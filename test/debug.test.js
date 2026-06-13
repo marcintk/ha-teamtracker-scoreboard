@@ -95,6 +95,22 @@ describe('DebugMetrics', () => {
       d.track('renders');
       expect(d._data.renders).toHaveLength(1);
     });
+
+    it('counts all windows simultaneously when entries span multiple windows', () => {
+      const d = new DebugMetrics();
+      d.track('events'); // will age to 70s old by the time counts() is called
+      vi.advanceTimersByTime(70_000);
+      d.track('events'); // 0s old
+      const c = d.counts('events');
+      // first entry: 70s old — outside min1 (60s), inside min5 and beyond
+      // second entry: 0s old — inside all windows
+      expect(c.min1).toBe(1);
+      expect(c.min5).toBe(2);
+      expect(c.min15).toBe(2);
+      expect(c.min30).toBe(2);
+      expect(c.hour1).toBe(2);
+      expect(c.hour3).toBe(2);
+    });
   });
 
   describe('tableHtml', () => {

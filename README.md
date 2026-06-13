@@ -136,7 +136,7 @@ Add `debug: true` to your card config to enable a live refresh performance overl
 bottom of the card. It shows three counters — **events** (raw WebSocket notifications received),
 **accepted** (events that passed the entity filter), and **renders** (actual DOM updates) — across
 six rolling time windows (1m, 5m, 15m, 30m, 1h, 3h). The timestamp shows when the last render
-completed. In debug mode the debug pane is refreshed in the fixed rate of 1 second.
+completed. In debug mode the debug pane is refreshed every 5 seconds.
 
 ## Development
 
