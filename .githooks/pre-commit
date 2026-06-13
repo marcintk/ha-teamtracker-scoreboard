@@ -1,0 +1,4 @@
+#!/bin/sh
+# Fails the commit if code is not formatted. Run `npm run check && npm run format:md` to fix.
+set -e
+npm run check:ci
