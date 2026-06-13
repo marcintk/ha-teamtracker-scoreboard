@@ -112,7 +112,7 @@ class SportScoreboardCard extends HTMLElement {
       }, fixedMs);
     }
     if (this._config?.debug) {
-      this._debugTimer = setInterval(() => this._updateDebugOverlay(), 1000);
+      this._debugTimer = setInterval(() => this._updateDebugOverlay(), 5000);
     }
   }
 
