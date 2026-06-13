@@ -20,11 +20,14 @@ export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false)
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
 
+  const homeColor = teamColor('home', attr, special, colors, opponentSpecial);
+  const awayColor = teamColor('away', attr, special, colors, opponentSpecial);
+
   return `
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:${teamColor('home', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('home', attr, special, colors, opponentSpecial)}">${rankText('home', attr)}</div>
+    <div class="team-name" style="color:${homeColor};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
+    <div class="team-rank" style="color:${homeColor}">${rankText('home', attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml('home', attr)}</div>
   <div class="score score-a" style="background:${bg};color:${scoreColor('home', gs, attr, colors)}">${scoreText('home', gs, attr)}</div>
@@ -32,33 +35,31 @@ export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false)
   <div class="score score-b" style="background:${bg};color:${scoreColor('away', gs, attr, colors)}">${scoreText('away', gs, attr)}</div>
   <div class="logo logo-b">${logoHtml('away', attr)}</div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:${teamColor('away', attr, special, colors, opponentSpecial)};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
-    <div class="team-rank" style="color:${teamColor('away', attr, special, colors, opponentSpecial)}">${rankText('away', attr)}</div>
+    <div class="team-name" style="color:${awayColor};font-weight:${isTeamSide('away', attr) ? 'bold' : 'normal'}">${nameText('away', attr)}</div>
+    <div class="team-rank" style="color:${awayColor}">${rankText('away', attr)}</div>
   </div>
   <div class="message">${messageHtml(gs, attr, colors)}</div>
   <div class="tv">${tvHtml(gs, attr, colors)}</div>
 </div>`;
 }
 
-export function sectionHtml(section, states, stateKeysOrColors, colors) {
-  let stateKeys, resolvedColors;
-  if (Array.isArray(stateKeysOrColors)) {
-    stateKeys = stateKeysOrColors;
-    resolvedColors = colors ?? {};
-  } else {
-    stateKeys = Object.keys(states);
-    resolvedColors = stateKeysOrColors ?? {};
-  }
+export function sectionHtml(section, states, stateKeys, colors = {}) {
+  const resolvedKeys = stateKeys ?? Object.keys(states);
   const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
 
-  const entities = stateKeys.filter(
+  const entities = resolvedKeys.filter(
     (id) => id.startsWith(prefix) && VALID_STATES.has(states[id]?.state)
   );
   if (!entities.length) return '';
 
-  // rankType applies to regular season only — auto-switch to by-date outside it
-  const firstAttr = states[entities[0]]?.attributes;
-  const sortMode = firstAttr?.season && firstAttr.season !== 'regular' ? 'by-date' : rankType;
+  // Use by-date when any entity explicitly reports a non-regular season (playoffs, off-season, …).
+  // Undefined season (e.g. during HA startup) is treated as regular so rankType is preserved.
+  const sortMode = entities.some((id) => {
+    const s = states[id]?.attributes?.season;
+    return s && s !== 'regular';
+  })
+    ? 'by-date'
+    : rankType;
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
@@ -80,7 +81,7 @@ export function sectionHtml(section, states, stateKeysOrColors, colors) {
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
     .map(({ entityId, special, opponentSpecial = false }) =>
-      rowHtml(states[entityId], special, resolvedColors, opponentSpecial)
+      rowHtml(states[entityId], special, colors, opponentSpecial)
     )
     .join('');
 

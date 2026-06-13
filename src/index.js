@@ -12,6 +12,7 @@ class SportScoreboardCard extends HTMLElement {
     this._trackedIds = null;
     this._unsubscribe = null;
     this._needsRender = false;
+    this._subscribeGen = 0;
   }
 
   setConfig(config) {
@@ -36,8 +37,11 @@ class SportScoreboardCard extends HTMLElement {
 
     if (isFirstCall || connectionChanged) {
       if (connectionChanged) this._clearSubscription();
-      this._buildTrackedIds(Object.keys(hass.states));
-      if (this._config && isAuto) this._render();
+      if (this._config && isAuto) {
+        this._render();
+      } else {
+        this._buildTrackedIds(Object.keys(hass.states));
+      }
       this._subscribe();
       return;
     }
@@ -56,22 +60,28 @@ class SportScoreboardCard extends HTMLElement {
 
   _subscribe() {
     if (!this._config) return;
-    const isAuto = !this._config.refresh || this._config.refresh === 'auto';
+    const isAuto = this._config.refresh === undefined || this._config.refresh === 'auto';
     if (!isAuto || !this._hass?.connection?.subscribeEvents) return;
 
+    const gen = this._subscribeGen;
     this._hass.connection
       .subscribeEvents((event) => {
-        if (this._trackedIds?.has(event.data.entity_id)) {
+        if (this._subscribeGen === gen && this._trackedIds?.has(event.data.entity_id)) {
           this._needsRender = true;
         }
       }, 'state_changed')
       .then((unsub) => {
-        this._unsubscribe = unsub;
+        if (this._subscribeGen === gen) {
+          this._unsubscribe = unsub;
+        } else {
+          unsub();
+        }
       })
       .catch(() => {});
   }
 
   _clearSubscription() {
+    this._subscribeGen++;
     this._unsubscribe?.();
     this._unsubscribe = null;
     this._needsRender = false;
@@ -116,14 +126,13 @@ class SportScoreboardCard extends HTMLElement {
     try {
       const { sections, height, colors = {} } = this._config;
       const states = this._hass.states;
+      const stateKeys = Object.keys(states);
+      this._buildTrackedIds(stateKeys);
 
       if (!Array.isArray(sections) || !sections.length) {
         this._showError('Add at least one section to your card config.');
         return;
       }
-
-      const stateKeys = Object.keys(states);
-      this._buildTrackedIds(stateKeys);
       const body = sections.map((s) => sectionHtml(s, states, stateKeys, colors)).join('');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
@@ -156,7 +165,10 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize() {
-    if (this._config?.height) return Math.ceil(parseInt(this._config.height, 10) / 50);
+    if (this._config?.height) {
+      const px = parseInt(this._config.height, 10);
+      if (Number.isFinite(px)) return Math.ceil(px / 50);
+    }
     const rows = (this._config?.sections ?? []).reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
     return Math.max(1, Math.ceil((rows * 28) / 50));
   }

@@ -85,6 +85,14 @@ describe('SportScoreboardCard', () => {
       // 1 header + 10 default rows = 11 rows * 28px = 308px / 50 = ceil(6.16) = 7
       expect(card.getCardSize()).toBe(7);
     });
+
+    it('falls back to section-based size when height is non-numeric', () => {
+      const card = makeCard();
+      card._config = { height: 'auto', sections: [{ limit: 10 }] };
+      const size = card.getCardSize();
+      expect(Number.isFinite(size)).toBe(true);
+      expect(size).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe('_hasRelevantChange', () => {
@@ -431,6 +439,15 @@ describe('SportScoreboardCard', () => {
       expect(connection.subscribeEvents).not.toHaveBeenCalled();
     });
 
+    it('does not subscribe when refresh is 0 (falsy number, not auto mode)', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], refresh: 0 });
+      const { hass, connection } = makeHassWithConnection({});
+      card.hass = hass;
+      await Promise.resolve();
+      expect(connection.subscribeEvents).not.toHaveBeenCalled();
+    });
+
     it('stores the unsubscribe function after subscription resolves', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
@@ -499,6 +516,20 @@ describe('SportScoreboardCard', () => {
       expect(card._needsRender).toBe(false);
     });
 
+    it('stale callback does not set _needsRender after _clearSubscription', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const staleCallback = connection.subscribeEvents.mock.calls[0][0];
+      card._clearSubscription(); // increments gen, resets _needsRender
+      staleCallback({ data: { entity_id: 'sensor.nba_lal' } }); // stale callback fires
+      expect(card._needsRender).toBe(false);
+    });
+
     it('disconnectedCallback unsubscribes from WS', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
@@ -525,6 +556,21 @@ describe('SportScoreboardCard', () => {
       expect(unsub).toHaveBeenCalledTimes(1);
       await Promise.resolve();
       expect(connection.subscribeEvents).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retain stale subscription handle when clearSubscription fires before promise resolves', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, unsub } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      // clear before the promise resolves — simulates rapid setConfig or disconnect
+      card._clearSubscription();
+      await Promise.resolve();
+      // stale .then() must call unsub() to clean up, not store it
+      expect(unsub).toHaveBeenCalledTimes(1);
+      expect(card._unsubscribe).toBeNull();
     });
 
     it('silently ignores subscribeEvents rejection and falls back to diffing', async () => {

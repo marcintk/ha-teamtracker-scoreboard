@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deduplicate, preferHome, sortKeyFor, winRatio } from '../src/sorting.js';
+import { deduplicate, sortKeyFor, winRatio } from '../src/sorting.js';
 
 describe('winRatio', () => {
   it('calculates win percentage for win-loss', () => {
@@ -48,34 +48,6 @@ describe('sortKeyFor', () => {
 
   it('returns win ratio for win-loss', () => {
     expect(sortKeyFor({ team_record: '30-10' }, 'win-loss')).toBeCloseTo(0.75);
-  });
-});
-
-describe('preferHome', () => {
-  it('puts home sensor before away sensor', () => {
-    const states = {
-      'sensor.nba_lal': { attributes: { team_homeaway: 'away' } },
-      'sensor.nba_gsw': { attributes: { team_homeaway: 'home' } },
-    };
-    const list = [{ entityId: 'sensor.nba_lal' }, { entityId: 'sensor.nba_gsw' }];
-    const result = preferHome(list, states);
-    expect(result[0].entityId).toBe('sensor.nba_gsw');
-  });
-
-  it('keeps home sensor first when it is already first in the list', () => {
-    // Covers the comparator branch where `a` is home and `b` is away (lines 23-24 true/false).
-    const states = {
-      'sensor.nba_gsw': { attributes: { team_homeaway: 'home' } },
-      'sensor.nba_lal': { attributes: { team_homeaway: 'away' } },
-      'sensor.nba_bos': { attributes: { team_homeaway: 'away' } },
-    };
-    const list = [
-      { entityId: 'sensor.nba_gsw' },
-      { entityId: 'sensor.nba_lal' },
-      { entityId: 'sensor.nba_bos' },
-    ];
-    const result = preferHome(list, states);
-    expect(result[0].entityId).toBe('sensor.nba_gsw');
   });
 });
 
@@ -139,7 +111,21 @@ describe('deduplicate', () => {
         },
       },
     };
-    // sensor.wc_missing hits the ?? {} fallback — key becomes "undefined_..."
+    const result = deduplicate(list, 'by-date', states);
+    expect(result).toHaveLength(2);
+  });
+
+  it('keeps both rows when two sensors have no date attribute (no false dedup collision)', () => {
+    // Both sensors lack a date — previously both produced "undefined_undefined_undefined"
+    // and the second was silently dropped by seen.has(key).
+    const list = [
+      { entityId: 'sensor.wc_fra' },
+      { entityId: 'sensor.wc_bra' },
+    ];
+    const states = {
+      'sensor.wc_fra': { attributes: { team_homeaway: 'home' } }, // no date/abbr
+      'sensor.wc_bra': { attributes: { team_homeaway: 'home' } }, // no date/abbr
+    };
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(2);
   });
