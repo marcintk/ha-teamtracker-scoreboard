@@ -211,7 +211,7 @@ describe('SportScoreboardCard', () => {
     it('skips render when no relevant entity changed', () => {
       const card = makeCard();
       const stateObj = makeState('PRE', baseAttrs);
-      card.setConfig({ sections: [nbaSection] });
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 0 });
       card.hass = makeHass({ 'sensor.nba_lal': stateObj }); // first call: builds _trackedIds
       const renderSpy = vi.spyOn(card, '_render');
       // same state object reference — fallback diffing returns false, no render
@@ -233,12 +233,13 @@ describe('SportScoreboardCard', () => {
 
     it('re-renders when a relevant entity state changes', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection] });
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 0 });
       // first call: builds _trackedIds; makeHass has no connection so _unsubscribe stays null
       card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      const renderSpy = vi.spyOn(card, '_render');
       // second call: different state ref → fallback diffing triggers render
       card.hass = makeHass({ 'sensor.nba_lal': makeState('IN', baseAttrs) });
-      expect(card.shadowRoot.innerHTML).toContain('ha-card');
+      expect(renderSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -316,28 +317,28 @@ describe('SportScoreboardCard', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
-    it('does not start a timer when refresh is auto', () => {
-      const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 'auto' });
-      expect(card._refreshTimer).toBeNull();
-    });
-
-    it('does not start a timer when refresh is omitted', () => {
+    it('starts fixedTimer with default 5-minute interval when refresh is omitted', () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
-      expect(card._refreshTimer).toBeNull();
+      expect(card._fixedTimer).not.toBeNull();
     });
 
-    it('starts a timer when refresh is a number', () => {
+    it('fixedRefresh: 0 does not start a fixed timer', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 30 });
-      expect(card._refreshTimer).not.toBeNull();
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 0 });
+      expect(card._fixedTimer).toBeNull();
     });
 
-    it('calls _render on each interval tick', () => {
+    it('starts fixedTimer at custom fixedRefresh interval', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 60_000 });
+      expect(card._fixedTimer).not.toBeNull();
+    });
+
+    it('fixedTimer calls _render at fixedRefresh interval', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], refresh: 10 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 10_000 });
       const renderSpy = vi.spyOn(card, '_render');
 
       vi.advanceTimersByTime(10_000);
@@ -347,50 +348,24 @@ describe('SportScoreboardCard', () => {
       expect(renderSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('does not render via set hass when refresh is a number', () => {
-      const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 30 });
-      const renderSpy = vi.spyOn(card, '_render');
-
-      card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      expect(renderSpy).not.toHaveBeenCalled();
-    });
-
-    it('still updates _hass via set hass when refresh is a number', () => {
-      const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 30 });
-      const hass = makeHass({ 'sensor.nba_lal': makeState('IN', baseAttrs) });
-      card.hass = hass;
-      expect(card._hass).toBe(hass);
-    });
-
-    it('does not render on second set hass call in numeric refresh mode', () => {
-      const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 30 });
-      card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      const renderSpy = vi.spyOn(card, '_render');
-      card.hass = makeHass({ 'sensor.nba_lal': makeState('IN', baseAttrs) });
-      expect(renderSpy).not.toHaveBeenCalled();
-    });
-
     it('clears the old timer when setConfig is called again', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 30 });
-      const firstTimer = card._refreshTimer;
-      card.setConfig({ sections: [nbaSection], refresh: 60 });
-      expect(card._refreshTimer).not.toBe(firstTimer);
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 30_000 });
+      const firstTimer = card._fixedTimer;
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 60_000 });
+      expect(card._fixedTimer).not.toBe(firstTimer);
     });
 
     it('clears the timer on disconnectedCallback', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 30 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 30_000 });
       card.disconnectedCallback();
-      expect(card._refreshTimer).toBeNull();
+      expect(card._fixedTimer).toBeNull();
     });
 
     it('does not render when timer fires before hass is assigned', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 10 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 10_000 });
       const renderSpy = vi.spyOn(card, '_render');
 
       vi.advanceTimersByTime(10_000);
@@ -400,7 +375,7 @@ describe('SportScoreboardCard', () => {
     it('does not fire after disconnectedCallback', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], refresh: 10 });
+      card.setConfig({ sections: [nbaSection], fixedRefresh: 10_000 });
       const renderSpy = vi.spyOn(card, '_render');
 
       card.disconnectedCallback();
@@ -410,6 +385,9 @@ describe('SportScoreboardCard', () => {
   });
 
   describe('subscription', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
     const makeHassWithConnection = (states = {}) => {
       const unsub = vi.fn();
       const connection = { subscribeEvents: vi.fn().mockResolvedValue(unsub) };
@@ -430,24 +408,6 @@ describe('SportScoreboardCard', () => {
       );
     });
 
-    it('does not subscribe in numeric refresh mode', async () => {
-      const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 30 });
-      const { hass, connection } = makeHassWithConnection({});
-      card.hass = hass;
-      await Promise.resolve();
-      expect(connection.subscribeEvents).not.toHaveBeenCalled();
-    });
-
-    it('does not subscribe when refresh is 0 (falsy number, not auto mode)', async () => {
-      const card = makeCard();
-      card.setConfig({ sections: [nbaSection], refresh: 0 });
-      const { hass, connection } = makeHassWithConnection({});
-      card.hass = hass;
-      await Promise.resolve();
-      expect(connection.subscribeEvents).not.toHaveBeenCalled();
-    });
-
     it('stores the unsubscribe function after subscription resolves', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
@@ -459,7 +419,7 @@ describe('SportScoreboardCard', () => {
       expect(card._unsubscribe).toBe(unsub);
     });
 
-    it('WS callback sets _needsRender for a tracked entity', async () => {
+    it('WS callback schedules render via _renderTimer for a tracked entity', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
       const { hass, connection } = makeHassWithConnection({
@@ -469,10 +429,10 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       const callback = connection.subscribeEvents.mock.calls[0][0];
       callback({ data: { entity_id: 'sensor.nba_lal' } });
-      expect(card._needsRender).toBe(true);
+      expect(card._renderTimer).not.toBeNull();
     });
 
-    it('WS callback does not set _needsRender for an untracked entity', async () => {
+    it('WS callback does not schedule render for an untracked entity', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
       const { hass, connection } = makeHassWithConnection({
@@ -482,41 +442,94 @@ describe('SportScoreboardCard', () => {
       await Promise.resolve();
       const callback = connection.subscribeEvents.mock.calls[0][0];
       callback({ data: { entity_id: 'sensor.weather_london' } });
-      expect(card._needsRender).toBe(false);
+      expect(card._renderTimer).toBeNull();
     });
 
-    it('set hass renders and clears _needsRender when flag is set', async () => {
+    it('lazyRefresh timer triggers render after configured delay', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection] });
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 200 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
       card.hass = hass;
       await Promise.resolve();
       const callback = connection.subscribeEvents.mock.calls[0][0];
-      callback({ data: { entity_id: 'sensor.nba_lal' } });
       const renderSpy = vi.spyOn(card, '_render');
-      card.hass = { ...hass };
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      expect(renderSpy).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(200);
       expect(renderSpy).toHaveBeenCalledTimes(1);
-      expect(card._needsRender).toBe(false);
+      expect(card._renderTimer).toBeNull();
     });
 
-    it('_clearSubscription calls unsub, nulls _unsubscribe, clears _needsRender', async () => {
+    it('lazyRefresh: 0 renders immediately without starting a timer', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection] });
-      const { hass, unsub } = makeHassWithConnection({
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 0 });
+      const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
       card.hass = hass;
       await Promise.resolve();
-      card._needsRender = true;
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const renderSpy = vi.spyOn(card, '_render');
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+      expect(card._renderTimer).toBeNull();
+    });
+
+    it('multiple events within lazyRefresh window trigger only one render', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 300 });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const renderSpy = vi.spyOn(card, '_render');
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      vi.advanceTimersByTime(300);
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('second event after lazyRefresh window closes schedules a new render', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], lazyRefresh: 300 });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const renderSpy = vi.spyOn(card, '_render');
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      vi.advanceTimersByTime(300);
+      expect(renderSpy).toHaveBeenCalledTimes(1);
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      vi.advanceTimersByTime(300);
+      expect(renderSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('_clearSubscription calls unsub, nulls _unsubscribe, cancels _renderTimer', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, unsub, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      expect(card._renderTimer).not.toBeNull();
       card._clearSubscription();
       expect(unsub).toHaveBeenCalledTimes(1);
       expect(card._unsubscribe).toBeNull();
-      expect(card._needsRender).toBe(false);
+      expect(card._renderTimer).toBeNull();
     });
 
-    it('stale callback does not set _needsRender after _clearSubscription', async () => {
+    it('stale callback does not schedule render after _clearSubscription', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
       const { hass, connection } = makeHassWithConnection({
@@ -525,9 +538,9 @@ describe('SportScoreboardCard', () => {
       card.hass = hass;
       await Promise.resolve();
       const staleCallback = connection.subscribeEvents.mock.calls[0][0];
-      card._clearSubscription(); // increments gen, resets _needsRender
-      staleCallback({ data: { entity_id: 'sensor.nba_lal' } }); // stale callback fires
-      expect(card._needsRender).toBe(false);
+      card._clearSubscription();
+      staleCallback({ data: { entity_id: 'sensor.nba_lal' } });
+      expect(card._renderTimer).toBeNull();
     });
 
     it('disconnectedCallback unsubscribes from WS', async () => {
