@@ -22,6 +22,7 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
       - run: npm run build:prod
 
       - name: Tag and publish release
