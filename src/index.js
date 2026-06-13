@@ -187,6 +187,7 @@ class SportScoreboardCard extends HTMLElement {
         <style>${CARD_STYLES}${headerOverride}</style>
         <ha-card style="${heightStyle}${debug ? 'position:relative;' : ''}">
           ${debug ? this._debug.html() : ''}
+          ${debug ? `<div id="sc-version" style="position:absolute;top:2px;right:4px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>` : ''}
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>
       `;

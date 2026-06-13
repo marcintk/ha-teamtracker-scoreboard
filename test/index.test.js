@@ -847,6 +847,23 @@ describe('SportScoreboardCard', () => {
       card._render();
       expect(card.shadowRoot.innerHTML).toContain('position:relative');
     });
+
+    it('debug mode shows card version badge', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).toContain('sc-version');
+      expect(card.shadowRoot.innerHTML).toContain('test');
+    });
+
+    it('version badge is absent when debug is false', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).not.toContain('sc-version');
+    });
   });
 
   describe('_showError', () => {
