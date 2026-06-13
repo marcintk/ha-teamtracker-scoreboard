@@ -15,9 +15,9 @@ describe('DebugMetrics', () => {
       const c = d.counts('notifications');
       expect(c.min1).toBe(3);
       expect(c.min5).toBe(3);
+      expect(c.min15).toBe(3);
       expect(c.min30).toBe(3);
       expect(c.hour3).toBe(3);
-      expect(c.hour6).toBe(3);
     });
 
     it('excludes entries outside the 1-minute window', () => {
@@ -28,9 +28,9 @@ describe('DebugMetrics', () => {
       const c = d.counts('notifications');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(2);
+      expect(c.min15).toBe(2);
       expect(c.min30).toBe(2);
       expect(c.hour3).toBe(2);
-      expect(c.hour6).toBe(2);
     });
 
     it('excludes entries outside the 5-minute window', () => {
@@ -41,9 +41,23 @@ describe('DebugMetrics', () => {
       const c = d.counts('notifications');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
+      expect(c.min15).toBe(2);
       expect(c.min30).toBe(2);
       expect(c.hour3).toBe(2);
-      expect(c.hour6).toBe(2);
+    });
+
+    it('excludes entries outside the 15-minute window', () => {
+      const d = new DebugMetrics();
+      d.track('notifications');
+      vi.advanceTimersByTime(900_001);
+      d.track('notifications');
+      const c = d.counts('notifications');
+      expect(c.min1).toBe(1);
+      expect(c.min5).toBe(1);
+      expect(c.min15).toBe(1);
+      expect(c.min30).toBe(2);
+      expect(c.hour1).toBe(2);
+      expect(c.hour3).toBe(2);
     });
 
     it('excludes entries outside the 30-minute window', () => {
@@ -54,10 +68,10 @@ describe('DebugMetrics', () => {
       const c = d.counts('notifications');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
+      expect(c.min15).toBe(1);
       expect(c.min30).toBe(1);
       expect(c.hour1).toBe(2);
       expect(c.hour3).toBe(2);
-      expect(c.hour6).toBe(2);
     });
 
     it('excludes entries outside the 1-hour window', () => {
@@ -68,22 +82,82 @@ describe('DebugMetrics', () => {
       const c = d.counts('notifications');
       expect(c.min1).toBe(1);
       expect(c.min5).toBe(1);
+      expect(c.min15).toBe(1);
       expect(c.min30).toBe(1);
       expect(c.hour1).toBe(1);
       expect(c.hour3).toBe(2);
-      expect(c.hour6).toBe(2);
     });
 
-    it('prunes entries older than 6 hours', () => {
+    it('prunes entries older than 3 hours', () => {
       const d = new DebugMetrics();
       d.track('renders');
-      vi.advanceTimersByTime(21_600_001);
+      vi.advanceTimersByTime(10_800_001);
       d.track('renders');
       expect(d._data.renders).toHaveLength(1);
     });
   });
 
+  describe('tableHtml', () => {
+    it('contains all metric row labels', () => {
+      const d = new DebugMetrics();
+      const h = d.tableHtml();
+      expect(h).toContain('events');
+      expect(h).toContain('accepted');
+      expect(h).toContain('renders');
+    });
+
+    it('contains all column headers', () => {
+      const d = new DebugMetrics();
+      const h = d.tableHtml();
+      expect(h).toContain('1m');
+      expect(h).toContain('5m');
+      expect(h).toContain('15m');
+      expect(h).toContain('30m');
+      expect(h).toContain('1h');
+      expect(h).toContain('3h');
+    });
+
+    it('does not contain 6h column', () => {
+      const d = new DebugMetrics();
+      expect(d.tableHtml()).not.toContain('6h');
+    });
+
+    it('does not contain the outer wrapper positioning styles', () => {
+      const d = new DebugMetrics();
+      expect(d.tableHtml()).not.toContain('position:absolute');
+      expect(d.tableHtml()).not.toContain('pointer-events:none');
+    });
+
+    it('row labels are colored orange', () => {
+      const d = new DebugMetrics();
+      const h = d.tableHtml();
+      expect(h).toContain('color:orange">events');
+      expect(h).toContain('color:orange">accepted');
+      expect(h).toContain('color:orange">renders');
+    });
+
+    it('shows "--" timestamp when no render has been tracked yet', () => {
+      const d = new DebugMetrics();
+      expect(d.tableHtml()).toContain('--');
+    });
+
+    it('shows the last tracked render timestamp', () => {
+      const d = new DebugMetrics();
+      const fixed = new Date('2026-06-13T10:01:46.123Z');
+      vi.setSystemTime(fixed);
+      d.track('renders');
+      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
+      expect(d.tableHtml()).toContain(expected);
+    });
+  });
+
   describe('html', () => {
+    it('wraps tableHtml in a div with id="sc-debug"', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).toContain('id="sc-debug"');
+    });
+
     it('shows "--" timestamp when no render has been tracked yet', () => {
       const d = new DebugMetrics();
       expect(d.html()).toContain('--');
@@ -114,10 +188,15 @@ describe('DebugMetrics', () => {
       const h = d.html();
       expect(h).toContain('1m');
       expect(h).toContain('5m');
+      expect(h).toContain('15m');
       expect(h).toContain('30m');
       expect(h).toContain('1h');
       expect(h).toContain('3h');
-      expect(h).toContain('6h');
+    });
+
+    it('does not contain 6h column', () => {
+      const d = new DebugMetrics();
+      expect(d.html()).not.toContain('6h');
     });
 
     it('contains all metric row labels', () => {

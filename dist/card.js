@@ -1,4 +1,57 @@
 /* ha-teamtracker-scoreboard-card */
+class DebugMetrics {
+  constructor() {
+    this._data = { notifications: [], accepted: [], renders: [] };
+  }
+
+  track(key) {
+    const now = Date.now();
+    const arr = this._data[key];
+    arr.push(now);
+    const cutoff = now - 10_800_000;
+    let i = 0;
+    while (i < arr.length && arr[i] < cutoff) i++;
+    if (i) arr.splice(0, i);
+  }
+
+  counts(key) {
+    const now = Date.now();
+    const arr = this._data[key];
+    return {
+      min1: arr.filter((t) => now - t <= 60_000).length,
+      min5: arr.filter((t) => now - t <= 300_000).length,
+      min15: arr.filter((t) => now - t <= 900_000).length,
+      min30: arr.filter((t) => now - t <= 1_800_000).length,
+      hour1: arr.filter((t) => now - t <= 3_600_000).length,
+      hour3: arr.length,
+    };
+  }
+
+  tableHtml() {
+    const cell = (n) => `<td style="padding-right:8px;text-align:right">${n}</td>`;
+    const hcell = (label) =>
+      `<td style="padding-right:8px;text-align:right;color:orange">${label}</td>`;
+    const row = (label, key) => {
+      const c = this.counts(key);
+      return `<tr><td style="padding-right:10px;color:orange">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min15)}${cell(c.min30)}${cell(c.hour1)}${cell(c.hour3)}</tr>`;
+    };
+    const renders = this._data.renders;
+    const pad = (n, w = 2) => String(n).padStart(w, '0');
+    const ts = renders.length
+      ? (() => {
+          const d = new Date(renders.at(-1));
+          return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
+        })()
+      : '--';
+    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:red">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
+    return `<table style="border-collapse:collapse;width:100%">${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table>`;
+  }
+
+  html() {
+    return `<div id="sc-debug" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:11px;line-height:1;padding:2px 6px;pointer-events:none;">${this.tableHtml()}</div>`;
+  }
+}
+
 const VALID_STATES = new Set(['PRE', 'IN', 'POST', 'BYE']);
 
 function esc(str) {
@@ -106,12 +159,12 @@ function messageHtml(gs, attr, colors = {}) {
       let subHtml = '';
       if (raw) {
         if (raw.length > 50) {
-          subHtml = `<span class="msg-sub tv-tooltip" data-tooltip="${esc(raw)}">${esc(raw.substring(0, 50) + '>')}</span>`;
+          subHtml = `<span class="msg-sub tv-tooltip" data-tooltip="${esc(raw)}">${esc(`${raw.substring(0, 50)}>`)}</span>`;
         } else {
           subHtml = `<span class="msg-sub">${esc(raw)}</span>`;
         }
       }
-      return `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>` + subHtml;
+      return `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>${subHtml}`;
     }
     default: {
       const clock = esc(attr.clock ?? '');
@@ -446,6 +499,38 @@ const CARD_STYLES = `
   }
 `;
 
+class SubscriptionManager {
+  constructor() {
+    this._gen = 0;
+    this._unsub = null;
+  }
+
+  subscribe(connection, trackedIds, onMatch) {
+    if (!connection?.subscribeEvents) return;
+    const gen = this._gen;
+    connection
+      .subscribeEvents((event) => {
+        if (this._gen === gen && trackedIds?.has(event.data.entity_id)) {
+          onMatch();
+        }
+      }, 'state_changed')
+      .then((unsub) => {
+        if (this._gen === gen) {
+          this._unsub = unsub;
+        } else {
+          unsub();
+        }
+      })
+      .catch(() => {});
+  }
+
+  clear() {
+    this._gen++;
+    this._unsub?.();
+    this._unsub = null;
+  }
+}
+
 class SportScoreboardCard extends HTMLElement {
   constructor() {
     super();
@@ -455,9 +540,8 @@ class SportScoreboardCard extends HTMLElement {
     this._fixedTimer = null;
     this._renderTimer = null;
     this._trackedIds = null;
-    this._unsubscribe = null;
-    this._subscribeGen = 0;
-    this._metrics = { notifications: [], accepted: [], renders: [] };
+    this._subscription = new SubscriptionManager();
+    this._debug = new DebugMetrics();
   }
 
   setConfig(config) {
@@ -488,7 +572,7 @@ class SportScoreboardCard extends HTMLElement {
       return;
     }
 
-    if (!this._unsubscribe && this._hasRelevantChange(hass, prevHass) && this._config) {
+    if (!this._subscription._unsub && this._hasRelevantChange(hass, prevHass) && this._config) {
       this._scheduleRender();
     }
   }
@@ -500,43 +584,9 @@ class SportScoreboardCard extends HTMLElement {
     };
   }
 
-  _trackMetric(key) {
-    const now = Date.now();
-    const arr = this._metrics[key];
-    arr.push(now);
-    const cutoff = now - 21_600_000;
-    let i = 0;
-    while (i < arr.length && arr[i] < cutoff) i++;
-    if (i) arr.splice(0, i);
-  }
-
-  _metricCounts(key) {
-    const now = Date.now();
-    const arr = this._metrics[key];
-    return {
-      min1: arr.filter((t) => now - t <= 60_000).length,
-      min5: arr.filter((t) => now - t <= 300_000).length,
-      min30: arr.filter((t) => now - t <= 1_800_000).length,
-      hour3: arr.filter((t) => now - t <= 10_800_000).length,
-      hour6: arr.length,
-    };
-  }
-
-  _debugHtml() {
-    const cell = (n) => `<td style="padding-right:8px;text-align:right">${n}</td>`;
-    const row = (label, key) => {
-      const c = this._metricCounts(key);
-      return `<tr><td style="padding-right:10px;color:#999">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min30)}${cell(c.hour3)}${cell(c.hour6)}</tr>`;
-    };
-    const ts = this._metrics.renders.length
-      ? new Date(this._metrics.renders.at(-1)).toISOString().slice(11, 23)
-      : '--';
-    return `<div style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:9px;line-height:1.3;padding:2px 6px;pointer-events:none;"><table style="border-collapse:collapse;width:100%"><tr style="color:#555;font-size:8px"><td style="padding-right:10px">${ts}</td><td style="padding-right:8px;text-align:right">1m</td><td style="padding-right:8px;text-align:right">5m</td><td style="padding-right:8px;text-align:right">30m</td><td style="padding-right:8px;text-align:right">3h</td><td style="text-align:right">6h</td></tr>${row('events', 'notifications')}${row('accepted', 'accepted')}${row('renders', 'renders')}</table></div>`;
-  }
-
   _scheduleRender() {
     if (this._renderTimer) return;
-    if (this._config?.debug) this._trackMetric('accepted');
+    if (this._config?.debug) this._debug.track('accepted');
     const { lazyMs } = this._getRefreshConfig();
     if (lazyMs === 0) {
       this._render();
@@ -556,35 +606,29 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _subscribe() {
-    if (!this._config || !this._hass?.connection?.subscribeEvents) return;
-
-    const gen = this._subscribeGen;
-    this._hass.connection
-      .subscribeEvents((event) => {
-        if (this._subscribeGen === gen && this._trackedIds?.has(event.data.entity_id)) {
-          if (this._config?.debug) this._trackMetric('notifications');
-          this._scheduleRender();
-        }
-      }, 'state_changed')
-      .then((unsub) => {
-        if (this._subscribeGen === gen) {
-          this._unsubscribe = unsub;
-        } else {
-          unsub();
-        }
-      })
-      .catch(() => {});
+    if (!this._config || !this._hass?.connection) return;
+    this._subscription.subscribe(this._hass.connection, this._trackedIds, () => {
+      if (this._config?.debug) this._debug.track('notifications');
+      this._scheduleRender();
+    });
   }
 
   _clearSubscription() {
-    this._subscribeGen++;
-    this._unsubscribe?.();
-    this._unsubscribe = null;
+    this._subscription.clear();
     this._cancelRenderTimer();
+  }
+
+  _updateDebugOverlay() {
+    const overlay = this.shadowRoot?.querySelector('#sc-debug');
+    if (overlay) overlay.innerHTML = this._debug.tableHtml();
   }
 
   _startFixedTimer() {
     this._stopFixedTimer();
+    if (this._config?.debug) {
+      this._fixedTimer = setInterval(() => this._updateDebugOverlay(), 1000);
+      return;
+    }
     const { fixedMs } = this._getRefreshConfig();
     if (fixedMs > 0) {
       this._fixedTimer = setInterval(() => {
@@ -619,7 +663,7 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _render() {
-    if (this._config?.debug) this._trackMetric('renders');
+    if (this._config?.debug) this._debug.track('renders');
     try {
       const { sections, height, colors = {}, debug } = this._config;
       const states = this._hass.states;
@@ -641,7 +685,7 @@ class SportScoreboardCard extends HTMLElement {
       this.shadowRoot.innerHTML = `
         <style>${CARD_STYLES}${headerOverride}</style>
         <ha-card style="${heightStyle}${debug ? 'position:relative;' : ''}">
-          ${debug ? this._debugHtml() : ''}
+          ${debug ? this._debug.html() : ''}
           ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
         </ha-card>
       `;

@@ -703,10 +703,10 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot.innerHTML).toContain('accepted');
       expect(card.shadowRoot.innerHTML).toContain('renders');
       expect(card.shadowRoot.innerHTML).toContain('5m');
+      expect(card.shadowRoot.innerHTML).toContain('15m');
       expect(card.shadowRoot.innerHTML).toContain('30m');
       expect(card.shadowRoot.innerHTML).toContain('1h');
       expect(card.shadowRoot.innerHTML).toContain('3h');
-      expect(card.shadowRoot.innerHTML).toContain('6h');
     });
 
     it('debug pane is positioned at the bottom', () => {
@@ -727,6 +727,49 @@ describe('SportScoreboardCard', () => {
       const pad = (n, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(card.shadowRoot.innerHTML).toContain(expected);
+    });
+
+    it('in debug mode fixedTimer fires every 1 second regardless of fixedRefresh', () => {
+      const card = makeCard();
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 300_000 });
+      const updateSpy = vi.spyOn(card, '_updateDebugOverlay');
+      vi.advanceTimersByTime(1_000);
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(1_000);
+      expect(updateSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('in debug mode fixedTimer calls _updateDebugOverlay not _render', () => {
+      const card = makeCard();
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card.setConfig({ sections: [nbaSection], debug: true });
+      const renderSpy = vi.spyOn(card, '_render');
+      const updateSpy = vi.spyOn(card, '_updateDebugOverlay');
+      vi.advanceTimersByTime(1_000);
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      expect(renderSpy).not.toHaveBeenCalled();
+    });
+
+    it('_updateDebugOverlay updates #sc-debug element innerHTML when present', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      const overlay = card.shadowRoot.querySelector('#sc-debug');
+      expect(overlay).not.toBeNull();
+      const before = overlay.innerHTML;
+      card._debug.track('renders');
+      card._updateDebugOverlay();
+      expect(overlay.innerHTML).not.toBe(before);
+    });
+
+    it('_updateDebugOverlay does nothing when #sc-debug is not in the DOM', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(() => card._updateDebugOverlay()).not.toThrow();
     });
 
     it('debug pane is absent when debug is not set', () => {
