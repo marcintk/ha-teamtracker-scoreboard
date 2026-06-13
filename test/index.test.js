@@ -317,6 +317,49 @@ describe('SportScoreboardCard', () => {
       card._render();
       expect(card.shadowRoot.innerHTML).toContain('error');
     });
+
+    it('initializes _lastBody to null', () => {
+      const card = makeCard();
+      expect(card._lastBody).toBeNull();
+    });
+
+    it('sets _lastBody after first render', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card._lastBody).not.toBeNull();
+    });
+
+    it('skips DOM write on second render when body is unchanged', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render(); // first render — writes
+      card._render(); // identical body — must not write again
+      expect(card._debug._data.renders).toHaveLength(1);
+    });
+
+    it('writes DOM again when body changes after a cache hit', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render(); // writes (renders=1)
+      card._render(); // skipped (renders=1)
+      card._hass = makeHass({
+        'sensor.nba_lal': makeState('IN', { ...baseAttrs, team_score: '5' }),
+      });
+      card._render(); // different body — must write (renders=2)
+      expect(card._debug._data.renders).toHaveLength(2);
+    });
+
+    it('setConfig resets _lastBody so next render always writes', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._lastBody = 'stale-cache';
+      card.setConfig({ sections: [nbaSection] });
+      expect(card._lastBody).toBeNull();
+    });
   });
 
   describe('refresh', () => {

@@ -16,6 +16,7 @@ class SportScoreboardCard extends HTMLElement {
     this._trackedIds = null;
     this._trackedByPrefix = null;
     this._stateKeyCount = 0;
+    this._lastBody = null;
     this._subscription = new SubscriptionManager();
     this._debug = new DebugMetrics();
   }
@@ -26,6 +27,7 @@ class SportScoreboardCard extends HTMLElement {
     this._trackedIds = null;
     this._trackedByPrefix = null;
     this._stateKeyCount = 0;
+    this._lastBody = null;
     this._startFixedTimer();
     if (this._hass) {
       this._render();
@@ -156,7 +158,6 @@ class SportScoreboardCard extends HTMLElement {
   }
 
   _render() {
-    if (this._config?.debug) this._debug.track('renders');
     try {
       const { sections, height, colors = {}, debug } = this._config;
       const states = this._hass.states;
@@ -170,6 +171,11 @@ class SportScoreboardCard extends HTMLElement {
       const body = sections
         .map((s) => sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix), colors))
         .join('');
+
+      if (body === this._lastBody) return;
+      this._lastBody = body;
+
+      if (debug) this._debug.track('renders');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
         : '';
