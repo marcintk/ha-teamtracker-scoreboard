@@ -31,6 +31,12 @@ function makeCard() {
   return document.createElement('ha-teamtracker-scoreboard-card');
 }
 
+function makeHassWithConnection(states = {}) {
+  const unsub = vi.fn();
+  const connection = { subscribeEvents: vi.fn().mockResolvedValue(unsub) };
+  return { hass: { states, connection }, unsub, connection };
+}
+
 describe('SportScoreboardCard', () => {
   describe('registration', () => {
     it('registers as a custom element', () => {
@@ -388,12 +394,6 @@ describe('SportScoreboardCard', () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
 
-    const makeHassWithConnection = (states = {}) => {
-      const unsub = vi.fn();
-      const connection = { subscribeEvents: vi.fn().mockResolvedValue(unsub) };
-      return { hass: { states, connection }, unsub, connection };
-    };
-
     it('calls subscribeEvents on first hass assignment in auto mode', async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
@@ -626,6 +626,129 @@ describe('SportScoreboardCard', () => {
 
       expect(unsub1).toHaveBeenCalledTimes(1);
       expect(conn2.subscribeEvents).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('debug', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it('_trackMetric records timestamps and _metricCounts returns correct window counts', () => {
+      const card = makeCard();
+      card._trackMetric('notifications');
+      card._trackMetric('notifications');
+      vi.advanceTimersByTime(30_000);
+      card._trackMetric('notifications');
+      const c = card._metricCounts('notifications');
+      expect(c.min).toBe(3);
+      expect(c.hour).toBe(3);
+      expect(c.day).toBe(3);
+    });
+
+    it('_metricCounts excludes entries outside the time window', () => {
+      const card = makeCard();
+      card._trackMetric('notifications');
+      vi.advanceTimersByTime(61_000);
+      card._trackMetric('notifications');
+      const c = card._metricCounts('notifications');
+      expect(c.min).toBe(1);
+      expect(c.hour).toBe(2);
+      expect(c.day).toBe(2);
+    });
+
+    it('_trackMetric prunes entries older than 24 hours', () => {
+      const card = makeCard();
+      card._trackMetric('renders');
+      vi.advanceTimersByTime(86_400_001);
+      card._trackMetric('renders');
+      expect(card._metrics.renders).toHaveLength(1);
+    });
+
+    it('WS event increments notifications metric when debug is true', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection], debug: true });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      expect(card._metrics.notifications).toHaveLength(1);
+    });
+
+    it('WS event does not increment notifications when debug is false', async () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      const { hass, connection } = makeHassWithConnection({
+        'sensor.nba_lal': makeState('PRE', baseAttrs),
+      });
+      card.hass = hass;
+      await Promise.resolve();
+      const callback = connection.subscribeEvents.mock.calls[0][0];
+      callback({ data: { entity_id: 'sensor.nba_lal' } });
+      expect(card._metrics.notifications).toHaveLength(0);
+    });
+
+    it('_scheduleRender increments accepted when debug is true and no timer is active', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 500 };
+      card._hass = makeHass({});
+      card._trackedIds = new Set();
+      card._scheduleRender();
+      expect(card._metrics.accepted).toHaveLength(1);
+    });
+
+    it('_scheduleRender does not increment accepted when timer is already active', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 500 };
+      card._hass = makeHass({});
+      card._trackedIds = new Set();
+      card._scheduleRender();
+      card._scheduleRender(); // dropped — timer active
+      expect(card._metrics.accepted).toHaveLength(1);
+    });
+
+    it('_render increments renders metric when debug is true', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card._metrics.renders).toHaveLength(1);
+    });
+
+    it('_render does not increment renders when debug is false', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card._metrics.renders).toHaveLength(0);
+    });
+
+    it('debug pane is present in rendered HTML when debug is true', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).toContain('notif');
+      expect(card.shadowRoot.innerHTML).toContain('accept');
+      expect(card.shadowRoot.innerHTML).toContain('render');
+    });
+
+    it('debug pane is absent when debug is not set', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).not.toContain('notif');
+    });
+
+    it('ha-card gets position:relative when debug is true', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot.innerHTML).toContain('position:relative');
     });
   });
 
