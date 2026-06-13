@@ -640,18 +640,32 @@ describe('SportScoreboardCard', () => {
       vi.advanceTimersByTime(30_000);
       card._trackMetric('notifications');
       const c = card._metricCounts('notifications');
-      expect(c.min).toBe(3);
+      expect(c.min1).toBe(3);
+      expect(c.min5).toBe(3);
       expect(c.hour).toBe(3);
       expect(c.day).toBe(3);
     });
 
-    it('_metricCounts excludes entries outside the time window', () => {
+    it('_metricCounts excludes entries outside the 1-minute window', () => {
       const card = makeCard();
       card._trackMetric('notifications');
       vi.advanceTimersByTime(61_000);
       card._trackMetric('notifications');
       const c = card._metricCounts('notifications');
-      expect(c.min).toBe(1);
+      expect(c.min1).toBe(1);
+      expect(c.min5).toBe(2);
+      expect(c.hour).toBe(2);
+      expect(c.day).toBe(2);
+    });
+
+    it('_metricCounts excludes entries outside the 5-minute window', () => {
+      const card = makeCard();
+      card._trackMetric('notifications');
+      vi.advanceTimersByTime(301_000);
+      card._trackMetric('notifications');
+      const c = card._metricCounts('notifications');
+      expect(c.min1).toBe(1);
+      expect(c.min5).toBe(1);
       expect(c.hour).toBe(2);
       expect(c.day).toBe(2);
     });
@@ -730,9 +744,10 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('notif');
-      expect(card.shadowRoot.innerHTML).toContain('accept');
-      expect(card.shadowRoot.innerHTML).toContain('render');
+      expect(card.shadowRoot.innerHTML).toContain('events');
+      expect(card.shadowRoot.innerHTML).toContain('accepted');
+      expect(card.shadowRoot.innerHTML).toContain('renders');
+      expect(card.shadowRoot.innerHTML).toContain('5m');
     });
 
     it('debug pane is absent when debug is not set', () => {
@@ -740,7 +755,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).not.toContain('notif');
+      expect(card.shadowRoot.innerHTML).not.toContain('pointer-events:none');
     });
 
     it('ha-card gets position:relative when debug is true', () => {
