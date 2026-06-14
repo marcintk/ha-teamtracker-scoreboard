@@ -257,16 +257,51 @@ describe('tvHtml', () => {
 });
 
 describe('messageHtml', () => {
-  it('shows kickoff and odds for PRE', () => {
+  it('shows kickoff and odds for PRE when no location', () => {
     const html = messageHtml('PRE', { kickoff_in: '2h', odds: 'LAL -3.5' });
     expect(html).toContain('2h');
     expect(html).toContain('LAL -3.5');
   });
 
-  it('shows only kickoff for PRE when no odds or series summary', () => {
+  it('shows only kickoff for PRE when no odds or location', () => {
     const html = messageHtml('PRE', { kickoff_in: 'Tomorrow' });
     expect(html).toContain('Tomorrow');
     expect(html).not.toContain('msg-sub');
+  });
+
+  it('shows city and odds as sub for PRE when both location and odds present', () => {
+    const html = messageHtml('PRE', {
+      kickoff_in: '2h',
+      location: 'Houston, Texas, USA',
+      odds: 'LAL -3.5',
+    });
+    expect(html).toContain('Houston, LAL -3.5');
+  });
+
+  it('extracts only city (text before first comma) from full location string', () => {
+    const html = messageHtml('PRE', { location: 'San Antonio, TX', odds: 'HOU -7' });
+    expect(html).toContain('San Antonio, HOU -7');
+    expect(html).not.toContain('Texas');
+  });
+
+  it('shows only city in sub for PRE when odds is absent', () => {
+    const html = messageHtml('PRE', { location: 'Dallas, Texas, USA' });
+    expect(html).toContain('msg-sub');
+    expect(html).toContain('Dallas');
+    expect(html).not.toContain('Texas');
+  });
+
+  it('shows only odds in sub for PRE when location is absent', () => {
+    const html = messageHtml('PRE', { odds: 'BOS -2' });
+    expect(html).toContain('msg-sub');
+    expect(html).toContain('BOS -2');
+  });
+
+  it('escapes HTML in location city and odds', () => {
+    const html = messageHtml('PRE', { location: '<city>, State', odds: '<b>odds</b>' });
+    expect(html).not.toContain('<city>');
+    expect(html).not.toContain('<b>');
+    expect(html).toContain('&lt;city&gt;');
   });
 
   it('shows clock and last_play for IN', () => {

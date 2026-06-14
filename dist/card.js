@@ -1,5 +1,5 @@
-/* ha-teamtracker-scoreboard-card v1.0.0 */
-const __CARD_VERSION__ = '1.0.0';
+/* ha-teamtracker-scoreboard-card v1.0.27 */
+const __CARD_VERSION__ = '1.0.27';
 
 class DebugMetrics {
   constructor() {
@@ -20,14 +20,16 @@ class DebugMetrics {
   counts(key) {
     const now = Date.now();
     const arr = this._data[key];
-    return {
-      min1: arr.filter((t) => now - t <= 60_000).length,
-      min5: arr.filter((t) => now - t <= 300_000).length,
-      min15: arr.filter((t) => now - t <= 900_000).length,
-      min30: arr.filter((t) => now - t <= 1_800_000).length,
-      hour1: arr.filter((t) => now - t <= 3_600_000).length,
-      hour3: arr.length,
-    };
+    const windows = [60_000, 300_000, 900_000, 1_800_000, 3_600_000];
+    const c = [0, 0, 0, 0, 0];
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const age = now - arr[i];
+      if (age > 3_600_000) break; // arr is oldest→newest; past 1h, no further entry qualifies
+      for (let w = 0; w < 5; w++) {
+        if (age <= windows[w]) c[w]++;
+      }
+    }
+    return { min1: c[0], min5: c[1], min15: c[2], min30: c[3], hour1: c[4], hour3: arr.length };
   }
 
   _timeAgo(ms) {
@@ -159,7 +161,13 @@ function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
     case 'PRE': {
       const kickoff = esc(attr.kickoff_in ?? '');
-      const sub = esc(attr.series_summary ?? attr.odds ?? '');
+      const city = esc(
+        String(attr.location ?? '')
+          .split(',')[0]
+          .trim()
+      );
+      const odds = esc(attr.odds ?? '');
+      const sub = city && odds ? `${city}, ${odds}` : city || odds;
       return (
         `<span style="color:darkgray">${kickoff}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
@@ -648,7 +656,7 @@ class SportScoreboardCard extends HTMLElement {
       }, fixedMs);
     }
     if (this._config?.debug) {
-      this._debugTimer = setInterval(() => this._updateDebugOverlay(), 1000);
+      this._debugTimer = setInterval(() => this._updateDebugOverlay(), 5000);
     }
   }
 
