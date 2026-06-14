@@ -83,7 +83,13 @@ export function messageHtml(gs, attr, colors = {}) {
   switch (gs) {
     case 'PRE': {
       const kickoff = esc(attr.kickoff_in ?? '');
-      const sub = esc(attr.series_summary ?? attr.odds ?? '');
+      const city = esc(
+        String(attr.location ?? '')
+          .split(',')[0]
+          .trim()
+      );
+      const odds = esc(attr.odds ?? '');
+      const sub = city && odds ? `${city}, ${odds}` : city || odds;
       return (
         `<span style="color:darkgray">${kickoff}</span>` +
         (sub ? `<span class="msg-sub">${sub}</span>` : '')
