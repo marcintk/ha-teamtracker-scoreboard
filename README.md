@@ -33,12 +33,13 @@ league files.
 
 ### Manual
 
-1. Copy `dist/card.js` to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder
-   if needed)
-2. In Home Assistant → Settings → Dashboards → Resources → **Add resource**
+1. Download `card.js` from the
+   [latest release](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases/latest)
+2. Copy it to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder if needed)
+3. In Home Assistant → Settings → Dashboards → Resources → **Add resource**
    - URL: `/local/ha-teamtracker-scoreboard-card/card.js`
    - Resource type: **JavaScript module**
-3. Reload your browser
+4. Reload your browser
 
 ## Configuration
 

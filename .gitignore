@@ -2,3 +2,4 @@
 .serena/
 node_modules/
 coverage/
+dist/

@@ -11,8 +11,8 @@ npm run check          # biome lint + format (src/ and test/)
 npm run format:md      # prettier for markdown files
 ```
 
-Source is in `src/`, built output is `dist/card.js`. The dist file is committed so HACS can serve it
-directly without a CI build step.
+Source is in `src/`, built output is `dist/card.js`. The dist file is **not committed** — it is
+built by CI on every release and attached as a GitHub Release asset that HACS downloads.
 
 ## Module Map
 
@@ -73,9 +73,9 @@ coverage drops below that.
 - **Verify docs before every PR.** Before opening a PR, check that `README.md` and `CLAUDE.md`
   reflect any behavior changes made in that session — updated option defaults, new config keys,
   changed architecture, new modules. Never open a PR with stale docs.
-- **Release cadence.** After three to five merged PRs, recommend cutting a release via **Actions →
-  Publish Release → Run workflow**. Never trigger the release workflow autonomously — propose the
-  next version number and wait for explicit user approval.
+- **Release cadence.** After three to five merged PRs, recommend cutting a release. Never trigger
+  the release workflow autonomously — propose the next version number and wait for explicit user
+  approval before pushing the tag.
 
 **Why:** Clean, reviewable history and no unilateral publishing actions. Splitting concerns keeps
 PRs easy to revert independently. Docs that lag behind the code require readers to diff both to
@@ -85,7 +85,8 @@ understand what the card actually does.
 PRs. Never run `git push` or `gh pr create` until explicitly asked for that session. Immediately
 before running `gh pr create`, scan README.md options tables and CLAUDE.md architecture notes for
 anything that no longer matches the implementation. Track merged PR count; after 3–5, proactively
-suggest a release.
+suggest a release. To release, propose a version tag (`git tag vX.Y.Z && git push origin vX.Y.Z`)
+and wait for the user to confirm before running it.
 
 ## TDD Workflow
 
@@ -100,5 +101,16 @@ behaviour — red-first keeps tests honest.
 
 ## Releasing
 
-Go to **Actions → Publish Release → Run workflow**, enter the version number (e.g. `1.0.1`). The
-workflow builds `dist/card.js`, tags the release, and publishes a GitHub Release that HACS picks up.
+Push a semver tag — the release workflow fires automatically:
+
+```bash
+git tag v1.0.32
+git push origin v1.0.32
+```
+
+The workflow runs `npm test`, builds `dist/card.js` with the version injected from the tag, and
+publishes a GitHub Release with `dist/card.js` as an asset that HACS downloads.
+
+`package.json` version is a permanent `0.0.0-dev` placeholder and is never changed. The tag is the
+single source of truth for the version. Dev builds (`npm run build`) stamp the bundle with
+`0.0.0-dev`; release builds stamp it with the real version via the `VERSION` env var.
