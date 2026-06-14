@@ -90,10 +90,10 @@ describe('DebugMetrics', () => {
 
     it('prunes entries older than 3 hours', () => {
       const d = new DebugMetrics();
-      d.track('renders');
+      d.track('rendered');
       vi.advanceTimersByTime(10_800_001);
-      d.track('renders');
-      expect(d._data.renders).toHaveLength(1);
+      d.track('rendered');
+      expect(d._data.rendered).toHaveLength(1);
     });
 
     it('counts all windows simultaneously when entries span multiple windows', () => {
@@ -118,8 +118,8 @@ describe('DebugMetrics', () => {
       const d = new DebugMetrics();
       const h = d.tableHtml();
       expect(h).toContain('events');
-      expect(h).toContain('accepted');
-      expect(h).toContain('renders');
+      expect(h).toContain('filtered');
+      expect(h).toContain('rendered');
     });
 
     it('contains all column headers', () => {
@@ -148,8 +148,8 @@ describe('DebugMetrics', () => {
       const d = new DebugMetrics();
       const h = d.tableHtml();
       expect(h).toContain('color:orange">events');
-      expect(h).toContain('color:orange">accepted');
-      expect(h).toContain('color:orange">renders');
+      expect(h).toContain('color:orange">filtered');
+      expect(h).toContain('color:orange">rendered');
     });
 
     it('shows "--" timestamp when no render has been tracked yet', () => {
@@ -161,7 +161,7 @@ describe('DebugMetrics', () => {
       const d = new DebugMetrics();
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
-      d.track('renders');
+      d.track('rendered');
       const pad = (n, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(d.tableHtml()).toContain(expected);
@@ -170,7 +170,7 @@ describe('DebugMetrics', () => {
     it('appends "(Xs ago)" when render was seconds ago', () => {
       const d = new DebugMetrics();
       vi.setSystemTime(new Date('2026-06-13T10:00:00.000Z'));
-      d.track('renders');
+      d.track('rendered');
       vi.advanceTimersByTime(10_000);
       expect(d.tableHtml()).toContain('(10s ago)');
     });
@@ -178,7 +178,7 @@ describe('DebugMetrics', () => {
     it('appends "(Xm ago)" when render was minutes ago', () => {
       const d = new DebugMetrics();
       vi.setSystemTime(new Date('2026-06-13T10:00:00.000Z'));
-      d.track('renders');
+      d.track('rendered');
       vi.advanceTimersByTime(120_000);
       expect(d.tableHtml()).toContain('(2m ago)');
     });
@@ -186,7 +186,7 @@ describe('DebugMetrics', () => {
     it('appends "(Xh ago)" when render was hours ago', () => {
       const d = new DebugMetrics();
       vi.setSystemTime(new Date('2026-06-13T10:00:00.000Z'));
-      d.track('renders');
+      d.track('rendered');
       vi.advanceTimersByTime(7_200_000);
       expect(d.tableHtml()).toContain('(2h ago)');
     });
@@ -249,7 +249,7 @@ describe('DebugMetrics', () => {
       const d = new DebugMetrics();
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
-      d.track('renders');
+      d.track('rendered');
       const pad = (n, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(d.html()).toContain(expected);
@@ -259,7 +259,7 @@ describe('DebugMetrics', () => {
       const d = new DebugMetrics();
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
-      d.track('renders');
+      d.track('rendered');
       const pad = (n, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(d.html()).toContain(expected);
@@ -285,8 +285,8 @@ describe('DebugMetrics', () => {
       const d = new DebugMetrics();
       const h = d.html();
       expect(h).toContain('events');
-      expect(h).toContain('accepted');
-      expect(h).toContain('renders');
+      expect(h).toContain('filtered');
+      expect(h).toContain('rendered');
     });
 
     it('is positioned at the bottom', () => {
@@ -327,14 +327,14 @@ describe('DebugMetrics', () => {
     it('data rows appear before the column header row', () => {
       const d = new DebugMetrics();
       const h = d.html();
-      expect(h.indexOf('renders')).toBeLessThan(h.indexOf('1m'));
+      expect(h.indexOf('rendered')).toBeLessThan(h.indexOf('1m'));
     });
 
     it('timestamp is the first cell of the footer row, before the column labels', () => {
       const d = new DebugMetrics();
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
-      d.track('renders');
+      d.track('rendered');
       const pad = (n, w = 2) => String(n).padStart(w, '0');
       const ts = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       const h = d.html();

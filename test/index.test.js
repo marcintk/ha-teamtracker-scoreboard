@@ -337,7 +337,7 @@ describe('SportScoreboardCard', () => {
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render(); // first render — writes
       card._render(); // identical body — must not write again
-      expect(card._debug._data.renders).toHaveLength(1);
+      expect(card._debug._data.rendered).toHaveLength(1);
     });
 
     it('writes DOM again when body changes after a cache hit', () => {
@@ -350,7 +350,7 @@ describe('SportScoreboardCard', () => {
         'sensor.nba_lal': makeState('IN', { ...baseAttrs, team_score: '5' }),
       });
       card._render(); // different body — must write (renders=2)
-      expect(card._debug._data.renders).toHaveLength(2);
+      expect(card._debug._data.rendered).toHaveLength(2);
     });
 
     it('setConfig resets _lastBody so next render always writes', () => {
@@ -702,39 +702,39 @@ describe('SportScoreboardCard', () => {
       expect(card._debug._data.events).toHaveLength(0);
     });
 
-    it('_scheduleRender increments accepted when debug is true and no timer is active', () => {
+    it('_scheduleRender increments filtered when debug is true and no timer is active', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], debug: true, lazyRefresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
-      expect(card._debug._data.accepted).toHaveLength(1);
+      expect(card._debug._data.filtered).toHaveLength(1);
     });
 
-    it('_scheduleRender does not increment accepted when timer is already active', () => {
+    it('_scheduleRender does not increment filtered when timer is already active', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], debug: true, lazyRefresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
       card._scheduleRender(); // dropped — timer active
-      expect(card._debug._data.accepted).toHaveLength(1);
+      expect(card._debug._data.filtered).toHaveLength(1);
     });
 
-    it('_render increments renders metric when debug is true', () => {
+    it('_render increments rendered metric when debug is true', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card._debug._data.renders).toHaveLength(1);
+      expect(card._debug._data.rendered).toHaveLength(1);
     });
 
-    it('_render does not increment renders when debug is false', () => {
+    it('_render does not increment rendered when debug is false', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card._debug._data.renders).toHaveLength(0);
+      expect(card._debug._data.rendered).toHaveLength(0);
     });
 
     it('debug pane is present in rendered HTML when debug is true', () => {
@@ -743,8 +743,8 @@ describe('SportScoreboardCard', () => {
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
       expect(card.shadowRoot.innerHTML).toContain('events');
-      expect(card.shadowRoot.innerHTML).toContain('accepted');
-      expect(card.shadowRoot.innerHTML).toContain('renders');
+      expect(card.shadowRoot.innerHTML).toContain('filtered');
+      expect(card.shadowRoot.innerHTML).toContain('rendered');
       expect(card.shadowRoot.innerHTML).toContain('5m');
       expect(card.shadowRoot.innerHTML).toContain('15m');
       expect(card.shadowRoot.innerHTML).toContain('30m');
@@ -821,7 +821,7 @@ describe('SportScoreboardCard', () => {
       const overlay = card.shadowRoot.querySelector('#sc-debug');
       expect(overlay).not.toBeNull();
       const before = overlay.innerHTML;
-      card._debug.track('renders');
+      card._debug.track('rendered');
       card._updateDebugOverlay();
       expect(overlay.innerHTML).not.toBe(before);
     });
