@@ -327,6 +327,21 @@ describe('messageHtml', () => {
     expect(html).not.toContain(`>${'A'.repeat(51)}<`);
   });
 
+  it('inserts newlines before soccer minute markers in long last_play tooltip', () => {
+    const plays = "GER 66.9%, CUW 33.1%; 6' Goal: Nmecha 21' Goal: Other Player";
+    const html = messageHtml('IN', { clock: "90'", last_play: plays });
+    expect(html).toContain('tv-tooltip');
+    expect(html).toContain(";\n6'");
+    expect(html).toContain("\n21'");
+  });
+
+  it('inserts newlines before injury-time minute markers in tooltip', () => {
+    const plays = "GER 1-0 CUW; 45'+5' Penalty - Scored: Havertz 90'+3' Goal: Musiala";
+    const html = messageHtml('IN', { clock: "90'+3'", last_play: plays });
+    expect(html).toContain(";\n45'+5'");
+    expect(html).toContain("\n90'+3'");
+  });
+
   it('does not truncate last_play of exactly 50 chars', () => {
     const exact = 'B'.repeat(50);
     const html = messageHtml('IN', { clock: 'Q2 1:00', last_play: exact });
