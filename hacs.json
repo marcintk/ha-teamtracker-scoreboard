@@ -1,5 +1,5 @@
 {
   "name": "TeamTracker Scoreboard Card",
   "render_readme": true,
-  "filename": "dist/card.js"
+  "filename": "card.js"
 }
