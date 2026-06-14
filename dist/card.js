@@ -1,9 +1,9 @@
-/* ha-teamtracker-scoreboard-card v1.0.27 */
-const __CARD_VERSION__ = '1.0.27';
+/* ha-teamtracker-scoreboard-card v1.0.31 */
+const __CARD_VERSION__ = '1.0.31';
 
 class DebugMetrics {
   constructor() {
-    this._data = { events: [], accepted: [], renders: [] };
+    this._data = { events: [], filtered: [], rendered: [] };
   }
 
   track(key) {
@@ -46,11 +46,11 @@ class DebugMetrics {
       const c = this.counts(key);
       return `<tr><td style="padding-right:10px;color:orange">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min15)}${cell(c.min30)}${cell(c.hour1)}${cell(c.hour3)}</tr>`;
     };
-    const renders = this._data.renders;
+    const rendered = this._data.rendered;
     const pad = (n, w = 2) => String(n).padStart(w, '0');
-    const ts = renders.length
+    const ts = rendered.length
       ? (() => {
-          const last = renders.at(-1);
+          const last = rendered.at(-1);
           const d = new Date(last);
           const time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
           const ago = this._timeAgo(Date.now() - last);
@@ -58,7 +58,7 @@ class DebugMetrics {
         })()
       : '--';
     const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:indianred">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
-    return `<table style="border-collapse:collapse;width:100%">${row('events', 'events')}${row('accepted', 'accepted')}${row('renders', 'renders')}${footer}</table>`;
+    return `<table style="border-collapse:collapse;width:100%">${row('events', 'events')}${row('filtered', 'filtered')}${row('rendered', 'rendered')}${footer}</table>`;
   }
 
   html() {
@@ -610,7 +610,7 @@ class SportScoreboardCard extends HTMLElement {
 
   _scheduleRender() {
     if (this._renderTimer) return;
-    if (this._config?.debug) this._debug.track('accepted');
+    if (this._config?.debug) this._debug.track('filtered');
     const { lazyMs } = this._getRefreshConfig();
     if (lazyMs === 0) {
       this._render();
@@ -719,7 +719,7 @@ class SportScoreboardCard extends HTMLElement {
       if (body === this._lastBody) return;
       this._lastBody = body;
 
-      if (debug) this._debug.track('renders');
+      if (debug) this._debug.track('rendered');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
         : '';

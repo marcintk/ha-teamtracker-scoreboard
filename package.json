@@ -1,6 +1,6 @@
 {
   "name": "ha-teamtracker-scoreboard-card",
-  "version": "1.0.27",
+  "version": "1.0.31",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
