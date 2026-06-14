@@ -125,7 +125,8 @@ export const CARD_STYLES = `
     padding: 3px 6px;
     border-radius: 4px;
     white-space: pre-wrap;
-    max-width: 350px;
+    width: max-content;
+    max-width: 300px;
     text-align: left;
     pointer-events: none;
     opacity: 0;
