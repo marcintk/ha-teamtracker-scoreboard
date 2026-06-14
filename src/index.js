@@ -66,7 +66,7 @@ class SportScoreboardCard extends HTMLElement {
 
   _scheduleRender() {
     if (this._renderTimer) return;
-    if (this._config?.debug) this._debug.track('accepted');
+    if (this._config?.debug) this._debug.track('filtered');
     const { lazyMs } = this._getRefreshConfig();
     if (lazyMs === 0) {
       this._render();
@@ -175,7 +175,7 @@ class SportScoreboardCard extends HTMLElement {
       if (body === this._lastBody) return;
       this._lastBody = body;
 
-      if (debug) this._debug.track('renders');
+      if (debug) this._debug.track('rendered');
       const heightStyle = height
         ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
         : '';
