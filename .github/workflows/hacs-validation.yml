@@ -1,14 +1,16 @@
 name: HACS Validation
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Publish Release"]
+    types: [completed]
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
   validate:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
