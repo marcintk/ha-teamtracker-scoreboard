@@ -1,8 +1,8 @@
 name: HACS Validation
 
 on:
-  push:
-    branches: ["main"]
+  release:
+    types: [published]
   schedule:
     - cron: "0 0 * * *"
 
@@ -11,13 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "22.x"
-          cache: npm
-
-      - run: npm ci && npm run build
 
       - name: HACS Action
         uses: hacs/action@main
