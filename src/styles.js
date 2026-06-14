@@ -124,7 +124,9 @@ export const CARD_STYLES = `
     font-weight: bold;
     padding: 3px 6px;
     border-radius: 4px;
-    white-space: nowrap;
+    white-space: pre-wrap;
+    max-width: 350px;
+    text-align: left;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s;

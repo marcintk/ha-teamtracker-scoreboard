@@ -101,7 +101,8 @@ export function messageHtml(gs, attr, colors = {}) {
       let subHtml = '';
       if (raw) {
         if (raw.length > 50) {
-          subHtml = `<span class="msg-sub tv-tooltip" data-tooltip="${esc(raw)}">${esc(`${raw.substring(0, 50)}>`)}</span>`;
+          const fmt = raw.replace(/; /g, ';\n').replace(/ (\d+(?:'\+\d+)?')/g, '\n$1');
+          subHtml = `<span class="msg-sub tv-tooltip" data-tooltip="${esc(fmt)}">${esc(`${raw.substring(0, 50)}>`)}</span>`;
         } else {
           subHtml = `<span class="msg-sub">${esc(raw)}</span>`;
         }
