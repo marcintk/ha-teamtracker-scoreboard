@@ -41,12 +41,12 @@ export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false)
 }
 
 export function sectionHtml(section, states, entityIds, colors = {}) {
-  const { name, prefix, limit = 10, special_teams = [], rankType = 'win-draw-loss' } = section;
+  const { name, prefix, limit = 10, special_teams = [], rank_type = 'win-draw-loss' } = section;
   const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
   const entities = resolvedIds.filter((id) => VALID_STATES.has(states[id]?.state));
   if (!entities.length) return '';
 
-  const sortMode = resolveSortMode(entities, states, rankType);
+  const sortMode = resolveSortMode(entities, states, rank_type);
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;

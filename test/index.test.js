@@ -24,7 +24,7 @@ const nbaSection = {
   prefix: 'sensor.nba_',
   limit: 10,
   special_teams: [],
-  rankType: 'win-loss',
+  rank_type: 'win-loss',
 };
 
 function makeCard() {
@@ -217,7 +217,7 @@ describe('SportScoreboardCard', () => {
     it('skips render when no relevant entity changed', () => {
       const card = makeCard();
       const stateObj = makeState('PRE', baseAttrs);
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 0 });
+      card.setConfig({ sections: [nbaSection], lazy_refresh: 0 });
       card.hass = makeHass({ 'sensor.nba_lal': stateObj }); // first call: builds _trackedIds
       const renderSpy = vi.spyOn(card, '_render');
       // same state object reference — fallback diffing returns false, no render
@@ -239,7 +239,7 @@ describe('SportScoreboardCard', () => {
 
     it('re-renders when a relevant entity state changes', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 0 });
+      card.setConfig({ sections: [nbaSection], lazy_refresh: 0 });
       // first call: builds _trackedIds; makeHass has no connection so _unsubscribe stays null
       card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       const renderSpy = vi.spyOn(card, '_render');
@@ -372,22 +372,22 @@ describe('SportScoreboardCard', () => {
       expect(card._fixedTimer).not.toBeNull();
     });
 
-    it('fixedRefresh: 0 does not start a fixed timer', () => {
+    it('fixed_refresh: 0 does not start a fixed timer', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 0 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 0 });
       expect(card._fixedTimer).toBeNull();
     });
 
-    it('starts fixedTimer at custom fixedRefresh interval', () => {
+    it('starts fixedTimer at custom fixed_refresh interval', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 60 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 60 });
       expect(card._fixedTimer).not.toBeNull();
     });
 
-    it('fixedTimer calls _render at fixedRefresh interval', () => {
+    it('fixedTimer calls _render at fixed_refresh interval', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 10 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
 
       vi.advanceTimersByTime(10_000);
@@ -399,22 +399,22 @@ describe('SportScoreboardCard', () => {
 
     it('clears the old timer when setConfig is called again', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 30 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 30 });
       const firstTimer = card._fixedTimer;
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 60 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 60 });
       expect(card._fixedTimer).not.toBe(firstTimer);
     });
 
     it('clears the timer on disconnectedCallback', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 30 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 30 });
       card.disconnectedCallback();
       expect(card._fixedTimer).toBeNull();
     });
 
     it('does not render when timer fires before hass is assigned', () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 10 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
 
       vi.advanceTimersByTime(10_000);
@@ -424,7 +424,7 @@ describe('SportScoreboardCard', () => {
     it('does not fire after disconnectedCallback', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], fixedRefresh: 10 });
+      card.setConfig({ sections: [nbaSection], fixed_refresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
 
       card.disconnectedCallback();
@@ -488,9 +488,9 @@ describe('SportScoreboardCard', () => {
       expect(card._renderTimer).toBeNull();
     });
 
-    it('lazyRefresh timer triggers render after configured delay', async () => {
+    it('lazy_refresh timer triggers render after configured delay', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 1 });
+      card.setConfig({ sections: [nbaSection], lazy_refresh: 1 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
@@ -505,9 +505,9 @@ describe('SportScoreboardCard', () => {
       expect(card._renderTimer).toBeNull();
     });
 
-    it('lazyRefresh: 0 renders immediately without starting a timer', async () => {
+    it('lazy_refresh: 0 renders immediately without starting a timer', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 0 });
+      card.setConfig({ sections: [nbaSection], lazy_refresh: 0 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
@@ -520,9 +520,9 @@ describe('SportScoreboardCard', () => {
       expect(card._renderTimer).toBeNull();
     });
 
-    it('lazyRefresh timer skips render if hass is null when it fires', () => {
+    it('lazy_refresh timer skips render if hass is null when it fires', () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], lazyRefresh: 1 };
+      card._config = { sections: [nbaSection], lazy_refresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
@@ -533,9 +533,9 @@ describe('SportScoreboardCard', () => {
       expect(card._renderTimer).toBeNull();
     });
 
-    it('multiple events within lazyRefresh window trigger only one render', async () => {
+    it('multiple events within lazy_refresh window trigger only one render', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 1 });
+      card.setConfig({ sections: [nbaSection], lazy_refresh: 1 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
@@ -550,9 +550,9 @@ describe('SportScoreboardCard', () => {
       expect(renderSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('second event after lazyRefresh window closes schedules a new render', async () => {
+    it('second event after lazy_refresh window closes schedules a new render', async () => {
       const card = makeCard();
-      card.setConfig({ sections: [nbaSection], lazyRefresh: 1 });
+      card.setConfig({ sections: [nbaSection], lazy_refresh: 1 });
       const { hass, connection } = makeHassWithConnection({
         'sensor.nba_lal': makeState('PRE', baseAttrs),
       });
@@ -704,7 +704,7 @@ describe('SportScoreboardCard', () => {
 
     it('_scheduleRender increments filtered when debug is true and no timer is active', () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 1 };
+      card._config = { sections: [nbaSection], debug: true, lazy_refresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
@@ -713,7 +713,7 @@ describe('SportScoreboardCard', () => {
 
     it('_scheduleRender does not increment filtered when timer is already active', () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], debug: true, lazyRefresh: 1 };
+      card._config = { sections: [nbaSection], debug: true, lazy_refresh: 1 };
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
@@ -772,10 +772,10 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot.innerHTML).toContain(expected);
     });
 
-    it('in debug mode 5s overlay timer fires every 5 seconds regardless of fixedRefresh', () => {
+    it('in debug mode 5s overlay timer fires every 5 seconds regardless of fixed_refresh', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 300 });
+      card.setConfig({ sections: [nbaSection], debug: true, fixed_refresh: 300 });
       const updateSpy = vi.spyOn(card, '_updateDebugOverlay');
       vi.advanceTimersByTime(4_999);
       expect(updateSpy).toHaveBeenCalledTimes(0);
@@ -796,10 +796,10 @@ describe('SportScoreboardCard', () => {
       expect(renderSpy).not.toHaveBeenCalled();
     });
 
-    it('in debug mode fixedRefresh timer also triggers _render', () => {
+    it('in debug mode fixed_refresh timer also triggers _render', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      card.setConfig({ sections: [nbaSection], debug: true, fixedRefresh: 10 });
+      card.setConfig({ sections: [nbaSection], debug: true, fixed_refresh: 10 });
       const renderSpy = vi.spyOn(card, '_render');
       vi.advanceTimersByTime(10_000);
       expect(renderSpy).toHaveBeenCalledTimes(1);
