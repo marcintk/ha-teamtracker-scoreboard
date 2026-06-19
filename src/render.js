@@ -72,5 +72,6 @@ export function sectionHtml(section, states, entityIds, colors = {}) {
     )
     .join('');
 
+  if (!rows) return '';
   return `<div class="section-header">${esc(name)}</div>${rows}`;
 }

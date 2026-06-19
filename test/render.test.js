@@ -83,6 +83,11 @@ describe('sectionHtml', () => {
     expect(sectionHtml(section, states)).toBe('');
   });
 
+  it('returns empty string when limit produces no rows', () => {
+    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+    expect(sectionHtml({ ...section, limit: 0 }, states)).toBe('');
+  });
+
   it('renders section header with name', () => {
     const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
     const html = sectionHtml(section, states);
