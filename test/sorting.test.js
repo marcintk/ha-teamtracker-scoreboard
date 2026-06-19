@@ -251,7 +251,7 @@ describe('deduplicate', () => {
 });
 
 describe('resolveSortMode', () => {
-  it('returns rankType when all entities have regular season', () => {
+  it('returns rank_type when all entities have regular season', () => {
     const states = { 'sensor.a': { attributes: { season: 'regular' } } };
     expect(resolveSortMode(['sensor.a'], states, 'win-loss')).toBe('win-loss');
   });
@@ -264,12 +264,12 @@ describe('resolveSortMode', () => {
     expect(resolveSortMode(['sensor.a', 'sensor.b'], states, 'win-loss')).toBe('by-date');
   });
 
-  it('returns rankType when season attribute is absent (HA startup — treat as regular)', () => {
+  it('returns rank_type when season attribute is absent (HA startup — treat as regular)', () => {
     const states = { 'sensor.a': { attributes: {} } };
     expect(resolveSortMode(['sensor.a'], states, 'win-draw-loss')).toBe('win-draw-loss');
   });
 
-  it('returns rankType for an empty entity list', () => {
+  it('returns rank_type for an empty entity list', () => {
     expect(resolveSortMode([], {}, 'win-loss-otl')).toBe('win-loss-otl');
   });
 });

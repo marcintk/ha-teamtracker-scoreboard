@@ -53,13 +53,13 @@ sections:
     limit: 10
     special_teams:
       - bos
-    rankType: win-loss
+    rank_type: win-loss
   - name: NHL Scoreboard
     prefix: sensor.nhl_
     limit: 5
     special_teams:
       - dal
-    rankType: win-loss-otl
+    rank_type: win-loss-otl
   - name: World Cup
     prefix: sensor.wc_
     limit: 13
@@ -69,14 +69,14 @@ sections:
 
 ### Options
 
-| Option         | Type    | Default  | Description                                                                      |
-| -------------- | ------- | -------- | -------------------------------------------------------------------------------- |
-| `height`       | string  | auto     | Card height (CSS value); omit to fit content                                     |
-| `lazyRefresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately |
-| `fixedRefresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                   |
-| `sections`     | list    | required | One entry per sport/league                                                       |
-| `colors`       | map     | —        | Override team colours (see [Colors](#colors))                                    |
-| `debug`        | boolean | `false`  | Show performance overlay (see [Debug overlay](#debug-overlay))                   |
+| Option          | Type    | Default  | Description                                                                      |
+| --------------- | ------- | -------- | -------------------------------------------------------------------------------- |
+| `height`        | string  | auto     | Card height (CSS value); omit to fit content                                     |
+| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately |
+| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                   |
+| `sections`      | list    | required | One entry per sport/league                                                       |
+| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                    |
+| `debug`         | boolean | `false`  | Show performance overlay (see [Debug overlay](#debug-overlay))                   |
 
 ### Section options
 
@@ -86,9 +86,9 @@ sections:
 | `prefix`        | string | required        | Entity ID prefix, e.g. `sensor.nba_`                                                        |
 | `limit`         | number | `10`            | Max rows to show                                                                            |
 | `special_teams` | list   | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `rankType`      | string | `win-draw-loss` | Ranking formula for the regular season. See below                                           |
+| `rank_type`     | string | `win-draw-loss` | Ranking formula for the regular season. See below                                           |
 
-### rankType
+### rank_type
 
 During the **regular season** the card ranks all tracked teams by their win-loss record and displays
 them top-to-bottom from highest to lowest in the standings — i.e. first place at the top, last place
@@ -100,7 +100,7 @@ at the bottom. Choose the formula that matches the league:
 | `win-draw-loss` | W=3, D=1, L=0   | `W-D-L`       | Soccer, MLS, World Cup, …            |
 | `win-loss-otl`  | W=2, OTL=1, L=0 | `W-L-OTL`     | NHL and leagues with overtime losses |
 
-During **playoffs, cups, and tournaments** the card ignores `rankType` entirely and sorts rows by
+During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
 game date instead.
 
 ## Colors

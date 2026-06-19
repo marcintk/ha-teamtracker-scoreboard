@@ -59,8 +59,8 @@ class SportScoreboardCard extends HTMLElement {
 
   _getRefreshConfig() {
     return {
-      lazyMs: (this._config?.lazyRefresh ?? 1) * 1000,
-      fixedMs: (this._config?.fixedRefresh ?? 60) * 1000,
+      lazyMs: (this._config?.lazy_refresh ?? 1) * 1000,
+      fixedMs: (this._config?.fixed_refresh ?? 60) * 1000,
     };
   }
 
@@ -225,14 +225,14 @@ class SportScoreboardCard extends HTMLElement {
           prefix: 'sensor.nba_',
           limit: 10,
           special_teams: [],
-          rankType: 'win-loss',
+          rank_type: 'win-loss',
         },
         {
           name: 'NHL Scoreboard',
           prefix: 'sensor.nhl_',
           limit: 5,
           special_teams: [],
-          rankType: 'win-loss-otl',
+          rank_type: 'win-loss-otl',
         },
       ],
     };

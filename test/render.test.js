@@ -71,7 +71,7 @@ describe('sectionHtml', () => {
     prefix: 'sensor.nba_',
     limit: 10,
     special_teams: [],
-    rankType: 'win-loss',
+    rank_type: 'win-loss',
   };
 
   it('returns empty string when no matching entities', () => {
@@ -183,7 +183,7 @@ describe('sectionHtml', () => {
       prefix: 'sensor.wc_',
       limit: 10,
       special_teams: [],
-      rankType: 'by-date',
+      rank_type: 'by-date',
     };
     const html = sectionHtml(wcSection, states);
     expect(html.indexOf('France')).toBeLessThan(html.indexOf('Brazil'));
@@ -230,7 +230,7 @@ describe('sectionHtml', () => {
       prefix: 'sensor.wc_',
       limit: 10,
       special_teams: [],
-      rankType: 'by-date',
+      rank_type: 'by-date',
     };
     const html1 = sectionHtml(wcSection, states);
     const html2 = sectionHtml(wcSection, states);
@@ -239,7 +239,7 @@ describe('sectionHtml', () => {
     expect(html1.indexOf('AAA')).toBeLessThan(html1.indexOf('ZZZ'));
   });
 
-  it('keeps configured rankType when first entity has no season attribute yet', () => {
+  it('keeps configured rank_type when first entity has no season attribute yet', () => {
     // sensor.nba_aaa is alphabetically first — Object.keys returns it first.
     // It has no season field, so firstAttr?.season is undefined.
     // Bug: undefined !== 'regular' → sortMode='by-date', keys all 0, alpha tie-break → Team A first.
@@ -252,7 +252,7 @@ describe('sectionHtml', () => {
         team_record: '25-5',
       }),
     };
-    const html = sectionHtml({ ...section, rankType: 'win-loss' }, states);
+    const html = sectionHtml({ ...section, rank_type: 'win-loss' }, states);
     expect(html.indexOf('Team Z')).toBeLessThan(html.indexOf('Team A'));
   });
 
