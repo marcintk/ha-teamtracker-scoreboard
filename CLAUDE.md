@@ -19,17 +19,17 @@ built by CI on every release and attached as a GitHub Release asset that HACS do
 Every `src/*.js` module has a corresponding `test/*.test.js`. New source files must ship with their
 test file.
 
-| Source file           | Test file                    | Responsibility                                                                  |
-| --------------------- | ---------------------------- | ------------------------------------------------------------------------------- |
-| `src/index.js`        | `test/index.test.js`         | Custom element class, HA lifecycle hooks, entity cache, render orchestration    |
-| `src/debug.js`        | `test/debug.test.js`         | `DebugMetrics` — timestamp tracking, windowed counts, overlay HTML              |
-| `src/subscription.js` | `test/subscription.test.js`  | `SubscriptionManager` — WebSocket subscribe/unsubscribe with stale-gen guard    |
-| `src/render.js`       | `test/render.test.js`        | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows |
-| `src/display.js`      | `test/display.test.js`       | Stateless display helpers: colors, text snippets, TV badge, message column      |
-| `src/sorting.js`      | `test/sorting.test.js`       | `winRatio()`, `sortKeyFor()`, `deduplicate()` — ranking and dedup logic         |
-| `src/styles.js`       | `test/styles.test.js`        | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render   |
-| `src/utils.js`        | _(covered via render/index)_ | `esc()` — HTML escaping; `safeLogoUrl()` — HTTPS-only URL guard                 |
-| `src/constants.js`    | _(covered via render/index)_ | `VALID_STATES` set: `PRE`, `IN`, `POST`, `BYE`                                  |
+| Source file           | Test file                   | Responsibility                                                                       |
+| --------------------- | --------------------------- | ------------------------------------------------------------------------------------ |
+| `src/index.js`        | `test/index.test.js`        | Custom element class, HA lifecycle hooks, entity cache, render orchestration         |
+| `src/debug.js`        | `test/debug.test.js`        | `DebugMetrics` — timestamp tracking, windowed counts, overlay HTML                   |
+| `src/subscription.js` | `test/subscription.test.js` | `SubscriptionManager` — WebSocket subscribe/unsubscribe with stale-gen guard         |
+| `src/render.js`       | `test/render.test.js`       | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows      |
+| `src/display.js`      | `test/display.test.js`      | Pure value helpers: colors, text snippets (no HTML output)                           |
+| `src/widgets.js`      | `test/widgets.test.js`      | HTML generators: `logoHtml()`, `tvHtml()`, `messageHtml()`                           |
+| `src/sorting.js`      | `test/sorting.test.js`      | `winRatio()`, `sortKeyFor()`, `resolveSortMode()`, `deduplicate()` — ranking & dedup |
+| `src/styles.js`       | `test/styles.test.js`       | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render        |
+| `src/utils.js`        | `test/utils.test.js`        | `esc()`, `safeLogoUrl()`, `VALID_STATES` — escaping, URL guard, valid state set      |
 
 ## Architecture Notes
 
@@ -42,6 +42,9 @@ test file.
   `setConfig`, rebuilt lazily on next `set hass`.
 - **Security**: all user-supplied strings go through `esc()` before HTML insertion; logo URLs
   validated HTTPS via `safeLogoUrl()`.
+- **Sort mode resolution**: `resolveSortMode()` in `sorting.js` auto-switches to `by-date` when any
+  entity reports a non-regular season (playoffs, off-season, …); undefined season is treated as
+  regular.
 - **Deduplication** (`by-date` mode only): two-pass algorithm — pass 1 builds home/special key sets,
   pass 2 filters keeping home sensor > away sensor per game key.
 

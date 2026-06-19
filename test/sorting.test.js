@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deduplicate, sortKeyFor, winRatio } from '../src/sorting.js';
+import { deduplicate, resolveSortMode, sortKeyFor, winRatio } from '../src/sorting.js';
 
 describe('winRatio', () => {
   it('calculates win percentage for win-loss', () => {
@@ -247,5 +247,29 @@ describe('deduplicate', () => {
     const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     const result = deduplicate(list, 'by-date', states);
     expect(result[0].entityId).toBe('sensor.wc_bra');
+  });
+});
+
+describe('resolveSortMode', () => {
+  it('returns rankType when all entities have regular season', () => {
+    const states = { 'sensor.a': { attributes: { season: 'regular' } } };
+    expect(resolveSortMode(['sensor.a'], states, 'win-loss')).toBe('win-loss');
+  });
+
+  it('returns by-date when any entity has a non-regular season', () => {
+    const states = {
+      'sensor.a': { attributes: { season: 'regular' } },
+      'sensor.b': { attributes: { season: 'playoffs' } },
+    };
+    expect(resolveSortMode(['sensor.a', 'sensor.b'], states, 'win-loss')).toBe('by-date');
+  });
+
+  it('returns rankType when season attribute is absent (HA startup — treat as regular)', () => {
+    const states = { 'sensor.a': { attributes: {} } };
+    expect(resolveSortMode(['sensor.a'], states, 'win-draw-loss')).toBe('win-draw-loss');
+  });
+
+  it('returns rankType for an empty entity list', () => {
+    expect(resolveSortMode([], {}, 'win-loss-otl')).toBe('win-loss-otl');
   });
 });

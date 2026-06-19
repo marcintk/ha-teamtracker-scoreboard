@@ -28,6 +28,15 @@ export function sortKeyFor(attr, sortMode) {
   return winRatio(attr?.team_record, sortMode);
 }
 
+export function resolveSortMode(entities, states, rankType) {
+  return entities.some((id) => {
+    const s = states[id]?.attributes?.season;
+    return s && s !== 'regular';
+  })
+    ? 'by-date'
+    : rankType;
+}
+
 // For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.
 // Uses a two-pass approach to preserve the original date order: re-sorting the whole list by
 // home/away would push away-only games (whose home-team sensor is missing) to the end where they

@@ -1,19 +1,16 @@
-import { VALID_STATES } from './constants.js';
 import {
   colonColor,
   isTeamSide,
-  logoHtml,
-  messageHtml,
   nameText,
   rankText,
   scoreBg,
   scoreColor,
   scoreText,
   teamColor,
-  tvHtml,
 } from './display.js';
-import { deduplicate, sortKeyFor } from './sorting.js';
-import { esc } from './utils.js';
+import { deduplicate, resolveSortMode, sortKeyFor } from './sorting.js';
+import { esc, VALID_STATES } from './utils.js';
+import { logoHtml, messageHtml, tvHtml } from './widgets.js';
 
 export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false) {
   const gs = stateObj?.state ?? '';
@@ -49,14 +46,7 @@ export function sectionHtml(section, states, entityIds, colors = {}) {
   const entities = resolvedIds.filter((id) => VALID_STATES.has(states[id]?.state));
   if (!entities.length) return '';
 
-  // Use by-date when any entity explicitly reports a non-regular season (playoffs, off-season, …).
-  // Undefined season (e.g. during HA startup) is treated as regular so rankType is preserved.
-  const sortMode = entities.some((id) => {
-    const s = states[id]?.attributes?.season;
-    return s && s !== 'regular';
-  })
-    ? 'by-date'
-    : rankType;
+  const sortMode = resolveSortMode(entities, states, rankType);
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
