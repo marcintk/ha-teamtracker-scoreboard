@@ -1,3 +1,4 @@
+import { html, nothing, type TemplateResult } from 'lit';
 import {
   colonColor,
   isTeamSide,
@@ -10,7 +11,7 @@ import {
 } from './display.js';
 import { deduplicate, resolveSortMode, sortKeyFor } from './sorting.js';
 import type { ColorsConfig, GameState, HassEntity, HassStates, SectionConfig } from './types.js';
-import { esc, VALID_STATES } from './utils.js';
+import { VALID_STATES } from './utils.js';
 import { logoHtml, messageHtml, tvHtml } from './widgets.js';
 
 export function rowHtml(
@@ -18,7 +19,7 @@ export function rowHtml(
   special: boolean,
   colors: ColorsConfig = {},
   opponentSpecial = false
-): string {
+): TemplateResult {
   const gs = (stateObj?.state ?? '') as GameState;
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
@@ -26,7 +27,7 @@ export function rowHtml(
   const homeColor = teamColor('home', attr, special, colors, opponentSpecial);
   const awayColor = teamColor('away', attr, special, colors, opponentSpecial);
 
-  return `
+  return html`
 <div class="game-row">
   <div class="team-col team-col-a">
     <div class="team-name" style="color:${homeColor};font-weight:${isTeamSide('home', attr) ? 'bold' : 'normal'}">${nameText('home', attr)}</div>
@@ -51,7 +52,7 @@ export function sectionHtml(
   states: HassStates,
   entityIds?: string[],
   colors: ColorsConfig = {}
-): string {
+): TemplateResult | typeof nothing {
   const {
     name,
     prefix = '',
@@ -63,7 +64,7 @@ export function sectionHtml(
   const entities = resolvedIds.filter((id) =>
     VALID_STATES.has((states[id]?.state ?? '') as GameState)
   );
-  if (!entities.length) return '';
+  if (!entities.length) return nothing;
 
   const sortMode = resolveSortMode(entities, states, rank_type);
 
@@ -88,9 +89,8 @@ export function sectionHtml(
     .slice(0, limit)
     .map(({ entityId, special = false, opponentSpecial = false }) =>
       rowHtml(states[entityId] as HassEntity, special, colors, opponentSpecial)
-    )
-    .join('');
+    );
 
-  if (!rows) return '';
-  return `<div class="section-header">${esc(name)}</div>${rows}`;
+  if (!rows.length) return nothing;
+  return html`<div class="section-header">${name}</div>${rows}`;
 }

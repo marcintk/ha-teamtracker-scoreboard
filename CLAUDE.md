@@ -33,15 +33,16 @@ test file.
 
 ## Architecture Notes
 
-- **Shadow DOM / full replacement**: `shadowRoot.innerHTML` is fully replaced on every render — no
-  diffing. Fast enough for ~30 rows max.
+- **Shadow DOM / Lit rendering**: Lit's `render()` patches the shadow DOM on every render —
+  efficient diffing, no full `innerHTML` replacement.
 - **WebSocket subscription**: card subscribes to `state_changed` events on first `set hass`;
   callback calls `_scheduleRender()`, which arms a debounce timer (`_renderTimer`). Rendering always
   uses `_hass.states`, not the event payload.
 - **Entity filter**: `_trackedIds` (Set) is built once per config from section prefixes; reset on
   `setConfig`, rebuilt lazily on next `set hass`.
-- **Security**: all user-supplied strings go through `esc()` before HTML insertion; logo URLs
-  validated HTTPS via `safeLogoUrl()`.
+- **Security**: Lit auto-escapes all interpolated text values in `html` templates — no manual
+  `esc()` needed in render paths. Logo URLs validated HTTPS via `safeLogoUrl()`. `esc()` in
+  `utils.ts` is retained as a utility for non-Lit contexts.
 - **Sort mode resolution**: `resolveSortMode()` in `sorting.js` auto-switches to `by-date` when any
   entity reports a non-regular season (playoffs, off-season, …); undefined season is treated as
   regular.

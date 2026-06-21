@@ -1,7 +1,14 @@
+import { render } from 'lit';
 import { describe, expect, it } from 'vitest';
 import { rowHtml } from '../src/render.js';
 import { CARD_STYLES } from '../src/styles.js';
 import type { GameAttr } from '../src/types.js';
+
+function doc(template: unknown): HTMLElement {
+  const el = document.createElement('div');
+  render(template, el);
+  return el;
+}
 
 // ─── CSS extractor helpers ────────────────────────────────────────────────────
 // Parse the flat, well-formed CARD_STYLES string without a full CSS parser.
@@ -219,33 +226,34 @@ const baseAttrs: GameAttr = {
 
 describe('rowHtml inline styles — score background', () => {
   it('uses dark background in PRE state', () => {
-    const html = rowHtml(makeState('PRE', baseAttrs), false);
-    expect(html).toContain('background:#303030');
+    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain(
+      'background:#303030'
+    );
   });
   it('uses lightgray background in IN state', () => {
-    const html = rowHtml(makeState('IN', baseAttrs), false);
-    expect(html).toContain('background:lightgray');
+    expect(doc(rowHtml(makeState('IN', baseAttrs), false)).innerHTML).toContain(
+      'background:lightgray'
+    );
   });
   it('uses transparent background in POST state', () => {
-    const html = rowHtml(makeState('POST', baseAttrs), false);
-    expect(html).toContain('background:transparent');
+    expect(doc(rowHtml(makeState('POST', baseAttrs), false)).innerHTML).toContain(
+      'background:transparent'
+    );
   });
 });
 
 describe('rowHtml inline styles — score text color', () => {
   it('uses black for both scores in PRE state', () => {
-    const html = rowHtml(makeState('PRE', baseAttrs), false);
-    // Both score divs carry color:black in PRE
+    const html = doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML;
     expect(html.match(/color:black/g)?.length).toBeGreaterThanOrEqual(2);
   });
   it('highlights leading team with brown in IN state', () => {
-    // home (95) leads away (90) — home score should be brown, away black
-    const html = rowHtml(makeState('IN', baseAttrs), false);
+    const html = doc(rowHtml(makeState('IN', baseAttrs), false)).innerHTML;
     expect(html).toContain('color:brown');
     expect(html).toContain('color:black');
   });
   it('marks winner orange and loser darkgray in POST state', () => {
-    const html = rowHtml(makeState('POST', baseAttrs), false);
+    const html = doc(rowHtml(makeState('POST', baseAttrs), false)).innerHTML;
     expect(html).toContain('color:orange');
     expect(html).toContain('color:darkgray');
   });
@@ -253,24 +261,24 @@ describe('rowHtml inline styles — score text color', () => {
 
 describe('rowHtml inline styles — team name font-weight', () => {
   it('bolds the tracked team name', () => {
-    // home sensor → home team-name div should be bold
-    const html = rowHtml(makeState('PRE', baseAttrs), false);
-    expect(html).toContain('font-weight:bold');
+    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain(
+      'font-weight:bold'
+    );
   });
   it('uses normal weight for the opponent name', () => {
-    const html = rowHtml(makeState('PRE', baseAttrs), false);
-    expect(html).toContain('font-weight:normal');
+    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain(
+      'font-weight:normal'
+    );
   });
 });
 
 describe('rowHtml inline styles — colon visibility', () => {
   it('hides the colon for BYE and other non-game states', () => {
-    const html = rowHtml(makeState('BYE', baseAttrs), false);
-    expect(html).toContain('color:transparent');
+    expect(doc(rowHtml(makeState('BYE', baseAttrs), false)).innerHTML).toContain(
+      'color:transparent'
+    );
   });
   it('shows a black colon in PRE state', () => {
-    const html = rowHtml(makeState('PRE', baseAttrs), false);
-    // colon div carries color:black
-    expect(html).toContain('color:black');
+    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain('color:black');
   });
 });

@@ -1,65 +1,66 @@
+import { html, nothing, type TemplateResult } from 'lit';
 import { isTeamSide } from './display.js';
 import type { ColorsConfig, GameAttr, GameState } from './types.js';
-import { esc, safeLogoUrl } from './utils.js';
+import { safeLogoUrl } from './utils.js';
 
-export function logoHtml(side: 'home' | 'away', attr: GameAttr): string {
+export function logoHtml(side: 'home' | 'away', attr: GameAttr): TemplateResult | typeof nothing {
   const url = safeLogoUrl(isTeamSide(side, attr) ? attr.team_logo : attr.opponent_logo);
-  return url ? `<img src="${url}" alt="">` : '';
+  return url ? html`<img src="${url}" alt="">` : nothing;
 }
 
-export function tvHtml(gs: GameState, attr: GameAttr, colors: ColorsConfig = {}): string {
-  if (gs !== 'PRE' && gs !== 'IN') return '';
+export function tvHtml(
+  gs: GameState,
+  attr: GameAttr,
+  colors: ColorsConfig = {}
+): TemplateResult | typeof nothing {
+  if (gs !== 'PRE' && gs !== 'IN') return nothing;
   const tv = String(attr.tv_network ?? '').trim();
-  if (!tv) return '';
+  if (!tv) return nothing;
   const networks = tv.split('/').map((n) => n.trim());
   const hasMultiple = networks.length > 1;
   /* v8 ignore next */ const first = networks[0] ?? '';
   const truncated = first.substring(0, 3);
   const label = first.length > 3 || hasMultiple ? `${truncated}>` : truncated;
   const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666';
-  const badge = `<span class="tv-badge" style="background:${bg}">${esc(label)}</span>`;
+  const badge = html`<span class="tv-badge" style="background:${bg}">${label}</span>`;
   if (hasMultiple) {
-    const tooltip = esc(networks.join(' · '));
-    return `<span class="tv-tooltip" data-tooltip="${tooltip}">${badge}</span>`;
+    const tooltip = networks.join(' · ');
+    return html`<span class="tv-tooltip" data-tooltip="${tooltip}">${badge}</span>`;
   }
   return badge;
 }
 
-export function messageHtml(gs: GameState, attr: GameAttr, colors: ColorsConfig = {}): string {
+export function messageHtml(
+  gs: GameState,
+  attr: GameAttr,
+  colors: ColorsConfig = {}
+): TemplateResult {
   switch (gs) {
     case 'PRE': {
-      const kickoff = esc(attr.kickoff_in ?? '');
-      /* v8 ignore next */ const city = esc(
-        (String(attr.location ?? '').split(',')[0] ?? '').trim()
-      );
-      const odds = esc(attr.odds ?? '');
+      const kickoff = attr.kickoff_in ?? '';
+      /* v8 ignore next */ const city = (String(attr.location ?? '').split(',')[0] ?? '').trim();
+      const odds = attr.odds ?? '';
       const sub = city && odds ? `${city}, ${odds}` : city || odds;
-      return (
-        `<span style="color:darkgray">${kickoff}</span>` +
-        (sub ? `<span class="msg-sub">${sub}</span>` : '')
-      );
+      return html`<span style="color:darkgray">${kickoff}</span>${sub ? html`<span class="msg-sub">${sub}</span>` : nothing}`;
     }
     case 'IN': {
-      const clock = esc(attr.clock ?? '');
+      const clock = attr.clock ?? '';
       const raw = String(attr.last_play ?? '');
-      let subHtml = '';
+      let subTemplate: TemplateResult | typeof nothing = nothing;
       if (raw) {
         if (raw.length > 50) {
           const fmt = raw.replace(/; /g, ';\n').replace(/ (\d+(?:'\+\d+)?')/g, '\n$1');
-          subHtml = `<span class="msg-sub tv-tooltip" data-tooltip="${esc(fmt)}">${esc(`${raw.substring(0, 50)}>`)}</span>`;
+          subTemplate = html`<span class="msg-sub tv-tooltip" data-tooltip="${fmt}">${raw.substring(0, 50)}></span>`;
         } else {
-          subHtml = `<span class="msg-sub">${esc(raw)}</span>`;
+          subTemplate = html`<span class="msg-sub">${raw}</span>`;
         }
       }
-      return `<span style="color:${colors.live ?? 'indianred'}">${clock}</span>${subHtml}`;
+      return html`<span style="color:${colors.live ?? 'indianred'}">${clock}</span>${subTemplate}`;
     }
     default: {
-      const clock = esc(attr.clock ?? '');
-      const sub = esc(attr.series_summary ?? '');
-      return (
-        `<span style="color:${colors.winner ?? 'orange'}">${clock}</span>` +
-        (sub ? `<span class="msg-sub">${sub}</span>` : '')
-      );
+      const clock = attr.clock ?? '';
+      const sub = attr.series_summary ?? '';
+      return html`<span style="color:${colors.winner ?? 'orange'}">${clock}</span>${sub ? html`<span class="msg-sub">${sub}</span>` : nothing}`;
     }
   }
 }
