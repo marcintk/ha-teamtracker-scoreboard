@@ -1,11 +1,15 @@
+import { html, nothing, render } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import { DebugMetrics } from './debug.js';
 import { sectionHtml } from './render.js';
 import { CARD_STYLES } from './styles.js';
 import { SubscriptionManager } from './subscription.js';
 import type { CardConfig, HomeAssistant } from './types.js';
-import { esc } from './utils.js';
+
+const _STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
 
 export class SportScoreboardCard extends HTMLElement {
+  readonly _root: ShadowRoot;
   _config: CardConfig | null;
   _hass: HomeAssistant | null;
   _fixedTimer: ReturnType<typeof setInterval> | null;
@@ -14,13 +18,12 @@ export class SportScoreboardCard extends HTMLElement {
   _trackedIds: Set<string> | null;
   _trackedByPrefix: Map<string, string[]> | null;
   _stateKeyCount: number;
-  _lastBody: string | null;
   _subscription: SubscriptionManager;
   _debug: DebugMetrics;
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this._root = this.attachShadow({ mode: 'open' });
     this._config = null;
     this._hass = null;
     this._fixedTimer = null;
@@ -29,7 +32,6 @@ export class SportScoreboardCard extends HTMLElement {
     this._trackedIds = null;
     this._trackedByPrefix = null;
     this._stateKeyCount = 0;
-    this._lastBody = null;
     this._subscription = new SubscriptionManager();
     this._debug = new DebugMetrics();
   }
@@ -40,7 +42,6 @@ export class SportScoreboardCard extends HTMLElement {
     this._trackedIds = null;
     this._trackedByPrefix = null;
     this._stateKeyCount = 0;
-    this._lastBody = null;
     this._startFixedTimer();
     if (this._hass) {
       this._render();
@@ -111,11 +112,6 @@ export class SportScoreboardCard extends HTMLElement {
     this._cancelRenderTimer();
   }
 
-  _updateDebugOverlay(): void {
-    const overlay = this.shadowRoot?.querySelector('#sc-debug');
-    if (overlay) overlay.innerHTML = this._debug.tableHtml();
-  }
-
   _startFixedTimer(): void {
     this._stopFixedTimer();
     const { fixedMs } = this._getRefreshConfig();
@@ -125,7 +121,9 @@ export class SportScoreboardCard extends HTMLElement {
       }, fixedMs);
     }
     if (this._config?.debug) {
-      this._debugTimer = setInterval(() => this._updateDebugOverlay(), 5000);
+      this._debugTimer = setInterval(() => {
+        if (this._hass && this._config) this._render();
+      }, 5000);
     }
   }
 
@@ -181,31 +179,38 @@ export class SportScoreboardCard extends HTMLElement {
         this._showError('Add at least one section to your card config.');
         return;
       }
-      const body = sections
-        .map((s) => sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix ?? ''), colors))
-        .join('');
-
-      if (body === this._lastBody) return;
-      this._lastBody = body;
 
       if (debug) this._debug.track('rendered');
-      const heightStyle = height
-        ? `height:${esc(String(height))};min-height:${esc(String(height))};max-height:${esc(String(height))};`
-        : '';
-      const headerOverride = colors.header
-        ? `.section-header{color:${esc(String(colors.header))}}`
-        : '';
 
-      if (this.shadowRoot) {
-        this.shadowRoot.innerHTML = `
-          <style>${CARD_STYLES}${headerOverride}</style>
-          <ha-card style="${heightStyle}${debug ? 'position:relative;' : ''}">
-            ${debug ? this._debug.html() : ''}
-            ${debug ? `<div id="sc-version" style="position:absolute;top:2px;right:4px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>` : ''}
-            ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
+      const haCardStyle =
+        `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ''}${debug ? 'position:relative;' : ''}` ||
+        undefined;
+      const headerOverride = colors.header ? `.section-header{color:${String(colors.header)}}` : '';
+
+      const sectionTemplates = sections.map((s) =>
+        sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix ?? ''), colors)
+      );
+      const hasContent = sectionTemplates.some((t) => t !== nothing);
+
+      render(
+        html`
+          ${_STYLE_BLOCK}${headerOverride ? unsafeHTML(`<style>${headerOverride}</style>`) : nothing}
+          <ha-card style=${haCardStyle ?? nothing}>
+            ${debug ? unsafeHTML(this._debug.html()) : nothing}
+            ${
+              debug
+                ? html`<div id="sc-version" style="position:absolute;top:2px;right:4px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>`
+                : nothing
+            }
+            ${
+              hasContent
+                ? sectionTemplates
+                : html`<div class="empty">No games found — check your section prefixes.</div>`
+            }
           </ha-card>
-        `;
-      }
+        `,
+        this._root
+      );
     } catch (e) {
       this._showError((e as Error).message);
       // biome-ignore lint/suspicious/noConsole: intentional render error logging
@@ -214,15 +219,14 @@ export class SportScoreboardCard extends HTMLElement {
   }
 
   _showError(msg: string): void {
-    /* v8 ignore next */ if (this.shadowRoot) {
-      this.shadowRoot.innerHTML = `
-        <ha-card>
-          <div style="padding:12px;color:var(--error-color,red);font-size:13px;">
-            <b>ha-teamtracker-scoreboard-card error:</b><br>${esc(msg)}
-          </div>
-        </ha-card>
-      `;
-    }
+    render(
+      html`<ha-card>
+        <div style="padding:12px;color:var(--error-color,red);font-size:13px;">
+          <b>ha-teamtracker-scoreboard-card error:</b><br />${msg}
+        </div>
+      </ha-card>`,
+      this._root
+    );
   }
 
   getCardSize(): number {

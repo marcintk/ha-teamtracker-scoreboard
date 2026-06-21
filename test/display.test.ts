@@ -165,9 +165,9 @@ describe('nameText', () => {
     expect(nameText('away', homeAttr)).toBe('Celtics');
   });
 
-  it('escapes HTML in team names', () => {
+  it('returns raw team name (HTML escaping delegated to Lit template)', () => {
     const attr: GameAttr = { team_homeaway: 'home', team_name: '<script>', opponent_name: 'Safe' };
-    expect(nameText('home', attr)).toBe('&lt;script&gt;');
+    expect(nameText('home', attr)).toBe('<script>');
   });
 });
 
