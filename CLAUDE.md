@@ -67,6 +67,16 @@ Every new feature or bug fix must include associated tests. Coverage thresholds 
 for statements, branches, functions, and lines — `npm run test:coverage` will fail (and block CI) if
 coverage drops below that.
 
+### TODO.md
+
+`TODO.md` is the canonical list of known bugs and open issues.
+
+- **When a new bug or issue is found** (code review, user report, test failure) — add it to
+  `TODO.md` with a one-line summary, the affected file:line, and a brief fix description.
+- **When a bug is fixed and merged** — remove its entry from `TODO.md` in the same PR that fixes it.
+- **Do not leave stale entries.** If a fix makes an entry obsolete (e.g. a refactor eliminates the
+  code path), remove the entry and note why in the PR description.
+
 ### PR discipline
 
 - **One concern per PR.** A refactor PR must not bundle feature changes; a feature PR must not
