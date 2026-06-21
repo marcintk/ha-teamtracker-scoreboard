@@ -74,8 +74,18 @@ describe('deduplicate', () => {
 
   it('keeps both entries when games are on different dates', () => {
     const states: HassStates = {
-      'sensor.wc_fra': s({ team_homeaway: 'home', date: '2024-03-15', team_abbr: 'fra', opponent_abbr: 'bra' }),
-      'sensor.wc_bra': s({ team_homeaway: 'home', date: '2024-03-16', team_abbr: 'bra', opponent_abbr: 'fra' }),
+      'sensor.wc_fra': s({
+        team_homeaway: 'home',
+        date: '2024-03-15',
+        team_abbr: 'fra',
+        opponent_abbr: 'bra',
+      }),
+      'sensor.wc_bra': s({
+        team_homeaway: 'home',
+        date: '2024-03-16',
+        team_abbr: 'bra',
+        opponent_abbr: 'fra',
+      }),
     };
     const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     expect(deduplicate(list, 'by-date', states)).toHaveLength(2);
@@ -87,7 +97,12 @@ describe('deduplicate', () => {
       { entityId: 'sensor.wc_missing' }, // not in states
     ];
     const states: HassStates = {
-      'sensor.wc_fra': s({ team_homeaway: 'home', date: '2024-03-15', team_abbr: 'fra', opponent_abbr: 'bra' }),
+      'sensor.wc_fra': s({
+        team_homeaway: 'home',
+        date: '2024-03-15',
+        team_abbr: 'fra',
+        opponent_abbr: 'bra',
+      }),
     };
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(2);
@@ -110,8 +125,18 @@ describe('deduplicate', () => {
     // A game whose home sensor is missing/unavailable got pushed past games with home sensors,
     // so the limit slice cut it off and the game was never shown.
     const states: HassStates = {
-      'sensor.wc_early_away': s({ team_homeaway: 'away', date: '2024-03-14', team_abbr: 'fra', opponent_abbr: 'bra' }),
-      'sensor.wc_later_home': s({ team_homeaway: 'home', date: '2024-03-15', team_abbr: 'gsw', opponent_abbr: 'lal' }),
+      'sensor.wc_early_away': s({
+        team_homeaway: 'away',
+        date: '2024-03-14',
+        team_abbr: 'fra',
+        opponent_abbr: 'bra',
+      }),
+      'sensor.wc_later_home': s({
+        team_homeaway: 'home',
+        date: '2024-03-15',
+        team_abbr: 'gsw',
+        opponent_abbr: 'lal',
+      }),
     };
     // List is already date-sorted (earlier game first)
     const list = [{ entityId: 'sensor.wc_early_away' }, { entityId: 'sensor.wc_later_home' }];
