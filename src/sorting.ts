@@ -4,31 +4,37 @@
 //   win-loss-otl:  W=2 OTL=1 L=0   (NHL, …)    record: W-L-OTL
 //   by-date: internal — auto-applied outside the regular season
 
-export function winRatio(record, sortMode) {
-  const pts = String(record ?? '0-0')
+import type { GameAttr, HassStates, SortItem, SortMode } from './types.js';
+
+export function winRatio(record: unknown, sortMode: SortMode): number {
+  const [w = 0, d = 0, l = 0] = String(record ?? '0-0')
     .split('-')
     .map(Number);
   if (sortMode === 'win-draw-loss') {
     // points = 3W + D, max possible = 3(W+D+L)
-    const total = pts[0] + pts[1] + pts[2];
-    return total ? (3 * pts[0] + pts[1]) / (3 * total) : 0;
+    const total = w + d + l;
+    return total ? (3 * w + d) / (3 * total) : 0;
   }
   if (sortMode === 'win-loss-otl') {
     // points = 2W + OTL, max possible = 2(W+L+OTL)  — record order: W-L-OTL
-    const total = pts[0] + pts[1] + pts[2];
-    return total ? (2 * pts[0] + pts[2]) / (2 * total) : 0;
+    const total = w + d + l;
+    return total ? (2 * w + l) / (2 * total) : 0;
   }
   // win-loss: W/(W+L)
-  const total = pts[0] + pts[1];
-  return total ? pts[0] / total : 0;
+  const total = w + d;
+  return total ? w / total : 0;
 }
 
-export function sortKeyFor(attr, sortMode) {
+export function sortKeyFor(attr: GameAttr | null | undefined, sortMode: SortMode): number {
   if (sortMode === 'by-date') return Date.parse(attr?.date ?? '') || 0;
   return winRatio(attr?.team_record, sortMode);
 }
 
-export function resolveSortMode(entities, states, rankType) {
+export function resolveSortMode(
+  entities: string[],
+  states: HassStates,
+  rankType: SortMode
+): SortMode {
   return entities.some((id) => {
     const s = states[id]?.attributes?.season;
     return s && s !== 'regular';
@@ -41,10 +47,10 @@ export function resolveSortMode(entities, states, rankType) {
 // Uses a two-pass approach to preserve the original date order: re-sorting the whole list by
 // home/away would push away-only games (whose home-team sensor is missing) to the end where they
 // get cut off by the limit slice even though a valid sensor is available.
-export function deduplicate(list, sortMode, states) {
+export function deduplicate(list: SortItem[], sortMode: SortMode, states: HassStates): SortItem[] {
   if (sortMode !== 'by-date') return list;
 
-  const gameKey = (entityId) => {
+  const gameKey = (entityId: string): string => {
     const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
     if (date == null) return entityId; // can't identify the game — keep row as unique
     return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
@@ -53,9 +59,9 @@ export function deduplicate(list, sortMode, states) {
   const keyMap = new Map(list.map(({ entityId }) => [entityId, gameKey(entityId)]));
 
   // First pass: find which game keys have at least one home-side and/or special sensor.
-  const homeKeys = new Set();
-  const specialKeys = new Set();
-  const specialAwayKeys = new Set();
+  const homeKeys = new Set<string | undefined>();
+  const specialKeys = new Set<string | undefined>();
+  const specialAwayKeys = new Set<string | undefined>();
   for (const { entityId, special } of list) {
     const key = keyMap.get(entityId);
     if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
@@ -69,7 +75,7 @@ export function deduplicate(list, sortMode, states) {
   // When a special team plays away AND a home sensor also exists, prefer the home sensor
   // but mark opponentSpecial so the away team still renders highlighted.
   // Otherwise keep the special sensor (special-plays-away with no home counterpart).
-  const seen = new Set();
+  const seen = new Set<string | undefined>();
   return list
     .filter(({ entityId, special }) => {
       const key = keyMap.get(entityId);

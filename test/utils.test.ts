@@ -45,7 +45,8 @@ describe('VALID_STATES', () => {
   });
 
   it('does not contain unrecognised states', () => {
-    expect(VALID_STATES.has('UNKNOWN')).toBe(false);
-    expect(VALID_STATES.has('')).toBe(false);
+    const states = VALID_STATES as ReadonlySet<string>;
+    expect(states.has('UNKNOWN')).toBe(false);
+    expect(states.has('')).toBe(false);
   });
 });

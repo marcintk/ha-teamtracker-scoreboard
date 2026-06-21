@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { deduplicate, resolveSortMode, sortKeyFor, winRatio } from '../src/sorting.js';
+import type { GameAttr, HassStates } from '../src/types.js';
+
+const s = (attrs: GameAttr): HassStates[string] => ({ state: '', attributes: attrs });
 
 describe('winRatio', () => {
   it('calculates win percentage for win-loss', () => {
@@ -60,13 +63,9 @@ describe('deduplicate', () => {
 
   it('removes duplicate game from two sensors for the same match', () => {
     const date = '2024-03-15';
-    const states = {
-      'sensor.wc_fra': {
-        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
-      },
-      'sensor.wc_bra': {
-        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
-      },
+    const states: HassStates = {
+      'sensor.wc_fra': s({ team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' }),
+      'sensor.wc_bra': s({ team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' }),
     };
     const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     const result = deduplicate(list, 'by-date', states);
@@ -74,23 +73,19 @@ describe('deduplicate', () => {
   });
 
   it('keeps both entries when games are on different dates', () => {
-    const states = {
-      'sensor.wc_fra': {
-        attributes: {
-          team_homeaway: 'home',
-          date: '2024-03-15',
-          team_abbr: 'fra',
-          opponent_abbr: 'bra',
-        },
-      },
-      'sensor.wc_bra': {
-        attributes: {
-          team_homeaway: 'home',
-          date: '2024-03-16',
-          team_abbr: 'bra',
-          opponent_abbr: 'fra',
-        },
-      },
+    const states: HassStates = {
+      'sensor.wc_fra': s({
+        team_homeaway: 'home',
+        date: '2024-03-15',
+        team_abbr: 'fra',
+        opponent_abbr: 'bra',
+      }),
+      'sensor.wc_bra': s({
+        team_homeaway: 'home',
+        date: '2024-03-16',
+        team_abbr: 'bra',
+        opponent_abbr: 'fra',
+      }),
     };
     const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     expect(deduplicate(list, 'by-date', states)).toHaveLength(2);
@@ -101,15 +96,13 @@ describe('deduplicate', () => {
       { entityId: 'sensor.wc_fra' },
       { entityId: 'sensor.wc_missing' }, // not in states
     ];
-    const states = {
-      'sensor.wc_fra': {
-        attributes: {
-          team_homeaway: 'home',
-          date: '2024-03-15',
-          team_abbr: 'fra',
-          opponent_abbr: 'bra',
-        },
-      },
+    const states: HassStates = {
+      'sensor.wc_fra': s({
+        team_homeaway: 'home',
+        date: '2024-03-15',
+        team_abbr: 'fra',
+        opponent_abbr: 'bra',
+      }),
     };
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(2);
@@ -119,9 +112,9 @@ describe('deduplicate', () => {
     // Both sensors lack a date — previously both produced "undefined_undefined_undefined"
     // and the second was silently dropped by seen.has(key).
     const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
-    const states = {
-      'sensor.wc_fra': { attributes: { team_homeaway: 'home' } }, // no date/abbr
-      'sensor.wc_bra': { attributes: { team_homeaway: 'home' } }, // no date/abbr
+    const states: HassStates = {
+      'sensor.wc_fra': s({ team_homeaway: 'home' }), // no date/abbr
+      'sensor.wc_bra': s({ team_homeaway: 'home' }), // no date/abbr
     };
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(2);
@@ -131,42 +124,34 @@ describe('deduplicate', () => {
     // Bug: old code called preferHome() on the whole list, moving ALL away sensors to the end.
     // A game whose home sensor is missing/unavailable got pushed past games with home sensors,
     // so the limit slice cut it off and the game was never shown.
-    const states = {
-      'sensor.wc_early_away': {
-        attributes: {
-          team_homeaway: 'away',
-          date: '2024-03-14',
-          team_abbr: 'fra',
-          opponent_abbr: 'bra',
-        },
-      },
-      'sensor.wc_later_home': {
-        attributes: {
-          team_homeaway: 'home',
-          date: '2024-03-15',
-          team_abbr: 'gsw',
-          opponent_abbr: 'lal',
-        },
-      },
+    const states: HassStates = {
+      'sensor.wc_early_away': s({
+        team_homeaway: 'away',
+        date: '2024-03-14',
+        team_abbr: 'fra',
+        opponent_abbr: 'bra',
+      }),
+      'sensor.wc_later_home': s({
+        team_homeaway: 'home',
+        date: '2024-03-15',
+        team_abbr: 'gsw',
+        opponent_abbr: 'lal',
+      }),
     };
     // List is already date-sorted (earlier game first)
     const list = [{ entityId: 'sensor.wc_early_away' }, { entityId: 'sensor.wc_later_home' }];
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(2);
     // Date order must be preserved: the early away-only game comes before the later home game.
-    expect(result[0].entityId).toBe('sensor.wc_early_away');
-    expect(result[1].entityId).toBe('sensor.wc_later_home');
+    expect(result[0]?.entityId).toBe('sensor.wc_early_away');
+    expect(result[1]?.entityId).toBe('sensor.wc_later_home');
   });
 
   it('prefers home sensor and marks opponentSpecial when away sensor is special', () => {
     const date = '2024-03-15';
-    const states = {
-      'sensor.wc_fra': {
-        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
-      },
-      'sensor.wc_bra': {
-        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
-      },
+    const states: HassStates = {
+      'sensor.wc_fra': s({ team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' }),
+      'sensor.wc_bra': s({ team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' }),
     };
     const list = [
       { entityId: 'sensor.wc_fra', special: false },
@@ -174,19 +159,15 @@ describe('deduplicate', () => {
     ];
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(1);
-    expect(result[0].entityId).toBe('sensor.wc_fra');
-    expect(result[0].opponentSpecial).toBe(true);
+    expect(result[0]?.entityId).toBe('sensor.wc_fra');
+    expect(result[0]?.opponentSpecial).toBe(true);
   });
 
   it('prefers home sensor and marks opponentSpecial regardless of list order', () => {
     const date = '2024-03-15';
-    const states = {
-      'sensor.wc_fra': {
-        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
-      },
-      'sensor.wc_bra': {
-        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
-      },
+    const states: HassStates = {
+      'sensor.wc_fra': s({ team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' }),
+      'sensor.wc_bra': s({ team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' }),
     };
     // away-special sensor appears first in list
     const list = [
@@ -195,33 +176,27 @@ describe('deduplicate', () => {
     ];
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(1);
-    expect(result[0].entityId).toBe('sensor.wc_fra');
-    expect(result[0].opponentSpecial).toBe(true);
+    expect(result[0]?.entityId).toBe('sensor.wc_fra');
+    expect(result[0]?.opponentSpecial).toBe(true);
   });
 
   it('keeps special away sensor when no home sensor exists in the section', () => {
     const date = '2024-03-15';
-    const states = {
-      'sensor.wc_bra': {
-        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
-      },
+    const states: HassStates = {
+      'sensor.wc_bra': s({ team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' }),
     };
     const list = [{ entityId: 'sensor.wc_bra', special: true }];
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(1);
-    expect(result[0].entityId).toBe('sensor.wc_bra');
-    expect(result[0].opponentSpecial).toBeUndefined();
+    expect(result[0]?.entityId).toBe('sensor.wc_bra');
+    expect(result[0]?.opponentSpecial).toBeUndefined();
   });
 
   it('drops non-special away sensor when home sensor is the special one', () => {
     const date = '2024-03-15';
-    const states = {
-      'sensor.wc_fra': {
-        attributes: { team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' },
-      },
-      'sensor.wc_bra': {
-        attributes: { team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' },
-      },
+    const states: HassStates = {
+      'sensor.wc_fra': s({ team_homeaway: 'home', date, team_abbr: 'fra', opponent_abbr: 'bra' }),
+      'sensor.wc_bra': s({ team_homeaway: 'away', date, team_abbr: 'bra', opponent_abbr: 'fra' }),
     };
     // away-non-special sensor appears first to exercise the drop-non-special branch
     const list = [
@@ -230,42 +205,38 @@ describe('deduplicate', () => {
     ];
     const result = deduplicate(list, 'by-date', states);
     expect(result).toHaveLength(1);
-    expect(result[0].entityId).toBe('sensor.wc_fra');
-    expect(result[0].opponentSpecial).toBeUndefined();
+    expect(result[0]?.entityId).toBe('sensor.wc_fra');
+    expect(result[0]?.opponentSpecial).toBeUndefined();
   });
 
   it('prefers home sensor when deduplicating', () => {
     const date = '2024-03-15';
-    const states = {
-      'sensor.wc_fra': {
-        attributes: { team_homeaway: 'away', date, team_abbr: 'fra', opponent_abbr: 'bra' },
-      },
-      'sensor.wc_bra': {
-        attributes: { team_homeaway: 'home', date, team_abbr: 'bra', opponent_abbr: 'fra' },
-      },
+    const states: HassStates = {
+      'sensor.wc_fra': s({ team_homeaway: 'away', date, team_abbr: 'fra', opponent_abbr: 'bra' }),
+      'sensor.wc_bra': s({ team_homeaway: 'home', date, team_abbr: 'bra', opponent_abbr: 'fra' }),
     };
     const list = [{ entityId: 'sensor.wc_fra' }, { entityId: 'sensor.wc_bra' }];
     const result = deduplicate(list, 'by-date', states);
-    expect(result[0].entityId).toBe('sensor.wc_bra');
+    expect(result[0]?.entityId).toBe('sensor.wc_bra');
   });
 });
 
 describe('resolveSortMode', () => {
   it('returns rank_type when all entities have regular season', () => {
-    const states = { 'sensor.a': { attributes: { season: 'regular' } } };
+    const states: HassStates = { 'sensor.a': s({ season: 'regular' }) };
     expect(resolveSortMode(['sensor.a'], states, 'win-loss')).toBe('win-loss');
   });
 
   it('returns by-date when any entity has a non-regular season', () => {
-    const states = {
-      'sensor.a': { attributes: { season: 'regular' } },
-      'sensor.b': { attributes: { season: 'playoffs' } },
+    const states: HassStates = {
+      'sensor.a': s({ season: 'regular' }),
+      'sensor.b': s({ season: 'playoffs' }),
     };
     expect(resolveSortMode(['sensor.a', 'sensor.b'], states, 'win-loss')).toBe('by-date');
   });
 
   it('returns rank_type when season attribute is absent (HA startup — treat as regular)', () => {
-    const states = { 'sensor.a': { attributes: {} } };
+    const states: HassStates = { 'sensor.a': s({}) };
     expect(resolveSortMode(['sensor.a'], states, 'win-draw-loss')).toBe('win-draw-loss');
   });
 

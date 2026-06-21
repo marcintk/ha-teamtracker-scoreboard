@@ -9,11 +9,17 @@ import {
   teamColor,
 } from './display.js';
 import { deduplicate, resolveSortMode, sortKeyFor } from './sorting.js';
+import type { ColorsConfig, GameState, HassEntity, HassStates, SectionConfig } from './types.js';
 import { esc, VALID_STATES } from './utils.js';
 import { logoHtml, messageHtml, tvHtml } from './widgets.js';
 
-export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false) {
-  const gs = stateObj?.state ?? '';
+export function rowHtml(
+  stateObj: HassEntity | null,
+  special: boolean,
+  colors: ColorsConfig = {},
+  opponentSpecial = false
+): string {
+  const gs = (stateObj?.state ?? '') as GameState;
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
 
@@ -40,10 +46,23 @@ export function rowHtml(stateObj, special, colors = {}, opponentSpecial = false)
 </div>`;
 }
 
-export function sectionHtml(section, states, entityIds, colors = {}) {
-  const { name, prefix, limit = 10, special_teams = [], rank_type = 'win-draw-loss' } = section;
+export function sectionHtml(
+  section: SectionConfig,
+  states: HassStates,
+  entityIds?: string[],
+  colors: ColorsConfig = {}
+): string {
+  const {
+    name,
+    prefix = '',
+    limit = 10,
+    special_teams = [],
+    rank_type = 'win-draw-loss',
+  } = section;
   const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
-  const entities = resolvedIds.filter((id) => VALID_STATES.has(states[id]?.state));
+  const entities = resolvedIds.filter((id) =>
+    VALID_STATES.has((states[id]?.state ?? '') as GameState)
+  );
   if (!entities.length) return '';
 
   const sortMode = resolveSortMode(entities, states, rank_type);
@@ -67,8 +86,8 @@ export function sectionHtml(section, states, entityIds, colors = {}) {
 
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special, opponentSpecial = false }) =>
-      rowHtml(states[entityId], special, colors, opponentSpecial)
+    .map(({ entityId, special = false, opponentSpecial = false }) =>
+      rowHtml(states[entityId] as HassEntity, special, colors, opponentSpecial)
     )
     .join('');
 

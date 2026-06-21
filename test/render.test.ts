@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { rowHtml, sectionHtml } from '../src/render.js';
+import type { GameAttr, SectionConfig } from '../src/types.js';
 
-const makeState = (state, attrs) => ({ state, attributes: attrs });
+const makeState = (state: string, attrs: GameAttr) => ({ state, attributes: attrs });
 
-const baseAttrs = {
+const baseAttrs: GameAttr = {
   team_homeaway: 'home',
   team_name: 'Lakers',
   opponent_name: 'Celtics',
@@ -66,7 +67,7 @@ describe('rowHtml', () => {
 });
 
 describe('sectionHtml', () => {
-  const section = {
+  const section: SectionConfig = {
     name: 'NBA',
     prefix: 'sensor.nba_',
     limit: 10,
@@ -178,7 +179,7 @@ describe('sectionHtml', () => {
         season: 'regular',
       }),
     };
-    const wcSection = {
+    const wcSection: SectionConfig = {
       name: 'WC',
       prefix: 'sensor.wc_',
       limit: 10,
@@ -225,7 +226,7 @@ describe('sectionHtml', () => {
         season: 'postseason',
       }),
     };
-    const wcSection = {
+    const wcSection: SectionConfig = {
       name: 'WC',
       prefix: 'sensor.wc_',
       limit: 10,
@@ -252,7 +253,7 @@ describe('sectionHtml', () => {
         team_record: '25-5',
       }),
     };
-    const html = sectionHtml({ ...section, rank_type: 'win-loss' }, states);
+    const html = sectionHtml({ ...section, rank_type: 'win-loss' as const }, states);
     expect(html.indexOf('Team Z')).toBeLessThan(html.indexOf('Team A'));
   });
 
@@ -292,7 +293,7 @@ describe('sectionHtml', () => {
     const states = {
       'sensor.nba_lal': makeState('PRE', {
         ...baseAttrs,
-        team_homeaway: 'away',
+        team_homeaway: 'away' as const,
         team_abbr: 'LAL',
         opponent_abbr: 'BOS',
         date,
@@ -300,7 +301,7 @@ describe('sectionHtml', () => {
       }),
       'sensor.nba_bos': makeState('PRE', {
         ...baseAttrs,
-        team_homeaway: 'home',
+        team_homeaway: 'home' as const,
         team_name: 'Celtics',
         team_abbr: 'BOS',
         opponent_abbr: 'LAL',
@@ -326,5 +327,11 @@ describe('sectionHtml', () => {
     };
     // Should not throw — just verifies the fallback path executes cleanly
     expect(() => sectionHtml(section, states)).not.toThrow();
+  });
+
+  it('skips entity IDs that are no longer present in states', () => {
+    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+    const html = sectionHtml(section, states, ['sensor.stale_id', 'sensor.nba_lal']);
+    expect(html).toContain('class="game-row"');
   });
 });

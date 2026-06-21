@@ -162,7 +162,7 @@ describe('DebugMetrics', () => {
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
       d.track('rendered');
-      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const pad = (n: number, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(d.tableHtml()).toContain(expected);
     });
@@ -250,7 +250,7 @@ describe('DebugMetrics', () => {
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
       d.track('rendered');
-      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const pad = (n: number, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(d.html()).toContain(expected);
     });
@@ -260,7 +260,7 @@ describe('DebugMetrics', () => {
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
       d.track('rendered');
-      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const pad = (n: number, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       expect(d.html()).toContain(expected);
     });
@@ -335,7 +335,7 @@ describe('DebugMetrics', () => {
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
       d.track('rendered');
-      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const pad = (n: number, w = 2) => String(n).padStart(w, '0');
       const ts = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
       const h = d.html();
       expect(h.indexOf(ts)).toBeLessThan(h.indexOf('1m'));
