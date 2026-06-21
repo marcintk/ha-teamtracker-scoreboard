@@ -9,8 +9,9 @@ import {
   scoreText,
   teamColor,
 } from '../src/display.js';
+import type { GameAttr } from '../src/types.js';
 
-const homeAttr = {
+const homeAttr: GameAttr = {
   team_homeaway: 'home',
   team_name: 'Lakers',
   opponent_name: 'Celtics',
@@ -24,7 +25,7 @@ const homeAttr = {
   opponent_logo: 'https://cdn.example.com/bos.png',
 };
 
-const awayAttr = { ...homeAttr, team_homeaway: 'away' };
+const awayAttr: GameAttr = { ...homeAttr, team_homeaway: 'away' };
 
 describe('isTeamSide', () => {
   it('matches home side when team is home', () => {
@@ -143,7 +144,11 @@ describe('scoreText', () => {
   });
 
   it('returns empty string when score is undefined in IN state', () => {
-    const attr = { team_homeaway: 'home', team_score: undefined, opponent_score: undefined };
+    const attr: GameAttr = {
+      team_homeaway: 'home',
+      team_score: undefined,
+      opponent_score: undefined,
+    };
     expect(scoreText('home', 'IN', attr)).toBe('');
     expect(scoreText('away', 'IN', attr)).toBe('');
   });
@@ -156,7 +161,7 @@ describe('nameText', () => {
   });
 
   it('escapes HTML in team names', () => {
-    const attr = { team_homeaway: 'home', team_name: '<script>', opponent_name: 'Safe' };
+    const attr: GameAttr = { team_homeaway: 'home', team_name: '<script>', opponent_name: 'Safe' };
     expect(nameText('home', attr)).toBe('&lt;script&gt;');
   });
 });

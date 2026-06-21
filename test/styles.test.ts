@@ -1,22 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { rowHtml } from '../src/render.js';
 import { CARD_STYLES } from '../src/styles.js';
+import type { GameAttr } from '../src/types.js';
 
 // ─── CSS extractor helpers ────────────────────────────────────────────────────
 // Parse the flat, well-formed CARD_STYLES string without a full CSS parser.
 
-function cssBlock(selector) {
+function cssBlock(selector: string): string {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp(`${escaped}\\s*\\{([^}]+)\\}`, 's');
   const m = CARD_STYLES.match(re);
-  return m ? m[1] : '';
+  return m ? (m[1] ?? '') : '';
 }
 
-function cssProp(selector, property) {
+function cssProp(selector: string, property: string): string | null {
   const stripped = cssBlock(selector).replace(/\/\*[^*]*\*\//g, '');
   const re = new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([^;]+)`, 'm');
   const m = stripped.match(re);
-  return m ? m[1].trim() : null;
+  return m ? (m[1]?.trim() ?? null) : null;
 }
 
 // ─── CSS layout and font tests ────────────────────────────────────────────────
@@ -200,9 +201,9 @@ describe('CARD_STYLES — .tv-tooltip::after', () => {
 // The rendered HTML carries dynamic inline styles (background, color, font-weight).
 // These tests verify the style attributes are written into the HTML correctly.
 
-const makeState = (state, attrs) => ({ state, attributes: attrs });
+const makeState = (state: string, attrs: GameAttr) => ({ state, attributes: attrs });
 
-const baseAttrs = {
+const baseAttrs: GameAttr = {
   team_homeaway: 'home',
   team_name: 'Lakers',
   opponent_name: 'Celtics',

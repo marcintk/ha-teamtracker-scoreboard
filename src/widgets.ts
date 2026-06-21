@@ -1,18 +1,19 @@
 import { isTeamSide } from './display.js';
+import type { ColorsConfig, GameAttr, GameState } from './types.js';
 import { esc, safeLogoUrl } from './utils.js';
 
-export function logoHtml(side, attr) {
+export function logoHtml(side: 'home' | 'away', attr: GameAttr): string {
   const url = safeLogoUrl(isTeamSide(side, attr) ? attr.team_logo : attr.opponent_logo);
   return url ? `<img src="${url}" alt="">` : '';
 }
 
-export function tvHtml(gs, attr, colors = {}) {
+export function tvHtml(gs: GameState, attr: GameAttr, colors: ColorsConfig = {}): string {
   if (gs !== 'PRE' && gs !== 'IN') return '';
   const tv = String(attr.tv_network ?? '').trim();
   if (!tv) return '';
   const networks = tv.split('/').map((n) => n.trim());
   const hasMultiple = networks.length > 1;
-  const first = networks[0];
+  const first = networks[0] ?? '';
   const truncated = first.substring(0, 3);
   const label = first.length > 3 || hasMultiple ? `${truncated}>` : truncated;
   const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666';
@@ -24,15 +25,11 @@ export function tvHtml(gs, attr, colors = {}) {
   return badge;
 }
 
-export function messageHtml(gs, attr, colors = {}) {
+export function messageHtml(gs: GameState, attr: GameAttr, colors: ColorsConfig = {}): string {
   switch (gs) {
     case 'PRE': {
       const kickoff = esc(attr.kickoff_in ?? '');
-      const city = esc(
-        String(attr.location ?? '')
-          .split(',')[0]
-          .trim()
-      );
+      const city = esc((String(attr.location ?? '').split(',')[0] ?? '').trim());
       const odds = esc(attr.odds ?? '');
       const sub = city && odds ? `${city}, ${odds}` : city || odds;
       return (

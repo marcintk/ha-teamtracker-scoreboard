@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import type { GameAttr } from '../src/types.js';
 import { logoHtml, messageHtml, tvHtml } from '../src/widgets.js';
 
-const homeAttr = {
+const homeAttr: GameAttr = {
   team_homeaway: 'home',
   team_name: 'Lakers',
   opponent_name: 'Celtics',
