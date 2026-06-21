@@ -23,7 +23,7 @@ export class DebugMetrics {
     const cutoff = now - 10_800_000;
     // arr is sorted oldest→newest (push appends); scan from front where expired entries live
     let i = 0;
-    while (i < arr.length && (arr[i] ?? 0) < cutoff) i++;
+    /* v8 ignore next */ while (i < arr.length && (arr[i] ?? 0) < cutoff) i++;
     if (i) arr.splice(0, i);
   }
 
@@ -36,13 +36,13 @@ export class DebugMetrics {
       min30 = 0,
       hour1 = 0;
     for (let i = arr.length - 1; i >= 0; i--) {
-      const age = now - (arr[i] ?? 0);
+      /* v8 ignore next */ const age = now - (arr[i] ?? 0);
       if (age > 3_600_000) break; // arr is oldest→newest; past 1h, no further entry qualifies
       if (age <= 60_000) min1++;
       if (age <= 300_000) min5++;
       if (age <= 900_000) min15++;
       if (age <= 1_800_000) min30++;
-      if (age <= 3_600_000) hour1++;
+      /* v8 ignore next */ if (age <= 3_600_000) hour1++;
     }
     return { min1, min5, min15, min30, hour1, hour3: arr.length };
   }
@@ -66,7 +66,7 @@ export class DebugMetrics {
     const ts = rendered.length
       ? (() => {
           const last = rendered.at(-1);
-          if (last === undefined) return '--';
+          /* v8 ignore next */ if (last === undefined) return '--';
           const d = new Date(last);
           const time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
           const ago = this._timeAgo(Date.now() - last);

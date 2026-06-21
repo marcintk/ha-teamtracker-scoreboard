@@ -13,7 +13,7 @@ export function tvHtml(gs: GameState, attr: GameAttr, colors: ColorsConfig = {})
   if (!tv) return '';
   const networks = tv.split('/').map((n) => n.trim());
   const hasMultiple = networks.length > 1;
-  const first = networks[0] ?? '';
+  /* v8 ignore next */ const first = networks[0] ?? '';
   const truncated = first.substring(0, 3);
   const label = first.length > 3 || hasMultiple ? `${truncated}>` : truncated;
   const bg = gs === 'IN' ? (colors.live ?? 'indianred') : '#666';
@@ -29,7 +29,9 @@ export function messageHtml(gs: GameState, attr: GameAttr, colors: ColorsConfig 
   switch (gs) {
     case 'PRE': {
       const kickoff = esc(attr.kickoff_in ?? '');
-      const city = esc((String(attr.location ?? '').split(',')[0] ?? '').trim());
+      /* v8 ignore next */ const city = esc(
+        (String(attr.location ?? '').split(',')[0] ?? '').trim()
+      );
       const odds = esc(attr.odds ?? '');
       const sub = city && odds ? `${city}, ${odds}` : city || odds;
       return (

@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SubscriptionManager } from '../src/subscription.js';
 
+type SubscribeCallback = (event: { data: { entity_id: string } }) => void;
+const getCallback = (fn: ReturnType<typeof vi.fn>): SubscribeCallback =>
+  (fn.mock.calls as [[SubscribeCallback]])[0][0];
+
 function makeConnection(resolvedUnsub = vi.fn()) {
   return {
     connection: { subscribeEvents: vi.fn().mockResolvedValue(resolvedUnsub) },
@@ -35,7 +39,7 @@ describe('SubscriptionManager', () => {
       const onMatch = vi.fn();
       mgr.subscribe(connection, new Set(['sensor.a']), onMatch);
       await Promise.resolve();
-      const cb = connection.subscribeEvents.mock.calls[0][0];
+      const cb = getCallback(connection.subscribeEvents);
       cb({ data: { entity_id: 'sensor.a' } });
       expect(onMatch).toHaveBeenCalledTimes(1);
     });
@@ -46,7 +50,7 @@ describe('SubscriptionManager', () => {
       const onMatch = vi.fn();
       mgr.subscribe(connection, new Set(['sensor.a']), onMatch);
       await Promise.resolve();
-      const cb = connection.subscribeEvents.mock.calls[0][0];
+      const cb = getCallback(connection.subscribeEvents);
       cb({ data: { entity_id: 'sensor.b' } });
       expect(onMatch).not.toHaveBeenCalled();
     });
@@ -95,7 +99,7 @@ describe('SubscriptionManager', () => {
       const onMatch = vi.fn();
       mgr.subscribe(connection, new Set(['sensor.a']), onMatch);
       await Promise.resolve();
-      const staleCallback = connection.subscribeEvents.mock.calls[0][0];
+      const staleCallback = getCallback(connection.subscribeEvents);
       mgr.clear();
       staleCallback({ data: { entity_id: 'sensor.a' } });
       expect(onMatch).not.toHaveBeenCalled();

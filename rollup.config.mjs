@@ -5,7 +5,7 @@ import typescript from '@rollup/plugin-typescript';
 const version = process.env.VERSION ?? '0.0.0-dev';
 
 export default {
-  input: 'src/index.js',
+  input: 'src/index.ts',
   output: {
     file: 'dist/card.js',
     format: 'es',

@@ -107,6 +107,11 @@ describe('scoreColor', () => {
     expect(scoreColor('away', 'IN', homeAttr)).toBe('black');
   });
 
+  it('treats undefined scores as 0 during IN', () => {
+    const attr = { ...homeAttr, team_score: undefined, opponent_score: undefined };
+    expect(scoreColor('home', 'IN', attr)).toBe('brown'); // tied at 0-0: home side ts>=os
+  });
+
   it('returns orange for winner and darkgray for loser in POST', () => {
     expect(scoreColor('home', 'POST', homeAttr)).toBe('orange');
     expect(scoreColor('away', 'POST', homeAttr)).toBe('darkgray');

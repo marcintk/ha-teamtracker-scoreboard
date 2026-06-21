@@ -2,9 +2,22 @@ import { DebugMetrics } from './debug.js';
 import { sectionHtml } from './render.js';
 import { CARD_STYLES } from './styles.js';
 import { SubscriptionManager } from './subscription.js';
+import type { CardConfig, HomeAssistant } from './types.js';
 import { esc } from './utils.js';
 
-class SportScoreboardCard extends HTMLElement {
+export class SportScoreboardCard extends HTMLElement {
+  _config: CardConfig | null;
+  _hass: HomeAssistant | null;
+  _fixedTimer: ReturnType<typeof setInterval> | null;
+  _debugTimer: ReturnType<typeof setInterval> | null;
+  _renderTimer: ReturnType<typeof setTimeout> | null;
+  _trackedIds: Set<string> | null;
+  _trackedByPrefix: Map<string, string[]> | null;
+  _stateKeyCount: number;
+  _lastBody: string | null;
+  _subscription: SubscriptionManager;
+  _debug: DebugMetrics;
+
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -21,7 +34,7 @@ class SportScoreboardCard extends HTMLElement {
     this._debug = new DebugMetrics();
   }
 
-  setConfig(config) {
+  setConfig(config: CardConfig): void {
     this._config = config;
     this._clearSubscription();
     this._trackedIds = null;
@@ -35,7 +48,7 @@ class SportScoreboardCard extends HTMLElement {
     }
   }
 
-  set hass(hass) {
+  set hass(hass: HomeAssistant) {
     const isFirstCall = !this._trackedIds;
     const connectionChanged = !isFirstCall && this._hass?.connection !== hass.connection;
     const prevHass = this._hass;
@@ -57,14 +70,14 @@ class SportScoreboardCard extends HTMLElement {
     }
   }
 
-  _getRefreshConfig() {
+  _getRefreshConfig(): { lazyMs: number; fixedMs: number } {
     return {
       lazyMs: (this._config?.lazy_refresh ?? 1) * 1000,
       fixedMs: (this._config?.fixed_refresh ?? 60) * 1000,
     };
   }
 
-  _scheduleRender() {
+  _scheduleRender(): void {
     if (this._renderTimer) return;
     if (this._config?.debug) this._debug.track('filtered');
     const { lazyMs } = this._getRefreshConfig();
@@ -78,14 +91,14 @@ class SportScoreboardCard extends HTMLElement {
     }, lazyMs);
   }
 
-  _cancelRenderTimer() {
+  _cancelRenderTimer(): void {
     if (this._renderTimer) {
       clearTimeout(this._renderTimer);
       this._renderTimer = null;
     }
   }
 
-  _subscribe() {
+  _subscribe(): void {
     if (!this._config || !this._hass?.connection) return;
     this._subscription.subscribe(this._hass.connection, this._trackedIds, () => {
       if (this._config?.debug) this._debug.track('events');
@@ -93,17 +106,17 @@ class SportScoreboardCard extends HTMLElement {
     });
   }
 
-  _clearSubscription() {
+  _clearSubscription(): void {
     this._subscription.clear();
     this._cancelRenderTimer();
   }
 
-  _updateDebugOverlay() {
+  _updateDebugOverlay(): void {
     const overlay = this.shadowRoot?.querySelector('#sc-debug');
     if (overlay) overlay.innerHTML = this._debug.tableHtml();
   }
 
-  _startFixedTimer() {
+  _startFixedTimer(): void {
     this._stopFixedTimer();
     const { fixedMs } = this._getRefreshConfig();
     if (fixedMs > 0) {
@@ -116,7 +129,7 @@ class SportScoreboardCard extends HTMLElement {
     }
   }
 
-  _stopFixedTimer() {
+  _stopFixedTimer(): void {
     if (this._fixedTimer) {
       clearInterval(this._fixedTimer);
       this._fixedTimer = null;
@@ -127,40 +140,40 @@ class SportScoreboardCard extends HTMLElement {
     }
   }
 
-  disconnectedCallback() {
+  disconnectedCallback(): void {
     this._stopFixedTimer();
     this._clearSubscription();
   }
 
-  _buildTrackedIds(stateKeys) {
+  _buildTrackedIds(stateKeys: string[]): void {
     if (stateKeys.length === this._stateKeyCount) return;
     this._stateKeyCount = stateKeys.length;
-    const prefixes = (this._config?.sections ?? []).map((s) => s.prefix);
+    const prefixes = (this._config?.sections ?? []).map((s) => s.prefix ?? '');
     this._trackedIds = new Set();
     this._trackedByPrefix = new Map(prefixes.map((p) => [p, []]));
     for (const id of stateKeys) {
       for (const p of prefixes) {
         if (id.startsWith(p)) {
           this._trackedIds.add(id);
-          this._trackedByPrefix.get(p).push(id);
+          this._trackedByPrefix.get(p)?.push(id);
           break;
         }
       }
     }
   }
 
-  _hasRelevantChange(newHass, prevHass) {
-    if (!prevHass || !this._config) return true;
+  _hasRelevantChange(newHass: HomeAssistant, prevHass: HomeAssistant | null): boolean {
+    if (!prevHass || !this._config || !this._trackedIds) return true;
     for (const id of this._trackedIds) {
       if (newHass.states[id] !== prevHass.states[id]) return true;
     }
     return false;
   }
 
-  _render() {
+  _render(): void {
     try {
-      const { sections, height, colors = {}, debug } = this._config;
-      const states = this._hass.states;
+      const { sections, height, colors = {}, debug } = this._config as CardConfig;
+      const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
       this._buildTrackedIds(stateKeys);
 
@@ -169,7 +182,7 @@ class SportScoreboardCard extends HTMLElement {
         return;
       }
       const body = sections
-        .map((s) => sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix), colors))
+        .map((s) => sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix ?? ''), colors))
         .join('');
 
       if (body === this._lastBody) return;
@@ -183,32 +196,36 @@ class SportScoreboardCard extends HTMLElement {
         ? `.section-header{color:${esc(String(colors.header))}}`
         : '';
 
-      this.shadowRoot.innerHTML = `
-        <style>${CARD_STYLES}${headerOverride}</style>
-        <ha-card style="${heightStyle}${debug ? 'position:relative;' : ''}">
-          ${debug ? this._debug.html() : ''}
-          ${debug ? `<div id="sc-version" style="position:absolute;top:2px;right:4px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>` : ''}
-          ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
-        </ha-card>
-      `;
+      if (this.shadowRoot) {
+        this.shadowRoot.innerHTML = `
+          <style>${CARD_STYLES}${headerOverride}</style>
+          <ha-card style="${heightStyle}${debug ? 'position:relative;' : ''}">
+            ${debug ? this._debug.html() : ''}
+            ${debug ? `<div id="sc-version" style="position:absolute;top:2px;right:4px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>` : ''}
+            ${body || '<div class="empty">No games found — check your section prefixes.</div>'}
+          </ha-card>
+        `;
+      }
     } catch (e) {
-      this._showError(e.message);
+      this._showError((e as Error).message);
       // biome-ignore lint/suspicious/noConsole: intentional render error logging
       console.error('ha-teamtracker-scoreboard-card render error:', e);
     }
   }
 
-  _showError(msg) {
-    this.shadowRoot.innerHTML = `
-      <ha-card>
-        <div style="padding:12px;color:var(--error-color,red);font-size:13px;">
-          <b>ha-teamtracker-scoreboard-card error:</b><br>${esc(msg)}
-        </div>
-      </ha-card>
-    `;
+  _showError(msg: string): void {
+    /* v8 ignore next */ if (this.shadowRoot) {
+      this.shadowRoot.innerHTML = `
+        <ha-card>
+          <div style="padding:12px;color:var(--error-color,red);font-size:13px;">
+            <b>ha-teamtracker-scoreboard-card error:</b><br>${esc(msg)}
+          </div>
+        </ha-card>
+      `;
+    }
   }
 
-  getCardSize() {
+  getCardSize(): number {
     if (this._config?.height) {
       const px = parseInt(this._config.height, 10);
       if (Number.isFinite(px)) return Math.ceil(px / 50);
@@ -217,7 +234,7 @@ class SportScoreboardCard extends HTMLElement {
     return Math.max(1, Math.ceil((rows * 28) / 50));
   }
 
-  static getStubConfig() {
+  static getStubConfig(): CardConfig {
     return {
       sections: [
         {

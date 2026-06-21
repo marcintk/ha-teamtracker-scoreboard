@@ -52,7 +52,7 @@ export interface HomeAssistant {
 
 export interface SectionConfig {
   name?: string;
-  prefix: string;
+  prefix?: string;
   limit?: number;
   special_teams?: string[];
   rank_type?: SortMode;
@@ -69,8 +69,16 @@ export interface ColorsConfig {
   live?: string;
 }
 
+export interface SortItem {
+  entityId: string;
+  teamName?: string;
+  special?: boolean;
+  key?: number;
+  opponentSpecial?: boolean;
+}
+
 export interface CardConfig {
-  sections: SectionConfig[];
+  sections?: SectionConfig[];
   height?: string;
   colors?: ColorsConfig;
   debug?: boolean;

@@ -1,10 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '../src/index.js';
+import type { SportScoreboardCard } from '../src/index.js';
+import type { GameAttr, HassStates, HomeAssistant } from '../src/types.js';
 
-const makeHass = (states = {}) => ({ states });
-const makeState = (state, attrs = {}) => ({ state, attributes: attrs });
+type SubscribeCallback = (event: { data: { entity_id: string } }) => void;
+const getCallback = (fn: ReturnType<typeof vi.fn>): SubscribeCallback =>
+  (fn.mock.calls as [[SubscribeCallback]])[0][0];
 
-const baseAttrs = {
+const makeHass = (states: HassStates = {}): HomeAssistant =>
+  ({ states }) as unknown as HomeAssistant;
+const makeState = (state: string, attrs: GameAttr = {}) => ({ state, attributes: attrs });
+
+const baseAttrs: GameAttr = {
   team_homeaway: 'home',
   team_name: 'Lakers',
   opponent_name: 'Celtics',
@@ -23,18 +30,18 @@ const nbaSection = {
   name: 'NBA',
   prefix: 'sensor.nba_',
   limit: 10,
-  special_teams: [],
-  rank_type: 'win-loss',
+  special_teams: [] as string[],
+  rank_type: 'win-loss' as const,
 };
 
-function makeCard() {
-  return document.createElement('ha-teamtracker-scoreboard-card');
+function makeCard(): SportScoreboardCard {
+  return document.createElement('ha-teamtracker-scoreboard-card') as unknown as SportScoreboardCard;
 }
 
-function makeHassWithConnection(states = {}) {
+function makeHassWithConnection(states: HassStates = {}) {
   const unsub = vi.fn();
   const connection = { subscribeEvents: vi.fn().mockResolvedValue(unsub) };
-  return { hass: { states, connection }, unsub, connection };
+  return { hass: { states, connection } as unknown as HomeAssistant, unsub, connection };
 }
 
 describe('SportScoreboardCard', () => {
@@ -46,16 +53,18 @@ describe('SportScoreboardCard', () => {
     it('adds entry to window.customCards', () => {
       const entry = window.customCards?.find((c) => c.type === 'ha-teamtracker-scoreboard-card');
       expect(entry).toBeDefined();
-      expect(entry.name).toBe('TeamTracker Scoreboard Card');
+      expect(entry?.name).toBe('TeamTracker Scoreboard Card');
     });
   });
 
   describe('getStubConfig', () => {
     it('returns a valid default config shape', () => {
-      const Cls = customElements.get('ha-teamtracker-scoreboard-card');
-      const config = Cls.getStubConfig();
-      expect(Array.isArray(config.sections)).toBe(true);
-      expect(config.sections.length).toBeGreaterThan(0);
+      const Cls = customElements.get('ha-teamtracker-scoreboard-card') as
+        | typeof SportScoreboardCard
+        | undefined;
+      const config = Cls?.getStubConfig();
+      expect(Array.isArray(config?.sections)).toBe(true);
+      expect(config?.sections?.length).toBeGreaterThan(0);
       expect(config).not.toHaveProperty('height');
     });
   });
@@ -123,23 +132,30 @@ describe('SportScoreboardCard', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._buildTrackedIds(['sensor.nba_lal', 'sensor.nhl_bos', 'sensor.weather_london']);
-      expect(card._trackedIds.has('sensor.nba_lal')).toBe(true);
-      expect(card._trackedIds.has('sensor.nhl_bos')).toBe(false);
-      expect(card._trackedIds.has('sensor.weather_london')).toBe(false);
+      expect(card._trackedIds?.has('sensor.nba_lal')).toBe(true);
+      expect(card._trackedIds?.has('sensor.nhl_bos')).toBe(false);
+      expect(card._trackedIds?.has('sensor.weather_london')).toBe(false);
     });
 
     it('produces an empty set when no prefix matches', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._buildTrackedIds(['sensor.weather_london', 'sensor.sun']);
-      expect(card._trackedIds.size).toBe(0);
+      expect(card._trackedIds?.size).toBe(0);
     });
 
     it('produces an empty set when config has no sections', () => {
       const card = makeCard();
       card._config = {};
       card._buildTrackedIds(['sensor.nba_lal']);
-      expect(card._trackedIds.size).toBe(0);
+      expect(card._trackedIds?.size).toBe(0);
+    });
+
+    it('matches all entities when section has no prefix', () => {
+      const card = makeCard();
+      card._config = { sections: [{ name: 'All' }] };
+      card._buildTrackedIds(['sensor.nba_lal', 'sensor.weather']);
+      expect(card._trackedIds?.size).toBe(2);
     });
   });
 
@@ -147,20 +163,20 @@ describe('SportScoreboardCard', () => {
     it('stores the provided config', () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
-      expect(card._config.sections).toHaveLength(1);
+      expect(card._config?.sections).toHaveLength(1);
     });
 
     it('triggers render immediately when hass is already set', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card.setConfig({ sections: [nbaSection] });
-      expect(card.shadowRoot.innerHTML).toContain('ha-card');
+      expect(card.shadowRoot?.innerHTML).toContain('ha-card');
     });
 
     it('does not render when hass is not yet set', () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
-      expect(card.shadowRoot.innerHTML).toBe('');
+      expect(card.shadowRoot?.innerHTML).toBe('');
     });
 
     it('invalidates _trackedIds so it is rebuilt on the next hass push', () => {
@@ -176,13 +192,13 @@ describe('SportScoreboardCard', () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
       card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      expect(card.shadowRoot.innerHTML).toContain('ha-card');
+      expect(card.shadowRoot?.innerHTML).toContain('ha-card');
     });
 
     it('does not render when no config is set', () => {
       const card = makeCard();
       card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
-      expect(card.shadowRoot.innerHTML).toBe('');
+      expect(card.shadowRoot?.innerHTML).toBe('');
     });
 
     it('builds _trackedIds on first assignment', () => {
@@ -190,7 +206,7 @@ describe('SportScoreboardCard', () => {
       card.setConfig({ sections: [nbaSection] });
       card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       expect(card._trackedIds).toBeInstanceOf(Set);
-      expect(card._trackedIds.has('sensor.nba_lal')).toBe(true);
+      expect(card._trackedIds?.has('sensor.nba_lal')).toBe(true);
     });
 
     it('refreshes _trackedIds on render so newly-added sensors are picked up', () => {
@@ -199,7 +215,7 @@ describe('SportScoreboardCard', () => {
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._trackedIds = new Set(); // simulate stale empty cache
       card._render();
-      expect(card._trackedIds.has('sensor.nba_lal')).toBe(true);
+      expect(card._trackedIds?.has('sensor.nba_lal')).toBe(true);
     });
 
     it('skips _trackedIds rebuild when already populated and no render follows', () => {
@@ -255,8 +271,8 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('ha-card');
-      expect(card.shadowRoot.innerHTML).toContain('Lakers');
+      expect(card.shadowRoot?.innerHTML).toContain('ha-card');
+      expect(card.shadowRoot?.innerHTML).toContain('Lakers');
     });
 
     it('shows no-games message when no entities match the prefix', () => {
@@ -264,7 +280,15 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({});
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('No games found');
+      expect(card.shadowRoot?.innerHTML).toContain('No games found');
+    });
+
+    it('renders section with no prefix defined (matches all entities)', () => {
+      const card = makeCard();
+      card._config = { sections: [{ name: 'All' }] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._render();
+      expect(card.shadowRoot?.innerHTML).toContain('ha-card');
     });
 
     it('applies custom height to ha-card style', () => {
@@ -272,7 +296,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], height: '300px' };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('300px');
+      expect(card.shadowRoot?.innerHTML).toContain('300px');
     });
 
     it('passes colors config through to row rendering', () => {
@@ -283,7 +307,7 @@ describe('SportScoreboardCard', () => {
       };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('gold');
+      expect(card.shadowRoot?.innerHTML).toContain('gold');
     });
 
     it('injects header color override into style block', () => {
@@ -291,15 +315,15 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], colors: { header: 'tomato' } };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('.section-header{color:tomato}');
+      expect(card.shadowRoot?.innerHTML).toContain('.section-header{color:tomato}');
     });
 
     it('shows error when sections is not an array', () => {
       const card = makeCard();
-      card._config = { sections: null };
+      card._config = { sections: null } as unknown as typeof card._config;
       card._hass = makeHass({});
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('error');
+      expect(card.shadowRoot?.innerHTML).toContain('error');
     });
 
     it('shows error when sections array is empty', () => {
@@ -307,7 +331,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [] };
       card._hass = makeHass({});
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('error');
+      expect(card.shadowRoot?.innerHTML).toContain('error');
     });
 
     it('shows error when render throws internally', () => {
@@ -315,7 +339,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection] };
       card._hass = null; // accessing .states throws
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('error');
+      expect(card.shadowRoot?.innerHTML).toContain('error');
     });
 
     it('initializes _lastBody to null', () => {
@@ -470,7 +494,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(card._renderTimer).not.toBeNull();
     });
@@ -483,7 +507,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       callback({ data: { entity_id: 'sensor.weather_london' } });
       expect(card._renderTimer).toBeNull();
     });
@@ -496,7 +520,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       const renderSpy = vi.spyOn(card, '_render');
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(renderSpy).not.toHaveBeenCalled();
@@ -513,7 +537,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       const renderSpy = vi.spyOn(card, '_render');
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(renderSpy).toHaveBeenCalledTimes(1);
@@ -541,7 +565,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       const renderSpy = vi.spyOn(card, '_render');
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       callback({ data: { entity_id: 'sensor.nba_lal' } });
@@ -558,7 +582,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       const renderSpy = vi.spyOn(card, '_render');
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       vi.advanceTimersByTime(1000);
@@ -576,7 +600,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(card._renderTimer).not.toBeNull();
       card._clearSubscription();
@@ -593,7 +617,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const staleCallback = connection.subscribeEvents.mock.calls[0][0];
+      const staleCallback = getCallback(connection.subscribeEvents);
       card._clearSubscription();
       staleCallback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(card._renderTimer).toBeNull();
@@ -684,7 +708,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(card._debug._data.events).toHaveLength(1);
     });
@@ -697,7 +721,7 @@ describe('SportScoreboardCard', () => {
       });
       card.hass = hass;
       await Promise.resolve();
-      const callback = connection.subscribeEvents.mock.calls[0][0];
+      const callback = getCallback(connection.subscribeEvents);
       callback({ data: { entity_id: 'sensor.nba_lal' } });
       expect(card._debug._data.events).toHaveLength(0);
     });
@@ -742,14 +766,14 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('events');
-      expect(card.shadowRoot.innerHTML).toContain('filtered');
-      expect(card.shadowRoot.innerHTML).toContain('rendered');
-      expect(card.shadowRoot.innerHTML).toContain('5m');
-      expect(card.shadowRoot.innerHTML).toContain('15m');
-      expect(card.shadowRoot.innerHTML).toContain('30m');
-      expect(card.shadowRoot.innerHTML).toContain('1h');
-      expect(card.shadowRoot.innerHTML).toContain('3h');
+      expect(card.shadowRoot?.innerHTML).toContain('events');
+      expect(card.shadowRoot?.innerHTML).toContain('filtered');
+      expect(card.shadowRoot?.innerHTML).toContain('rendered');
+      expect(card.shadowRoot?.innerHTML).toContain('5m');
+      expect(card.shadowRoot?.innerHTML).toContain('15m');
+      expect(card.shadowRoot?.innerHTML).toContain('30m');
+      expect(card.shadowRoot?.innerHTML).toContain('1h');
+      expect(card.shadowRoot?.innerHTML).toContain('3h');
     });
 
     it('debug pane is positioned at the bottom', () => {
@@ -757,7 +781,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('bottom:0');
+      expect(card.shadowRoot?.innerHTML).toContain('bottom:0');
     });
 
     it('debug pane shows last render timestamp', () => {
@@ -767,9 +791,9 @@ describe('SportScoreboardCard', () => {
       const fixed = new Date('2026-06-13T10:01:46.123Z');
       vi.setSystemTime(fixed);
       card._render();
-      const pad = (n, w = 2) => String(n).padStart(w, '0');
+      const pad = (n: number, w = 2) => String(n).padStart(w, '0');
       const expected = `${pad(fixed.getHours())}:${pad(fixed.getMinutes())}:${pad(fixed.getSeconds())}.${pad(fixed.getMilliseconds(), 3)}`;
-      expect(card.shadowRoot.innerHTML).toContain(expected);
+      expect(card.shadowRoot?.innerHTML).toContain(expected);
     });
 
     it('in debug mode 5s overlay timer fires every 5 seconds regardless of fixed_refresh', () => {
@@ -818,8 +842,9 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      const overlay = card.shadowRoot.querySelector('#sc-debug');
+      const overlay = card.shadowRoot?.querySelector('#sc-debug');
       expect(overlay).not.toBeNull();
+      if (!overlay) return;
       const before = overlay.innerHTML;
       card._debug.track('rendered');
       card._updateDebugOverlay();
@@ -839,7 +864,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).not.toContain('pointer-events:none');
+      expect(card.shadowRoot?.innerHTML).not.toContain('pointer-events:none');
     });
 
     it('ha-card gets position:relative when debug is true', () => {
@@ -847,7 +872,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('position:relative');
+      expect(card.shadowRoot?.innerHTML).toContain('position:relative');
     });
 
     it('debug mode shows card version badge', () => {
@@ -855,8 +880,8 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).toContain('sc-version');
-      expect(card.shadowRoot.innerHTML).toContain('test');
+      expect(card.shadowRoot?.innerHTML).toContain('sc-version');
+      expect(card.shadowRoot?.innerHTML).toContain('test');
     });
 
     it('version badge is absent when debug is false', () => {
@@ -864,7 +889,7 @@ describe('SportScoreboardCard', () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot.innerHTML).not.toContain('sc-version');
+      expect(card.shadowRoot?.innerHTML).not.toContain('sc-version');
     });
   });
 
@@ -872,15 +897,15 @@ describe('SportScoreboardCard', () => {
     it('renders error message in shadow DOM', () => {
       const card = makeCard();
       card._showError('Something went wrong');
-      expect(card.shadowRoot.innerHTML).toContain('Something went wrong');
-      expect(card.shadowRoot.innerHTML).toContain('ha-card');
+      expect(card.shadowRoot?.innerHTML).toContain('Something went wrong');
+      expect(card.shadowRoot?.innerHTML).toContain('ha-card');
     });
 
     it('escapes HTML in the error message', () => {
       const card = makeCard();
       card._showError('<script>alert(1)</script>');
-      expect(card.shadowRoot.innerHTML).toContain('&lt;script&gt;');
-      expect(card.shadowRoot.innerHTML).not.toContain('<script>alert');
+      expect(card.shadowRoot?.innerHTML).toContain('&lt;script&gt;');
+      expect(card.shadowRoot?.innerHTML).not.toContain('<script>alert');
     });
   });
 });
