@@ -122,9 +122,14 @@ export class SportScoreboardCard extends HTMLElement {
     }
     if (this._config?.debug) {
       this._debugTimer = setInterval(() => {
-        if (this._hass && this._config) this._render();
-      }, 5000);
+        if (this._hass && this._config) this._refreshDebugOverlay();
+      }, 1000);
     }
+  }
+
+  _refreshDebugOverlay(): void {
+    const el = this._root.querySelector('#sc-debug');
+    if (el) el.innerHTML = this._debug.tableHtml();
   }
 
   _stopFixedTimer(): void {

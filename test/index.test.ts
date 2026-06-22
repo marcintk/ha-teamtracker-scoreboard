@@ -775,26 +775,30 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot?.innerHTML).toContain(expected);
     });
 
-    it('in debug mode 5s timer calls _render every 5 seconds', () => {
+    it('in debug mode 1s timer calls _refreshDebugOverlay every second', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card.setConfig({ sections: [nbaSection], debug: true, fixed_refresh: 300 });
       const renderSpy = vi.spyOn(card, '_render');
-      vi.advanceTimersByTime(4_999);
-      expect(renderSpy).toHaveBeenCalledTimes(0);
+      const refreshSpy = vi.spyOn(card, '_refreshDebugOverlay');
+      vi.advanceTimersByTime(999);
+      expect(refreshSpy).toHaveBeenCalledTimes(0);
       vi.advanceTimersByTime(1);
-      expect(renderSpy).toHaveBeenCalledTimes(1);
-      vi.advanceTimersByTime(5_000);
-      expect(renderSpy).toHaveBeenCalledTimes(2);
+      expect(refreshSpy).toHaveBeenCalledTimes(1);
+      expect(renderSpy).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1_000);
+      expect(refreshSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('in debug mode 5s timer calls _render (not a separate overlay method)', () => {
+    it('in debug mode 1s timer calls _refreshDebugOverlay and does not call _render', () => {
       const card = makeCard();
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card.setConfig({ sections: [nbaSection], debug: true });
       const renderSpy = vi.spyOn(card, '_render');
-      vi.advanceTimersByTime(5_000);
-      expect(renderSpy).toHaveBeenCalledTimes(1);
+      const refreshSpy = vi.spyOn(card, '_refreshDebugOverlay');
+      vi.advanceTimersByTime(1_000);
+      expect(renderSpy).not.toHaveBeenCalled();
+      expect(refreshSpy).toHaveBeenCalled();
     });
 
     it('in debug mode fixed_refresh timer triggers _render', () => {
@@ -806,12 +810,12 @@ describe('SportScoreboardCard', () => {
       expect(renderSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('does not render when debug timer fires before hass is assigned', () => {
+    it('does not call _refreshDebugOverlay when debug timer fires before hass is assigned', () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection], debug: true });
-      const renderSpy = vi.spyOn(card, '_render');
-      vi.advanceTimersByTime(5_000);
-      expect(renderSpy).not.toHaveBeenCalled();
+      const refreshSpy = vi.spyOn(card, '_refreshDebugOverlay');
+      vi.advanceTimersByTime(1_000);
+      expect(refreshSpy).not.toHaveBeenCalled();
     });
 
     it('clears _debugTimer on disconnectedCallback in debug mode', () => {
@@ -866,6 +870,31 @@ describe('SportScoreboardCard', () => {
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
       expect(card.shadowRoot?.innerHTML).not.toContain('sc-version');
+    });
+  });
+
+  describe('_refreshDebugOverlay', () => {
+    it('patches #sc-debug innerHTML without invoking _render', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], debug: true };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._trackedIds = new Set();
+      card._render();
+      const renderSpy = vi.spyOn(card, '_render');
+      const tableSpy = vi.spyOn(card._debug, 'tableHtml');
+      card._refreshDebugOverlay();
+      expect(renderSpy).not.toHaveBeenCalled();
+      expect(tableSpy).toHaveBeenCalled();
+      expect(card.shadowRoot?.querySelector('#sc-debug')).not.toBeNull();
+    });
+
+    it('does nothing when #sc-debug is absent', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      card._trackedIds = new Set();
+      card._render();
+      expect(() => card._refreshDebugOverlay()).not.toThrow();
     });
   });
 
