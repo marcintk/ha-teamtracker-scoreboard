@@ -43,6 +43,8 @@ export function messageHtml(
       const sub = city && odds ? `${city}, ${odds}` : city || odds;
       return html`<span style="color:darkgray">${kickoff}</span>${sub ? html`<span class="msg-sub">${sub}</span>` : nothing}`;
     }
+    case 'BYE':
+      return html`<span style="color:darkgray">Bye</span>`;
     case 'IN': {
       const clock = attr.clock ?? '';
       const raw = String(attr.last_play ?? '');

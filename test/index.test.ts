@@ -157,6 +157,17 @@ describe('SportScoreboardCard', () => {
       card._buildTrackedIds(['sensor.nba_lal', 'sensor.weather']);
       expect(card._trackedIds?.size).toBe(2);
     });
+
+    it('rebuilds _trackedIds when an entity swaps in at the same total count', () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._buildTrackedIds(['sensor.nba_lal', 'sensor.weather']);
+      expect(card._trackedIds?.has('sensor.nba_lal')).toBe(true);
+      // same count, different entity — must rebuild
+      card._buildTrackedIds(['sensor.nba_bos', 'sensor.weather']);
+      expect(card._trackedIds?.has('sensor.nba_bos')).toBe(true);
+      expect(card._trackedIds?.has('sensor.nba_lal')).toBe(false);
+    });
   });
 
   describe('setConfig', () => {
@@ -310,12 +321,13 @@ describe('SportScoreboardCard', () => {
       expect(card.shadowRoot?.innerHTML).toContain('gold');
     });
 
-    it('injects header color override into style block', () => {
+    it('applies header color as inline style on section header element', () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], colors: { header: 'tomato' } };
       card._hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).toContain('.section-header{color:tomato}');
+      const header = card.shadowRoot?.querySelector('.section-header') as HTMLElement | null;
+      expect(header?.style.color).toBe('tomato');
     });
 
     it('shows error when sections is not an array', () => {
@@ -413,6 +425,15 @@ describe('SportScoreboardCard', () => {
       card.setConfig({ sections: [nbaSection], fixed_refresh: 30 });
       card.disconnectedCallback();
       expect(card._fixedTimer).toBeNull();
+    });
+
+    it('nulls _trackedIds on disconnectedCallback so subscription re-establishes on re-insertion', () => {
+      const card = makeCard();
+      card.setConfig({ sections: [nbaSection] });
+      card.hass = makeHass({ 'sensor.nba_lal': makeState('PRE', baseAttrs) });
+      expect(card._trackedIds).not.toBeNull();
+      card.disconnectedCallback();
+      expect(card._trackedIds).toBeNull();
     });
 
     it('does not render when timer fires before hass is assigned', () => {

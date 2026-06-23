@@ -146,10 +146,10 @@ export class SportScoreboardCard extends HTMLElement {
   disconnectedCallback(): void {
     this._stopFixedTimer();
     this._clearSubscription();
+    this._trackedIds = null;
   }
 
   _buildTrackedIds(stateKeys: string[]): void {
-    if (stateKeys.length === this._stateKeyCount) return;
     this._stateKeyCount = stateKeys.length;
     const prefixes = (this._config?.sections ?? []).map((s) => s.prefix ?? '');
     this._trackedIds = new Set();
@@ -190,7 +190,6 @@ export class SportScoreboardCard extends HTMLElement {
       const haCardStyle =
         `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ''}${debug ? 'position:relative;' : ''}` ||
         undefined;
-      const headerOverride = colors.header ? `.section-header{color:${String(colors.header)}}` : '';
 
       const sectionTemplates = sections.map((s) =>
         sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix ?? ''), colors)
@@ -199,7 +198,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       render(
         html`
-          ${_STYLE_BLOCK}${headerOverride ? unsafeHTML(`<style>${headerOverride}</style>`) : nothing}
+          ${_STYLE_BLOCK}
           <ha-card style=${haCardStyle ?? nothing}>
             ${debug ? unsafeHTML(this._debug.html()) : nothing}
             ${
