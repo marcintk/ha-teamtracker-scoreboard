@@ -1,5 +1,8 @@
 # Development
 
+Before writing custom code for any problem, read `package.json` to know what dependencies are
+already available and reach for those first.
+
 ```bash
 npm install
 npm run build          # bundle src/ → dist/card.js

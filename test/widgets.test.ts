@@ -227,4 +227,15 @@ describe('messageHtml', () => {
     const el = doc(messageHtml('POST', { clock: 'Final' }, { winner: 'gold' }));
     expect(el.querySelector('span')?.getAttribute('style')).toContain('gold');
   });
+
+  it('renders a bye label for BYE state', () => {
+    const el = doc(messageHtml('BYE', {}));
+    expect(el.textContent?.trim().toLowerCase()).toContain('bye');
+  });
+
+  it('does not render orange clock/series for BYE state', () => {
+    const el = doc(messageHtml('BYE', { clock: '', series_summary: '' }));
+    // BYE should not fall through to the POST branch's orange clock span
+    expect(el.querySelector('span')?.getAttribute('style') ?? '').not.toContain('orange');
+  });
 });

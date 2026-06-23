@@ -7,22 +7,21 @@
 import type { GameAttr, HassStates, SortItem, SortMode } from './types.js';
 
 export function winRatio(record: unknown, sortMode: SortMode): number {
-  const [w = 0, d = 0, l = 0] = String(record ?? '0-0')
+  const parts = String(record ?? '0-0')
     .split('-')
     .map(Number);
+  const p = (i: number): number => parts[i] ?? 0;
+
   if (sortMode === 'win-draw-loss') {
-    // points = 3W + D, max possible = 3(W+D+L)
-    const total = w + d + l;
-    return total ? (3 * w + d) / (3 * total) : 0;
+    const [w, d, l] = [p(0), p(1), p(2)]; // W-D-L
+    return w + d + l ? (3 * w + d) / (3 * (w + d + l)) : 0;
   }
   if (sortMode === 'win-loss-otl') {
-    // points = 2W + OTL, max possible = 2(W+L+OTL)  — record order: W-L-OTL
-    const total = w + d + l;
-    return total ? (2 * w + l) / (2 * total) : 0;
+    const [w, l, otl] = [p(0), p(1), p(2)]; // W-L-OTL
+    return w + l + otl ? (2 * w + otl) / (2 * (w + l + otl)) : 0;
   }
-  // win-loss: W/(W+L)
-  const total = w + d;
-  return total ? w / total : 0;
+  const [w, l] = [p(0), p(1)]; // win-loss: W-L
+  return w + l ? w / (w + l) : 0;
 }
 
 export function sortKeyFor(attr: GameAttr | null | undefined, sortMode: SortMode): number {
