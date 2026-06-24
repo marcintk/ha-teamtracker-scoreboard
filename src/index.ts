@@ -17,7 +17,6 @@ export class SportScoreboardCard extends HTMLElement {
   _renderTimer: ReturnType<typeof setTimeout> | null;
   _trackedIds: Set<string> | null;
   _trackedByPrefix: Map<string, string[]> | null;
-  _stateKeyCount: number;
   _subscription: SubscriptionManager;
   _debug: DebugMetrics;
 
@@ -31,7 +30,6 @@ export class SportScoreboardCard extends HTMLElement {
     this._renderTimer = null;
     this._trackedIds = null;
     this._trackedByPrefix = null;
-    this._stateKeyCount = 0;
     this._subscription = new SubscriptionManager();
     this._debug = new DebugMetrics();
   }
@@ -41,7 +39,6 @@ export class SportScoreboardCard extends HTMLElement {
     this._clearSubscription();
     this._trackedIds = null;
     this._trackedByPrefix = null;
-    this._stateKeyCount = 0;
     this._startFixedTimer();
     if (this._hass) {
       this._render();
@@ -139,7 +136,6 @@ export class SportScoreboardCard extends HTMLElement {
   }
 
   _buildTrackedIds(stateKeys: string[]): void {
-    this._stateKeyCount = stateKeys.length;
     const prefixes = (this._config?.sections ?? []).map((s) => s.prefix ?? '');
     this._trackedIds = new Set();
     this._trackedByPrefix = new Map(prefixes.map((p) => [p, []]));
