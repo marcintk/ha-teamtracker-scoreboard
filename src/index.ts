@@ -176,9 +176,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track('rendered');
 
-      const haCardStyle =
-        `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ''}${debug ? 'position:relative;' : ''}` ||
-        undefined;
+      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ''}${debug ? 'position:relative;' : ''}`;
 
       const sectionTemplates = sections.map((s) =>
         sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix ?? ''), colors)
@@ -188,7 +186,7 @@ export class SportScoreboardCard extends HTMLElement {
       render(
         html`
           ${_STYLE_BLOCK}
-          <ha-card style=${haCardStyle ?? nothing}>
+          <ha-card style=${haCardStyle || nothing}>
             ${debug ? unsafeHTML(this._debug.html()) : nothing}
             ${
               debug

@@ -29,7 +29,7 @@ export class DebugMetrics {
     if (i) arr.splice(0, i);
   }
 
-  counts(key: DebugKey): DebugCounts {
+  counts(key: DebugKey) {
     const now = Date.now();
     const arr = this._data[key];
     let min1 = 0,
