@@ -6,7 +6,7 @@ import { CARD_STYLES } from './styles.js';
 import { SubscriptionManager } from './subscription.js';
 import type { CardConfig, HomeAssistant } from './types.js';
 
-const _STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
+const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
 
 export class SportScoreboardCard extends HTMLElement {
   readonly _root: ShadowRoot;
@@ -181,7 +181,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       render(
         html`
-          ${_STYLE_BLOCK}
+          ${STYLE_BLOCK}
           <ha-card style=${haCardStyle || nothing}>
             ${debug ? unsafeHTML(this._debug.html()) : nothing}
             ${
