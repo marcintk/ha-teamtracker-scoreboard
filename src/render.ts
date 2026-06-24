@@ -1,5 +1,4 @@
 import { html, nothing, type TemplateResult } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
 import {
   colonColor,
   isTeamSide,
@@ -93,5 +92,5 @@ export function sectionHtml(
     );
 
   if (!rows.length) return nothing;
-  return html`<div class="section-header" style=${styleMap({ color: colors.header ?? null })}>${name}</div>${rows}`;
+  return html`<div class="section-header" style=${colors.header ? `color:${colors.header}` : nothing}>${name}</div>${rows}`;
 }
