@@ -1,6 +1,5 @@
 import type { ColorsConfig, GameAttr, GameState } from './types.js';
 
-// Returns true when `side` ('home'|'away') matches the sensor's tracked team.
 export function isTeamSide(side: 'home' | 'away', attr: GameAttr): boolean {
   return side === 'home' ? attr?.team_homeaway === 'home' : attr?.team_homeaway !== 'home';
 }
