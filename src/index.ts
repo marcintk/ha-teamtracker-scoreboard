@@ -6,7 +6,7 @@ import { CARD_STYLES } from './styles.js';
 import { SubscriptionManager } from './subscription.js';
 import type { CardConfig, HomeAssistant } from './types.js';
 
-const _STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
+const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
 
 export class SportScoreboardCard extends HTMLElement {
   readonly _root: ShadowRoot;
@@ -17,7 +17,6 @@ export class SportScoreboardCard extends HTMLElement {
   _renderTimer: ReturnType<typeof setTimeout> | null;
   _trackedIds: Set<string> | null;
   _trackedByPrefix: Map<string, string[]> | null;
-  _stateKeyCount: number;
   _subscription: SubscriptionManager;
   _debug: DebugMetrics;
 
@@ -31,7 +30,6 @@ export class SportScoreboardCard extends HTMLElement {
     this._renderTimer = null;
     this._trackedIds = null;
     this._trackedByPrefix = null;
-    this._stateKeyCount = 0;
     this._subscription = new SubscriptionManager();
     this._debug = new DebugMetrics();
   }
@@ -41,7 +39,6 @@ export class SportScoreboardCard extends HTMLElement {
     this._clearSubscription();
     this._trackedIds = null;
     this._trackedByPrefix = null;
-    this._stateKeyCount = 0;
     this._startFixedTimer();
     if (this._hass) {
       this._render();
@@ -139,7 +136,6 @@ export class SportScoreboardCard extends HTMLElement {
   }
 
   _buildTrackedIds(stateKeys: string[]): void {
-    this._stateKeyCount = stateKeys.length;
     const prefixes = (this._config?.sections ?? []).map((s) => s.prefix ?? '');
     this._trackedIds = new Set();
     this._trackedByPrefix = new Map(prefixes.map((p) => [p, []]));
@@ -176,9 +172,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track('rendered');
 
-      const haCardStyle =
-        `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ''}${debug ? 'position:relative;' : ''}` ||
-        undefined;
+      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ''}${debug ? 'position:relative;' : ''}`;
 
       const sectionTemplates = sections.map((s) =>
         sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix ?? ''), colors)
@@ -187,8 +181,8 @@ export class SportScoreboardCard extends HTMLElement {
 
       render(
         html`
-          ${_STYLE_BLOCK}
-          <ha-card style=${haCardStyle ?? nothing}>
+          ${STYLE_BLOCK}
+          <ha-card style=${haCardStyle || nothing}>
             ${debug ? unsafeHTML(this._debug.html()) : nothing}
             ${
               debug

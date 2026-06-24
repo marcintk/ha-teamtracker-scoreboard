@@ -32,7 +32,7 @@ test file.
 | `src/widgets.js`      | `test/widgets.test.js`      | HTML generators: `logoHtml()`, `tvHtml()`, `messageHtml()`                           |
 | `src/sorting.js`      | `test/sorting.test.js`      | `winRatio()`, `sortKeyFor()`, `resolveSortMode()`, `deduplicate()` — ranking & dedup |
 | `src/styles.js`       | `test/styles.test.js`       | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render        |
-| `src/utils.js`        | `test/utils.test.js`        | `esc()`, `safeLogoUrl()`, `VALID_STATES` — escaping, URL guard, valid state set      |
+| `src/utils.js`        | `test/utils.test.js`        | `safeLogoUrl()`, `VALID_STATES` — URL guard, valid state set                         |
 
 ## Architecture Notes
 
@@ -44,8 +44,7 @@ test file.
 - **Entity filter**: `_trackedIds` (Set) is built once per config from section prefixes; reset on
   `setConfig`, rebuilt lazily on next `set hass`.
 - **Security**: Lit auto-escapes all interpolated text values in `html` templates — no manual
-  `esc()` needed in render paths. Logo URLs validated HTTPS via `safeLogoUrl()`. `esc()` in
-  `utils.ts` is retained as a utility for non-Lit contexts.
+  escaping needed in render paths. Logo URLs validated HTTPS via `safeLogoUrl()`.
 - **Sort mode resolution**: `resolveSortMode()` in `sorting.js` auto-switches to `by-date` when any
   entity reports a non-regular season (playoffs, off-season, …); undefined season is treated as
   regular.
