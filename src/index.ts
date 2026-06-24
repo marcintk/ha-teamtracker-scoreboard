@@ -71,17 +71,10 @@ export class SportScoreboardCard extends HTMLElement {
     }
   }
 
-  _getRefreshConfig(): { lazyMs: number; fixedMs: number } {
-    return {
-      lazyMs: (this._config?.lazy_refresh ?? 1) * 1000,
-      fixedMs: (this._config?.fixed_refresh ?? 60) * 1000,
-    };
-  }
-
   _scheduleRender(): void {
     if (this._renderTimer) return;
     if (this._config?.debug) this._debug.track('filtered');
-    const { lazyMs } = this._getRefreshConfig();
+    const lazyMs = (this._config?.lazy_refresh ?? 1) * 1000;
     if (lazyMs === 0) {
       this._render();
       return;
@@ -90,13 +83,6 @@ export class SportScoreboardCard extends HTMLElement {
       this._renderTimer = null;
       if (this._hass && this._config) this._render();
     }, lazyMs);
-  }
-
-  _cancelRenderTimer(): void {
-    if (this._renderTimer) {
-      clearTimeout(this._renderTimer);
-      this._renderTimer = null;
-    }
   }
 
   _subscribe(): void {
@@ -109,12 +95,15 @@ export class SportScoreboardCard extends HTMLElement {
 
   _clearSubscription(): void {
     this._subscription.clear();
-    this._cancelRenderTimer();
+    if (this._renderTimer) {
+      clearTimeout(this._renderTimer);
+      this._renderTimer = null;
+    }
   }
 
   _startFixedTimer(): void {
     this._stopFixedTimer();
-    const { fixedMs } = this._getRefreshConfig();
+    const fixedMs = (this._config?.fixed_refresh ?? 60) * 1000;
     if (fixedMs > 0) {
       this._fixedTimer = setInterval(() => {
         if (this._hass && this._config) this._render();

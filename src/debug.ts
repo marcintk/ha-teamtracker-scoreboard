@@ -9,6 +9,8 @@ interface DebugCounts {
   hour3: number;
 }
 
+import { timeAgo } from './utils.js';
+
 export class DebugMetrics {
   _data: Record<DebugKey, number[]>;
 
@@ -47,12 +49,6 @@ export class DebugMetrics {
     return { min1, min5, min15, min30, hour1, hour3: arr.length };
   }
 
-  _timeAgo(ms: number): string {
-    if (ms < 60_000) return `${Math.floor(ms / 1_000)}s`;
-    if (ms < 3_600_000) return `${Math.floor(ms / 60_000)}m`;
-    return `${Math.floor(ms / 3_600_000)}h`;
-  }
-
   tableHtml(): string {
     const cell = (n: number) => `<td style="padding-right:8px;text-align:right">${n}</td>`;
     const hcell = (label: string) =>
@@ -69,7 +65,7 @@ export class DebugMetrics {
           /* v8 ignore next */ if (last === undefined) return '--';
           const d = new Date(last);
           const time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
-          const ago = this._timeAgo(Date.now() - last);
+          const ago = timeAgo(Date.now() - last);
           return `${time} (${ago} ago)`;
         })()
       : '--';
