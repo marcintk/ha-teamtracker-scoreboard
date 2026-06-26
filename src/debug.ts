@@ -1,14 +1,5 @@
 type DebugKey = 'events' | 'filtered' | 'rendered';
 
-interface DebugCounts {
-  min1: number;
-  min5: number;
-  min15: number;
-  min30: number;
-  hour1: number;
-  hour3: number;
-}
-
 import { timeAgo } from './utils.js';
 
 export class DebugMetrics {
