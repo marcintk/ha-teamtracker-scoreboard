@@ -1,10 +1,10 @@
-import { render } from 'lit';
-import { describe, expect, it } from 'vitest';
-import { rowHtml, sectionHtml } from '../src/render.js';
-import type { GameAttr, SectionConfig } from '../src/types.js';
+import { render } from "lit";
+import { describe, expect, it } from "vitest";
+import { rowHtml, sectionHtml } from "../src/render.js";
+import type { GameAttr, SectionConfig } from "../src/types.js";
 
 function doc(template: unknown): HTMLElement {
-  const el = document.createElement('div');
+  const el = document.createElement("div");
   render(template, el);
   return el;
 }
@@ -12,324 +12,324 @@ function doc(template: unknown): HTMLElement {
 const makeState = (state: string, attrs: GameAttr) => ({ state, attributes: attrs });
 
 const baseAttrs: GameAttr = {
-  team_homeaway: 'home',
-  team_name: 'Lakers',
-  opponent_name: 'Celtics',
-  team_record: '20-10',
-  opponent_record: '18-12',
-  team_score: '95',
-  opponent_score: '90',
+  team_homeaway: "home",
+  team_name: "Lakers",
+  opponent_name: "Celtics",
+  team_record: "20-10",
+  opponent_record: "18-12",
+  team_score: "95",
+  opponent_score: "90",
   team_winner: true,
   opponent_winner: false,
-  team_logo: 'https://cdn.example.com/lal.png',
-  opponent_logo: 'https://cdn.example.com/bos.png',
-  season: 'regular',
+  team_logo: "https://cdn.example.com/lal.png",
+  opponent_logo: "https://cdn.example.com/bos.png",
+  season: "regular",
 };
 
-describe('rowHtml', () => {
-  it('renders a game-row div', () => {
-    const el = doc(rowHtml(makeState('PRE', baseAttrs), false));
-    expect(el.querySelector('.game-row')).not.toBeNull();
+describe("rowHtml", () => {
+  it("renders a game-row div", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    expect(el.querySelector(".game-row")).not.toBeNull();
   });
 
-  it('renders team names', () => {
-    const el = doc(rowHtml(makeState('PRE', baseAttrs), false));
-    expect(el.textContent).toContain('Lakers');
-    expect(el.textContent).toContain('Celtics');
+  it("renders team names", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    expect(el.textContent).toContain("Lakers");
+    expect(el.textContent).toContain("Celtics");
   });
 
-  it('renders records', () => {
-    const el = doc(rowHtml(makeState('PRE', baseAttrs), false));
-    expect(el.textContent).toContain('20-10');
-    expect(el.textContent).toContain('18-12');
+  it("renders records", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    expect(el.textContent).toContain("20-10");
+    expect(el.textContent).toContain("18-12");
   });
 
-  it('shows dash for scores in PRE state', () => {
-    const el = doc(rowHtml(makeState('PRE', baseAttrs), false));
-    expect(el.textContent).toContain('–');
+  it("shows dash for scores in PRE state", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    expect(el.textContent).toContain("–");
   });
 
-  it('shows actual scores in IN state', () => {
-    const el = doc(rowHtml(makeState('IN', baseAttrs), false));
-    expect(el.textContent).toContain('95');
-    expect(el.textContent).toContain('90');
+  it("shows actual scores in IN state", () => {
+    const el = doc(rowHtml(makeState("IN", baseAttrs), false));
+    expect(el.textContent).toContain("95");
+    expect(el.textContent).toContain("90");
   });
 
-  it('renders colon when game is found', () => {
-    const el = doc(rowHtml(makeState('IN', baseAttrs), false));
-    expect(el.querySelector('.colon')?.textContent).toBe(':');
+  it("renders colon when game is found", () => {
+    const el = doc(rowHtml(makeState("IN", baseAttrs), false));
+    expect(el.querySelector(".colon")?.textContent).toBe(":");
   });
 
-  it('renders logo img tag', () => {
-    const el = doc(rowHtml(makeState('PRE', baseAttrs), false));
-    expect(el.querySelector('img')).not.toBeNull();
-    expect(el.querySelector('img')?.getAttribute('src')).toBe('https://cdn.example.com/lal.png');
+  it("renders logo img tag", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    expect(el.querySelector("img")).not.toBeNull();
+    expect(el.querySelector("img")?.getAttribute("src")).toBe("https://cdn.example.com/lal.png");
   });
 
-  it('renders gracefully when stateObj is null', () => {
+  it("renders gracefully when stateObj is null", () => {
     const el = doc(rowHtml(null, false));
-    expect(el.querySelector('.game-row')).not.toBeNull();
-    expect(el.querySelector('img')).toBeNull();
+    expect(el.querySelector(".game-row")).not.toBeNull();
+    expect(el.querySelector("img")).toBeNull();
   });
 });
 
-describe('sectionHtml', () => {
+describe("sectionHtml", () => {
   const section: SectionConfig = {
-    name: 'NBA',
-    prefix: 'sensor.nba_',
+    name: "NBA",
+    prefix: "sensor.nba_",
     limit: 10,
     special_teams: [],
-    rank_type: 'win-loss',
+    rank_type: "win-loss",
   };
 
-  it('returns empty when no matching entities', () => {
-    expect(doc(sectionHtml(section, {})).querySelector('.section-header')).toBeNull();
+  it("returns empty when no matching entities", () => {
+    expect(doc(sectionHtml(section, {})).querySelector(".section-header")).toBeNull();
   });
 
-  it('returns empty when entities are in invalid states', () => {
-    const states = { 'sensor.nba_lal': makeState('UNKNOWN', baseAttrs) };
-    expect(doc(sectionHtml(section, states)).querySelector('.section-header')).toBeNull();
+  it("returns empty when entities are in invalid states", () => {
+    const states = { "sensor.nba_lal": makeState("UNKNOWN", baseAttrs) };
+    expect(doc(sectionHtml(section, states)).querySelector(".section-header")).toBeNull();
   });
 
-  it('returns empty when limit produces no rows', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+  it("returns empty when limit produces no rows", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     expect(
-      doc(sectionHtml({ ...section, limit: 0 }, states)).querySelector('.section-header')
+      doc(sectionHtml({ ...section, limit: 0 }, states)).querySelector(".section-header")
     ).toBeNull();
   });
 
-  it('renders section header with name', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+  it("renders section header with name", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     const el = doc(sectionHtml(section, states));
-    expect(el.querySelector('.section-header')).not.toBeNull();
-    expect(el.querySelector('.section-header')?.textContent).toBe('NBA');
+    expect(el.querySelector(".section-header")).not.toBeNull();
+    expect(el.querySelector(".section-header")?.textContent).toBe("NBA");
   });
 
-  it('renders a row for each matching entity', () => {
+  it("renders a row for each matching entity", () => {
     const states = {
-      'sensor.nba_lal': makeState('PRE', baseAttrs),
-      'sensor.nba_gsw': makeState('IN', { ...baseAttrs, team_name: 'Warriors' }),
+      "sensor.nba_lal": makeState("PRE", baseAttrs),
+      "sensor.nba_gsw": makeState("IN", { ...baseAttrs, team_name: "Warriors" }),
     };
     const el = doc(sectionHtml(section, states));
-    expect(el.textContent).toContain('Lakers');
-    expect(el.textContent).toContain('Warriors');
+    expect(el.textContent).toContain("Lakers");
+    expect(el.textContent).toContain("Warriors");
   });
 
-  it('respects the limit', () => {
+  it("respects the limit", () => {
     const states = Object.fromEntries(
       Array.from({ length: 5 }, (_, i) => [
         `sensor.nba_team${i}`,
-        makeState('PRE', { ...baseAttrs, team_name: `Team${i}`, team_record: `${i}-10` }),
+        makeState("PRE", { ...baseAttrs, team_name: `Team${i}`, team_record: `${i}-10` }),
       ])
     );
     const el = doc(sectionHtml({ ...section, limit: 2 }, states));
-    expect(el.querySelectorAll('.game-row').length).toBe(2);
+    expect(el.querySelectorAll(".game-row").length).toBe(2);
   });
 
-  it('does not inject raw HTML in section name', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
-    const el = doc(sectionHtml({ ...section, name: '<b>NBA</b>' }, states));
-    expect(el.querySelector('.section-header b')).toBeNull();
-    expect(el.querySelector('.section-header')?.textContent).toBe('<b>NBA</b>');
+  it("does not inject raw HTML in section name", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
+    const el = doc(sectionHtml({ ...section, name: "<b>NBA</b>" }, states));
+    expect(el.querySelector(".section-header b")).toBeNull();
+    expect(el.querySelector(".section-header")?.textContent).toBe("<b>NBA</b>");
   });
 
-  it('marks special teams correctly using default CSS var color', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
-    const el = doc(sectionHtml({ ...section, special_teams: ['lal'] }, states));
-    expect(el.innerHTML).toContain('scoreboard-special-color');
+  it("marks special teams correctly using default CSS var color", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
+    const el = doc(sectionHtml({ ...section, special_teams: ["lal"] }, states));
+    expect(el.innerHTML).toContain("scoreboard-special-color");
   });
 
-  it('applies config colors to special teams', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+  it("applies config colors to special teams", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     const el = doc(
-      sectionHtml({ ...section, special_teams: ['lal'] }, states, Object.keys(states), {
-        special: 'gold',
+      sectionHtml({ ...section, special_teams: ["lal"] }, states, Object.keys(states), {
+        special: "gold",
       })
     );
-    expect(el.innerHTML).toContain('gold');
-    expect(el.innerHTML).not.toContain('scoreboard-special-color');
+    expect(el.innerHTML).toContain("gold");
+    expect(el.innerHTML).not.toContain("scoreboard-special-color");
   });
 
-  it('accepts pre-filtered entity IDs without colors', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+  it("accepts pre-filtered entity IDs without colors", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     const el = doc(sectionHtml(section, states, Object.keys(states)));
-    expect(el.querySelector('.game-row')).not.toBeNull();
+    expect(el.querySelector(".game-row")).not.toBeNull();
   });
 
-  it('accepts pre-filtered entity IDs and still applies colors', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+  it("accepts pre-filtered entity IDs and still applies colors", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     const el = doc(
-      sectionHtml({ ...section, special_teams: ['lal'] }, states, Object.keys(states), {
-        special: 'gold',
+      sectionHtml({ ...section, special_teams: ["lal"] }, states, Object.keys(states), {
+        special: "gold",
       })
     );
-    expect(el.innerHTML).toContain('gold');
-    expect(el.innerHTML).not.toContain('scoreboard-special-color');
+    expect(el.innerHTML).toContain("gold");
+    expect(el.innerHTML).not.toContain("scoreboard-special-color");
   });
 
-  it('applies config colors to team and opponent', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
+  it("applies config colors to team and opponent", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     const el = doc(
-      sectionHtml(section, states, Object.keys(states), { team: 'cyan', opponent: 'dimgray' })
+      sectionHtml(section, states, Object.keys(states), { team: "cyan", opponent: "dimgray" })
     );
-    expect(el.innerHTML).toContain('cyan');
-    expect(el.innerHTML).toContain('dimgray');
+    expect(el.innerHTML).toContain("cyan");
+    expect(el.innerHTML).toContain("dimgray");
   });
 
-  it('sorts by-date with multiple entities in ascending date order', () => {
+  it("sorts by-date with multiple entities in ascending date order", () => {
     const states = {
-      'sensor.wc_bra': makeState('PRE', {
+      "sensor.wc_bra": makeState("PRE", {
         ...baseAttrs,
-        date: '2024-04-20T00:00:00Z',
-        team_name: 'Brazil',
-        season: 'regular',
+        date: "2024-04-20T00:00:00Z",
+        team_name: "Brazil",
+        season: "regular",
       }),
-      'sensor.wc_fra': makeState('PRE', {
+      "sensor.wc_fra": makeState("PRE", {
         ...baseAttrs,
-        date: '2024-04-18T00:00:00Z',
-        team_name: 'France',
-        season: 'regular',
+        date: "2024-04-18T00:00:00Z",
+        team_name: "France",
+        season: "regular",
       }),
     };
     const wcSection: SectionConfig = {
-      name: 'WC',
-      prefix: 'sensor.wc_',
+      name: "WC",
+      prefix: "sensor.wc_",
       limit: 10,
       special_teams: [],
-      rank_type: 'by-date',
+      rank_type: "by-date",
     };
-    const text = doc(sectionHtml(wcSection, states)).textContent ?? '';
-    expect(text.indexOf('France')).toBeLessThan(text.indexOf('Brazil'));
+    const text = doc(sectionHtml(wcSection, states)).textContent ?? "";
+    expect(text.indexOf("France")).toBeLessThan(text.indexOf("Brazil"));
   });
 
-  it('produces stable order when two teams have the same win ratio', () => {
+  it("produces stable order when two teams have the same win ratio", () => {
     const states = {
-      'sensor.nba_zzz': makeState('PRE', { ...baseAttrs, team_name: 'ZZZ', team_record: '5-5' }),
-      'sensor.nba_aaa': makeState('PRE', { ...baseAttrs, team_name: 'AAA', team_record: '5-5' }),
+      "sensor.nba_zzz": makeState("PRE", { ...baseAttrs, team_name: "ZZZ", team_record: "5-5" }),
+      "sensor.nba_aaa": makeState("PRE", { ...baseAttrs, team_name: "AAA", team_record: "5-5" }),
     };
     const el1 = doc(sectionHtml(section, states));
     const el2 = doc(sectionHtml(section, states));
     expect(el1.innerHTML).toBe(el2.innerHTML);
-    const text = el1.textContent ?? '';
-    expect(text.indexOf('AAA')).toBeLessThan(text.indexOf('ZZZ'));
+    const text = el1.textContent ?? "";
+    expect(text.indexOf("AAA")).toBeLessThan(text.indexOf("ZZZ"));
   });
 
-  it('produces stable order when two by-date games have the same kick-off time', () => {
-    const sameTime = '2024-04-20T15:00:00Z';
+  it("produces stable order when two by-date games have the same kick-off time", () => {
+    const sameTime = "2024-04-20T15:00:00Z";
     const states = {
-      'sensor.wc_zzz': makeState('PRE', {
+      "sensor.wc_zzz": makeState("PRE", {
         ...baseAttrs,
-        team_name: 'ZZZ',
-        team_abbr: 'zzz',
-        opponent_abbr: 'yyy',
+        team_name: "ZZZ",
+        team_abbr: "zzz",
+        opponent_abbr: "yyy",
         date: sameTime,
-        season: 'postseason',
+        season: "postseason",
       }),
-      'sensor.wc_aaa': makeState('PRE', {
+      "sensor.wc_aaa": makeState("PRE", {
         ...baseAttrs,
-        team_name: 'AAA',
-        team_abbr: 'aaa',
-        opponent_abbr: 'bbb',
+        team_name: "AAA",
+        team_abbr: "aaa",
+        opponent_abbr: "bbb",
         date: sameTime,
-        season: 'postseason',
+        season: "postseason",
       }),
     };
     const wcSection: SectionConfig = {
-      name: 'WC',
-      prefix: 'sensor.wc_',
+      name: "WC",
+      prefix: "sensor.wc_",
       limit: 10,
       special_teams: [],
-      rank_type: 'by-date',
+      rank_type: "by-date",
     };
     const el1 = doc(sectionHtml(wcSection, states));
     const el2 = doc(sectionHtml(wcSection, states));
     expect(el1.innerHTML).toBe(el2.innerHTML);
-    const text = el1.textContent ?? '';
-    expect(text.indexOf('AAA')).toBeLessThan(text.indexOf('ZZZ'));
+    const text = el1.textContent ?? "";
+    expect(text.indexOf("AAA")).toBeLessThan(text.indexOf("ZZZ"));
   });
 
-  it('keeps configured rank_type when first entity has no season attribute yet', () => {
+  it("keeps configured rank_type when first entity has no season attribute yet", () => {
     const states = {
-      'sensor.nba_aaa': makeState('PRE', { team_name: 'Team A', team_record: '5-25' }),
-      'sensor.nba_zzz': makeState('PRE', {
+      "sensor.nba_aaa": makeState("PRE", { team_name: "Team A", team_record: "5-25" }),
+      "sensor.nba_zzz": makeState("PRE", {
         ...baseAttrs,
-        team_name: 'Team Z',
-        team_record: '25-5',
+        team_name: "Team Z",
+        team_record: "25-5",
       }),
     };
     const text =
-      doc(sectionHtml({ ...section, rank_type: 'win-loss' as const }, states)).textContent ?? '';
-    expect(text.indexOf('Team Z')).toBeLessThan(text.indexOf('Team A'));
+      doc(sectionHtml({ ...section, rank_type: "win-loss" as const }, states)).textContent ?? "";
+    expect(text.indexOf("Team Z")).toBeLessThan(text.indexOf("Team A"));
   });
 
-  it('falls back to entityId as teamName when team_name attribute is absent', () => {
+  it("falls back to entityId as teamName when team_name attribute is absent", () => {
     const states = {
-      'sensor.nba_lal': makeState('PRE', { ...baseAttrs, team_name: undefined }),
+      "sensor.nba_lal": makeState("PRE", { ...baseAttrs, team_name: undefined }),
     };
     expect(() => doc(sectionHtml(section, states))).not.toThrow();
-    expect(doc(sectionHtml(section, states)).querySelector('.game-row')).not.toBeNull();
+    expect(doc(sectionHtml(section, states)).querySelector(".game-row")).not.toBeNull();
   });
 
-  it('uses entityId as final tie-breaker when team names and sort keys are equal', () => {
+  it("uses entityId as final tie-breaker when team names and sort keys are equal", () => {
     const states = {
-      'sensor.nba_zzz': makeState('PRE', {
+      "sensor.nba_zzz": makeState("PRE", {
         ...baseAttrs,
-        team_name: 'Lakers',
-        team_record: '10-10',
-        opponent_name: 'Opp-Z',
+        team_name: "Lakers",
+        team_record: "10-10",
+        opponent_name: "Opp-Z",
       }),
-      'sensor.nba_aaa': makeState('PRE', {
+      "sensor.nba_aaa": makeState("PRE", {
         ...baseAttrs,
-        team_name: 'Lakers',
-        team_record: '10-10',
-        opponent_name: 'Opp-A',
+        team_name: "Lakers",
+        team_record: "10-10",
+        opponent_name: "Opp-A",
       }),
     };
-    const text = doc(sectionHtml(section, states)).textContent ?? '';
-    expect(text.indexOf('Opp-A')).toBeLessThan(text.indexOf('Opp-Z'));
+    const text = doc(sectionHtml(section, states)).textContent ?? "";
+    expect(text.indexOf("Opp-A")).toBeLessThan(text.indexOf("Opp-Z"));
   });
 
-  it('preserves special-team highlight when special team plays away against a tracked home opponent', () => {
-    const date = '2024-04-20T00:00:00Z';
+  it("preserves special-team highlight when special team plays away against a tracked home opponent", () => {
+    const date = "2024-04-20T00:00:00Z";
     const states = {
-      'sensor.nba_lal': makeState('PRE', {
+      "sensor.nba_lal": makeState("PRE", {
         ...baseAttrs,
-        team_homeaway: 'away' as const,
-        team_abbr: 'LAL',
-        opponent_abbr: 'BOS',
+        team_homeaway: "away" as const,
+        team_abbr: "LAL",
+        opponent_abbr: "BOS",
         date,
-        season: 'playoffs',
+        season: "playoffs",
       }),
-      'sensor.nba_bos': makeState('PRE', {
+      "sensor.nba_bos": makeState("PRE", {
         ...baseAttrs,
-        team_homeaway: 'home' as const,
-        team_name: 'Celtics',
-        team_abbr: 'BOS',
-        opponent_abbr: 'LAL',
+        team_homeaway: "home" as const,
+        team_name: "Celtics",
+        team_abbr: "BOS",
+        opponent_abbr: "LAL",
         date,
-        season: 'playoffs',
+        season: "playoffs",
       }),
     };
-    const el = doc(sectionHtml({ ...section, special_teams: ['lal'] }, states));
-    expect(el.innerHTML).toContain('scoreboard-special-color');
-    expect(el.innerHTML).toContain('scoreboard-team-color');
-    expect(el.innerHTML).toContain('font-weight:bold');
+    const el = doc(sectionHtml({ ...section, special_teams: ["lal"] }, states));
+    expect(el.innerHTML).toContain("scoreboard-special-color");
+    expect(el.innerHTML).toContain("scoreboard-team-color");
+    expect(el.innerHTML).toContain("font-weight:bold");
   });
 
-  it('auto-switches to by-date sort outside regular season', () => {
+  it("auto-switches to by-date sort outside regular season", () => {
     const states = {
-      'sensor.nba_lal': makeState('PRE', {
+      "sensor.nba_lal": makeState("PRE", {
         ...baseAttrs,
-        season: 'playoffs',
-        date: '2024-04-20T00:00:00Z',
+        season: "playoffs",
+        date: "2024-04-20T00:00:00Z",
       }),
     };
     expect(() => doc(sectionHtml(section, states))).not.toThrow();
   });
 
-  it('skips entity IDs that are no longer present in states', () => {
-    const states = { 'sensor.nba_lal': makeState('PRE', baseAttrs) };
-    const el = doc(sectionHtml(section, states, ['sensor.stale_id', 'sensor.nba_lal']));
-    expect(el.querySelector('.game-row')).not.toBeNull();
+  it("skips entity IDs that are no longer present in states", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
+    const el = doc(sectionHtml(section, states, ["sensor.stale_id", "sensor.nba_lal"]));
+    expect(el.querySelector(".game-row")).not.toBeNull();
   });
 });

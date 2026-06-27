@@ -1,17 +1,17 @@
-import { render } from 'lit';
-import { describe, expect, it } from 'vitest';
-import { rowHtml } from '../src/render.js';
-import { CARD_STYLES } from '../src/styles.js';
-import type { GameAttr } from '../src/types.js';
+import { render } from "lit";
+import { describe, expect, it } from "vitest";
+import { rowHtml } from "../src/render.js";
+import { CARD_STYLES } from "../src/styles.js";
+import type { GameAttr } from "../src/types.js";
 
 function doc(template: unknown): HTMLElement {
-  const el = document.createElement('div');
+  const el = document.createElement("div");
   render(template, el);
   return el;
 }
 
-describe('CARD_STYLES', () => {
-  it('matches snapshot', () => {
+describe("CARD_STYLES", () => {
+  it("matches snapshot", () => {
     expect(CARD_STYLES).toMatchSnapshot();
   });
 });
@@ -21,74 +21,74 @@ describe('CARD_STYLES', () => {
 const makeState = (state: string, attrs: GameAttr) => ({ state, attributes: attrs });
 
 const baseAttrs: GameAttr = {
-  team_homeaway: 'home',
-  team_name: 'Lakers',
-  opponent_name: 'Celtics',
-  team_record: '20-10',
-  opponent_record: '18-12',
-  team_score: '95',
-  opponent_score: '90',
+  team_homeaway: "home",
+  team_name: "Lakers",
+  opponent_name: "Celtics",
+  team_record: "20-10",
+  opponent_record: "18-12",
+  team_score: "95",
+  opponent_score: "90",
   team_winner: true,
   opponent_winner: false,
-  team_logo: 'https://cdn.example.com/lal.png',
-  opponent_logo: 'https://cdn.example.com/bos.png',
+  team_logo: "https://cdn.example.com/lal.png",
+  opponent_logo: "https://cdn.example.com/bos.png",
 };
 
-describe('rowHtml inline styles — score background', () => {
-  it('uses dark background in PRE state', () => {
-    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain(
-      'background:#303030'
+describe("rowHtml inline styles — score background", () => {
+  it("uses dark background in PRE state", () => {
+    expect(doc(rowHtml(makeState("PRE", baseAttrs), false)).innerHTML).toContain(
+      "background:#303030"
     );
   });
-  it('uses lightgray background in IN state', () => {
-    expect(doc(rowHtml(makeState('IN', baseAttrs), false)).innerHTML).toContain(
-      'background:lightgray'
+  it("uses lightgray background in IN state", () => {
+    expect(doc(rowHtml(makeState("IN", baseAttrs), false)).innerHTML).toContain(
+      "background:lightgray"
     );
   });
-  it('uses transparent background in POST state', () => {
-    expect(doc(rowHtml(makeState('POST', baseAttrs), false)).innerHTML).toContain(
-      'background:transparent'
+  it("uses transparent background in POST state", () => {
+    expect(doc(rowHtml(makeState("POST", baseAttrs), false)).innerHTML).toContain(
+      "background:transparent"
     );
   });
 });
 
-describe('rowHtml inline styles — score text color', () => {
-  it('uses black for both scores in PRE state', () => {
-    const html = doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML;
+describe("rowHtml inline styles — score text color", () => {
+  it("uses black for both scores in PRE state", () => {
+    const html = doc(rowHtml(makeState("PRE", baseAttrs), false)).innerHTML;
     expect(html.match(/color:black/g)?.length).toBeGreaterThanOrEqual(2);
   });
-  it('highlights leading team with brown in IN state', () => {
-    const html = doc(rowHtml(makeState('IN', baseAttrs), false)).innerHTML;
-    expect(html).toContain('color:brown');
-    expect(html).toContain('color:black');
+  it("highlights leading team with brown in IN state", () => {
+    const html = doc(rowHtml(makeState("IN", baseAttrs), false)).innerHTML;
+    expect(html).toContain("color:brown");
+    expect(html).toContain("color:black");
   });
-  it('marks winner orange and loser darkgray in POST state', () => {
-    const html = doc(rowHtml(makeState('POST', baseAttrs), false)).innerHTML;
-    expect(html).toContain('color:orange');
-    expect(html).toContain('color:darkgray');
-  });
-});
-
-describe('rowHtml inline styles — team name font-weight', () => {
-  it('bolds the tracked team name', () => {
-    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain(
-      'font-weight:bold'
-    );
-  });
-  it('uses normal weight for the opponent name', () => {
-    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain(
-      'font-weight:normal'
-    );
+  it("marks winner orange and loser darkgray in POST state", () => {
+    const html = doc(rowHtml(makeState("POST", baseAttrs), false)).innerHTML;
+    expect(html).toContain("color:orange");
+    expect(html).toContain("color:darkgray");
   });
 });
 
-describe('rowHtml inline styles — colon visibility', () => {
-  it('hides the colon for BYE and other non-game states', () => {
-    expect(doc(rowHtml(makeState('BYE', baseAttrs), false)).innerHTML).toContain(
-      'color:transparent'
+describe("rowHtml inline styles — team name font-weight", () => {
+  it("bolds the tracked team name", () => {
+    expect(doc(rowHtml(makeState("PRE", baseAttrs), false)).innerHTML).toContain(
+      "font-weight:bold"
     );
   });
-  it('shows a black colon in PRE state', () => {
-    expect(doc(rowHtml(makeState('PRE', baseAttrs), false)).innerHTML).toContain('color:black');
+  it("uses normal weight for the opponent name", () => {
+    expect(doc(rowHtml(makeState("PRE", baseAttrs), false)).innerHTML).toContain(
+      "font-weight:normal"
+    );
+  });
+});
+
+describe("rowHtml inline styles — colon visibility", () => {
+  it("hides the colon for BYE and other non-game states", () => {
+    expect(doc(rowHtml(makeState("BYE", baseAttrs), false)).innerHTML).toContain(
+      "color:transparent"
+    );
+  });
+  it("shows a black colon in PRE state", () => {
+    expect(doc(rowHtml(makeState("PRE", baseAttrs), false)).innerHTML).toContain("color:black");
   });
 });

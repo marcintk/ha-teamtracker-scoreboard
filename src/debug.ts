@@ -1,6 +1,6 @@
-type DebugKey = 'events' | 'filtered' | 'rendered';
+type DebugKey = "events" | "filtered" | "rendered";
 
-import { timeAgo } from './utils.js';
+import { timeAgo } from "./utils.js";
 
 export class DebugMetrics {
   _data: Record<DebugKey, number[]>;
@@ -49,19 +49,19 @@ export class DebugMetrics {
       return `<tr><td style="padding-right:10px;color:orange">${label}</td>${cell(c.min1)}${cell(c.min5)}${cell(c.min15)}${cell(c.min30)}${cell(c.hour1)}${cell(c.hour3)}</tr>`;
     };
     const rendered = this._data.rendered;
-    const pad = (n: number, w = 2) => String(n).padStart(w, '0');
+    const pad = (n: number, w = 2) => String(n).padStart(w, "0");
     const ts = rendered.length
       ? (() => {
           const last = rendered.at(-1);
-          /* v8 ignore next */ if (last === undefined) return '--';
+          /* v8 ignore next */ if (last === undefined) return "--";
           const d = new Date(last);
           const time = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${pad(d.getMilliseconds(), 3)}`;
           const ago = timeAgo(Date.now() - last);
           return `${time} (${ago} ago)`;
         })()
-      : '--';
-    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:indianred">${ts}</td>${hcell('1m')}${hcell('5m')}${hcell('15m')}${hcell('30m')}${hcell('1h')}${hcell('3h')}</tr>`;
-    return `<table style="border-collapse:collapse;width:100%">${row('events', 'events')}${row('filtered', 'filtered')}${row('rendered', 'rendered')}${footer}</table>`;
+      : "--";
+    const footer = `<tr style="font-size:10px"><td style="padding-right:10px;color:indianred">${ts}</td>${hcell("1m")}${hcell("5m")}${hcell("15m")}${hcell("30m")}${hcell("1h")}${hcell("3h")}</tr>`;
+    return `<table style="border-collapse:collapse;width:100%">${row("events", "events")}${row("filtered", "filtered")}${row("rendered", "rendered")}${footer}</table>`;
   }
 
   html(): string {

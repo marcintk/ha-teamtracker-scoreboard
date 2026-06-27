@@ -4,19 +4,19 @@
 //   win-loss-otl:  W=2 OTL=1 L=0   (NHL, …)    record: W-L-OTL
 //   by-date: internal — auto-applied outside the regular season
 
-import type { GameAttr, HassStates, SortItem, SortMode } from './types.js';
+import type { GameAttr, HassStates, SortItem, SortMode } from "./types.js";
 
 export function winRatio(record: unknown, sortMode: SortMode): number {
-  const parts = String(record ?? '0-0')
-    .split('-')
+  const parts = String(record ?? "0-0")
+    .split("-")
     .map(Number);
   const p = (i: number): number => parts[i] ?? 0;
 
-  if (sortMode === 'win-draw-loss') {
+  if (sortMode === "win-draw-loss") {
     const [w, d, l] = [p(0), p(1), p(2)]; // W-D-L
     return w + d + l ? (3 * w + d) / (3 * (w + d + l)) : 0;
   }
-  if (sortMode === 'win-loss-otl') {
+  if (sortMode === "win-loss-otl") {
     const [w, l, otl] = [p(0), p(1), p(2)]; // W-L-OTL
     return w + l + otl ? (2 * w + otl) / (2 * (w + l + otl)) : 0;
   }
@@ -25,7 +25,7 @@ export function winRatio(record: unknown, sortMode: SortMode): number {
 }
 
 export function sortKeyFor(attr: GameAttr | null | undefined, sortMode: SortMode): number {
-  if (sortMode === 'by-date') return Date.parse(attr?.date ?? '') || 0;
+  if (sortMode === "by-date") return Date.parse(attr?.date ?? "") || 0;
   return winRatio(attr?.team_record, sortMode);
 }
 
@@ -36,9 +36,9 @@ export function resolveSortMode(
 ): SortMode {
   return entities.some((id) => {
     const s = states[id]?.attributes?.season;
-    return s && s !== 'regular';
+    return s && s !== "regular";
   })
-    ? 'by-date'
+    ? "by-date"
     : rankType;
 }
 
@@ -47,12 +47,12 @@ export function resolveSortMode(
 // home/away would push away-only games (whose home-team sensor is missing) to the end where they
 // get cut off by the limit slice even though a valid sensor is available.
 export function deduplicate(list: SortItem[], sortMode: SortMode, states: HassStates): SortItem[] {
-  if (sortMode !== 'by-date') return list;
+  if (sortMode !== "by-date") return list;
 
   const gameKey = (entityId: string): string => {
     const { date, team_abbr, opponent_abbr } = states[entityId]?.attributes ?? {};
     if (date == null) return entityId; // can't identify the game — keep row as unique
-    return `${date}_${[team_abbr, opponent_abbr].sort().join('_')}`;
+    return `${date}_${[team_abbr, opponent_abbr].sort().join("_")}`;
   };
 
   const keyMap = new Map(list.map(({ entityId }) => [entityId, gameKey(entityId)]));
@@ -63,10 +63,10 @@ export function deduplicate(list: SortItem[], sortMode: SortMode, states: HassSt
   const specialAwayKeys = new Set<string | undefined>();
   for (const { entityId, special } of list) {
     const key = keyMap.get(entityId);
-    if (states[entityId]?.attributes?.team_homeaway === 'home') homeKeys.add(key);
+    if (states[entityId]?.attributes?.team_homeaway === "home") homeKeys.add(key);
     if (special) {
       specialKeys.add(key);
-      if (states[entityId]?.attributes?.team_homeaway !== 'home') specialAwayKeys.add(key);
+      if (states[entityId]?.attributes?.team_homeaway !== "home") specialAwayKeys.add(key);
     }
   }
 
@@ -79,14 +79,14 @@ export function deduplicate(list: SortItem[], sortMode: SortMode, states: HassSt
     .filter(({ entityId, special }) => {
       const key = keyMap.get(entityId);
       if (seen.has(key)) return false;
-      if (special && states[entityId]?.attributes?.team_homeaway !== 'home' && homeKeys.has(key))
+      if (special && states[entityId]?.attributes?.team_homeaway !== "home" && homeKeys.has(key))
         return false;
       if (specialKeys.has(key) && !special && (!specialAwayKeys.has(key) || !homeKeys.has(key)))
         return false;
       if (
         !specialKeys.has(key) &&
         homeKeys.has(key) &&
-        states[entityId]?.attributes?.team_homeaway !== 'home'
+        states[entityId]?.attributes?.team_homeaway !== "home"
       )
         return false;
       seen.add(key);
@@ -94,7 +94,7 @@ export function deduplicate(list: SortItem[], sortMode: SortMode, states: HassSt
     })
     .map((item) => {
       const key = keyMap.get(item.entityId);
-      if (states[item.entityId]?.attributes?.team_homeaway === 'home' && specialAwayKeys.has(key))
+      if (states[item.entityId]?.attributes?.team_homeaway === "home" && specialAwayKeys.has(key))
         return { ...item, opponentSpecial: true };
       return item;
     });
