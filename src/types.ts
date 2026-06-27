@@ -1,12 +1,12 @@
-export type GameState = 'PRE' | 'IN' | 'POST' | 'BYE';
+export type GameState = "PRE" | "IN" | "POST" | "BYE";
 
-export type SortMode = 'win-loss' | 'win-draw-loss' | 'win-loss-otl' | 'by-date';
+export type SortMode = "win-loss" | "win-draw-loss" | "win-loss-otl" | "by-date";
 
 export interface GameAttr {
   state?: string;
   season?: string;
   date?: string;
-  team_homeaway?: 'home' | 'away';
+  team_homeaway?: "home" | "away";
   team_abbr?: string;
   team_name?: string;
   team_score?: string | number;

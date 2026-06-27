@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
-import { SubscriptionManager } from '../src/subscription.js';
+import { describe, expect, it, vi } from "vitest";
+import { SubscriptionManager } from "../src/subscription.js";
 
 type SubscribeCallback = (event: { data: { entity_id: string } }) => void;
 const getCallback = (fn: ReturnType<typeof vi.fn>): SubscribeCallback =>
@@ -12,64 +12,64 @@ function makeConnection(resolvedUnsub = vi.fn()) {
   };
 }
 
-describe('SubscriptionManager', () => {
-  describe('subscribe', () => {
-    it('calls subscribeEvents on the connection', async () => {
+describe("SubscriptionManager", () => {
+  describe("subscribe", () => {
+    it("calls subscribeEvents on the connection", async () => {
       const mgr = new SubscriptionManager();
       const { connection } = makeConnection();
-      mgr.subscribe(connection, new Set(['sensor.a']), vi.fn());
+      mgr.subscribe(connection, new Set(["sensor.a"]), vi.fn());
       await Promise.resolve();
       expect(connection.subscribeEvents).toHaveBeenCalledWith(
         expect.any(Function),
-        'state_changed'
+        "state_changed"
       );
     });
 
-    it('stores the unsub handle after the promise resolves', async () => {
+    it("stores the unsub handle after the promise resolves", async () => {
       const mgr = new SubscriptionManager();
       const { connection, unsub } = makeConnection();
-      mgr.subscribe(connection, new Set(['sensor.a']), vi.fn());
+      mgr.subscribe(connection, new Set(["sensor.a"]), vi.fn());
       await Promise.resolve();
       expect(mgr._unsub).toBe(unsub);
     });
 
-    it('fires onMatch when the event entity is in trackedIds', async () => {
+    it("fires onMatch when the event entity is in trackedIds", async () => {
       const mgr = new SubscriptionManager();
       const { connection } = makeConnection();
       const onMatch = vi.fn();
-      mgr.subscribe(connection, new Set(['sensor.a']), onMatch);
+      mgr.subscribe(connection, new Set(["sensor.a"]), onMatch);
       await Promise.resolve();
       const cb = getCallback(connection.subscribeEvents);
-      cb({ data: { entity_id: 'sensor.a' } });
+      cb({ data: { entity_id: "sensor.a" } });
       expect(onMatch).toHaveBeenCalledTimes(1);
     });
 
-    it('does not fire onMatch for an entity not in trackedIds', async () => {
+    it("does not fire onMatch for an entity not in trackedIds", async () => {
       const mgr = new SubscriptionManager();
       const { connection } = makeConnection();
       const onMatch = vi.fn();
-      mgr.subscribe(connection, new Set(['sensor.a']), onMatch);
+      mgr.subscribe(connection, new Set(["sensor.a"]), onMatch);
       await Promise.resolve();
       const cb = getCallback(connection.subscribeEvents);
-      cb({ data: { entity_id: 'sensor.b' } });
+      cb({ data: { entity_id: "sensor.b" } });
       expect(onMatch).not.toHaveBeenCalled();
     });
 
-    it('does nothing when connection has no subscribeEvents', () => {
+    it("does nothing when connection has no subscribeEvents", () => {
       const mgr = new SubscriptionManager();
       expect(() => mgr.subscribe({}, new Set(), vi.fn())).not.toThrow();
       expect(mgr._unsub).toBeNull();
     });
 
-    it('does nothing when connection is null', () => {
+    it("does nothing when connection is null", () => {
       const mgr = new SubscriptionManager();
       expect(() => mgr.subscribe(null, new Set(), vi.fn())).not.toThrow();
       expect(mgr._unsub).toBeNull();
     });
 
-    it('silently ignores subscribeEvents rejection', async () => {
+    it("silently ignores subscribeEvents rejection", async () => {
       const mgr = new SubscriptionManager();
-      const connection = { subscribeEvents: vi.fn().mockRejectedValue(new Error('ws error')) };
+      const connection = { subscribeEvents: vi.fn().mockRejectedValue(new Error("ws error")) };
       mgr.subscribe(connection, new Set(), vi.fn());
       await Promise.resolve();
       await Promise.resolve();
@@ -77,8 +77,8 @@ describe('SubscriptionManager', () => {
     });
   });
 
-  describe('clear', () => {
-    it('calls unsub and nulls the handle', async () => {
+  describe("clear", () => {
+    it("calls unsub and nulls the handle", async () => {
       const mgr = new SubscriptionManager();
       const { connection, unsub } = makeConnection();
       mgr.subscribe(connection, new Set(), vi.fn());
@@ -88,24 +88,24 @@ describe('SubscriptionManager', () => {
       expect(mgr._unsub).toBeNull();
     });
 
-    it('does not throw when called before any subscription', () => {
+    it("does not throw when called before any subscription", () => {
       const mgr = new SubscriptionManager();
       expect(() => mgr.clear()).not.toThrow();
     });
 
-    it('stale callback fires after clear does not call onMatch', async () => {
+    it("stale callback fires after clear does not call onMatch", async () => {
       const mgr = new SubscriptionManager();
       const { connection } = makeConnection();
       const onMatch = vi.fn();
-      mgr.subscribe(connection, new Set(['sensor.a']), onMatch);
+      mgr.subscribe(connection, new Set(["sensor.a"]), onMatch);
       await Promise.resolve();
       const staleCallback = getCallback(connection.subscribeEvents);
       mgr.clear();
-      staleCallback({ data: { entity_id: 'sensor.a' } });
+      staleCallback({ data: { entity_id: "sensor.a" } });
       expect(onMatch).not.toHaveBeenCalled();
     });
 
-    it('stale promise after clear calls unsub immediately instead of storing it', async () => {
+    it("stale promise after clear calls unsub immediately instead of storing it", async () => {
       const mgr = new SubscriptionManager();
       const { connection, unsub } = makeConnection();
       mgr.subscribe(connection, new Set(), vi.fn());
