@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`widget structural snapshots > logoHtml 1`] = `"<!----><img alt="" src="https://cdn.example.com/lal.png">"`;
+
+exports[`widget structural snapshots > messageHtml BYE 1`] = `"<!----><span style="color:darkgray">Bye</span>"`;
+
+exports[`widget structural snapshots > messageHtml IN short 1`] = `"<!----><span style="color:indianred"><!--?lit$-->Q3 5:00</span><!--?lit$--><span class="msg-sub"><!--?lit$-->Touchdown - LAL</span><!--?-->"`;
+
+exports[`widget structural snapshots > messageHtml IN truncated 1`] = `"<!----><span style="color:indianred"><!--?lit$-->Q3 5:00</span><!--?lit$--><span class="msg-sub tv-tooltip" data-tooltip="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"><!--?lit$-->AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&gt;</span><!--?-->"`;
+
+exports[`widget structural snapshots > messageHtml POST 1`] = `"<!----><span style="color:orange"><!--?lit$-->Final</span><!--?lit$--><span class="msg-sub"><!--?lit$-->LAL leads 2-1</span><!--?-->"`;
+
+exports[`widget structural snapshots > messageHtml PRE with sub 1`] = `"<!----><span style="color:darkgray"><!--?lit$-->2h</span><!--?lit$--><span class="msg-sub"><!--?lit$-->Houston, LAL -3.5</span><!--?-->"`;
+
+exports[`widget structural snapshots > tvHtml IN 1`] = `"<!----><span class="tv-badge" style="background:indianred"><!--?lit$-->ESP&gt;</span>"`;
+
+exports[`widget structural snapshots > tvHtml PRE single 1`] = `"<!----><span class="tv-badge" style="background:#666"><!--?lit$-->ESP&gt;</span>"`;
+
+exports[`widget structural snapshots > tvHtml multi-network 1`] = `"<!----><span class="tv-tooltip" data-tooltip="ESPN · ESPN2 · TNT"><!--?lit$--><span class="tv-badge" style="background:#666"><!--?lit$-->ESP&gt;</span></span>"`;

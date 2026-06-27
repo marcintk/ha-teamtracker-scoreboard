@@ -1,14 +1,8 @@
-import { render } from "lit";
 import { describe, expect, it } from "vitest";
 import { rowHtml } from "../src/render.js";
 import { CARD_STYLES } from "../src/styles.js";
 import type { GameAttr } from "../src/types.js";
-
-function doc(template: unknown): HTMLElement {
-  const el = document.createElement("div");
-  render(template, el);
-  return el;
-}
+import { doc } from "./helpers.js";
 
 describe("CARD_STYLES", () => {
   it("matches snapshot", () => {
