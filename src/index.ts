@@ -1,3 +1,4 @@
+/// <reference path="../node_modules/ha-card-shared/globals.d.ts" />
 import { html, nothing, render } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { DebugMetrics } from "./debug.js";
