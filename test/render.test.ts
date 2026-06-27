@@ -1,13 +1,7 @@
-import { render } from "lit";
 import { describe, expect, it } from "vitest";
 import { rowHtml, sectionHtml } from "../src/render.js";
 import type { GameAttr, SectionConfig } from "../src/types.js";
-
-function doc(template: unknown): HTMLElement {
-  const el = document.createElement("div");
-  render(template, el);
-  return el;
-}
+import { doc, snap } from "./helpers.js";
 
 const makeState = (state: string, attrs: GameAttr) => ({ state, attributes: attrs });
 
@@ -331,5 +325,22 @@ describe("sectionHtml", () => {
     const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     const el = doc(sectionHtml(section, states, ["sensor.stale_id", "sensor.nba_lal"]));
     expect(el.querySelector(".game-row")).not.toBeNull();
+  });
+});
+
+// ─── structural snapshots ─────────────────────────────────────────────────────
+// These backstop everything the targeted .toContain/.querySelector assertions
+// above don't name: element structure, class names, attribute order. A diff
+// means the rendered markup changed — review it, then `vitest run -u` if intended.
+
+describe("rowHtml structural snapshots", () => {
+  for (const state of ["PRE", "IN", "POST", "BYE"]) {
+    it(`renders ${state} markup`, () => {
+      expect(snap(rowHtml(makeState(state, baseAttrs), false))).toMatchSnapshot();
+    });
+  }
+
+  it("renders with showLogos enabled", () => {
+    expect(snap(rowHtml(makeState("IN", baseAttrs), true))).toMatchSnapshot();
   });
 });
