@@ -9,15 +9,10 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "format": "biome format --write src/ test/ && prettier --write \"**/*.md\"",
-    "format:check": "biome format src/ test/ && prettier --check \"**/*.md\"",
-    "lint": "biome lint src/ test/",
-    "lint:fix": "biome lint --write src/ test/",
     "check": "biome check --write src/ test/",
     "typecheck": "tsc --noEmit",
     "check:ci": "tsc --noEmit && biome check src/ test/ && prettier --check \"**/*.md\"",
     "format:md": "prettier --write \"**/*.md\"",
-    "format:md:check": "prettier --check \"**/*.md\"",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
   "devDependencies": {
