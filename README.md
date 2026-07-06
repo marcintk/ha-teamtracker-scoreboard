@@ -88,6 +88,7 @@ sections:
 | `limit`         | number | `10`            | Max rows to show                                                                            |
 | `special_teams` | list   | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
 | `rank_type`     | string | `win-draw-loss` | Ranking formula for the regular season. See below                                           |
+| `score_blink`   | number | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                      |
 
 ### rank_type
 

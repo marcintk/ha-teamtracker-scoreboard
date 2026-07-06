@@ -5,7 +5,7 @@ import { DebugMetrics } from "./debug.js";
 import { sectionHtml } from "./render.js";
 import { CARD_STYLES } from "./styles.js";
 import { SubscriptionManager } from "./subscription.js";
-import type { CardConfig, HomeAssistant } from "./types.js";
+import type { CardConfig, HassStates, HomeAssistant } from "./types.js";
 
 const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
 
@@ -16,10 +16,13 @@ export class SportScoreboardCard extends HTMLElement {
   _fixedTimer: ReturnType<typeof setInterval> | null;
   _debugTimer: ReturnType<typeof setInterval> | null;
   _renderTimer: ReturnType<typeof setTimeout> | null;
+  _blinkTimer: ReturnType<typeof setTimeout> | null;
   _trackedIds: Set<string> | null;
   _trackedByPrefix: Map<string, string[]> | null;
   _subscription: SubscriptionManager;
   _debug: DebugMetrics;
+  _scoreChangedAt: Map<string, number>;
+  _prevScores: Map<string, { t: number; o: number }>;
 
   constructor() {
     super();
@@ -29,10 +32,13 @@ export class SportScoreboardCard extends HTMLElement {
     this._fixedTimer = null;
     this._debugTimer = null;
     this._renderTimer = null;
+    this._blinkTimer = null;
     this._trackedIds = null;
     this._trackedByPrefix = null;
     this._subscription = new SubscriptionManager();
     this._debug = new DebugMetrics();
+    this._scoreChangedAt = new Map();
+    this._prevScores = new Map();
   }
 
   setConfig(config: CardConfig): void {
@@ -40,6 +46,8 @@ export class SportScoreboardCard extends HTMLElement {
     this._clearSubscription();
     this._trackedIds = null;
     this._trackedByPrefix = null;
+    this._scoreChangedAt.clear();
+    this._prevScores.clear();
     this._startFixedTimer();
     if (this._hass) {
       this._render();
@@ -97,6 +105,10 @@ export class SportScoreboardCard extends HTMLElement {
       clearTimeout(this._renderTimer);
       this._renderTimer = null;
     }
+    if (this._blinkTimer) {
+      clearTimeout(this._blinkTimer);
+      this._blinkTimer = null;
+    }
   }
 
   _startFixedTimer(): void {
@@ -134,6 +146,60 @@ export class SportScoreboardCard extends HTMLElement {
     this._stopFixedTimer();
     this._clearSubscription();
     this._trackedIds = null;
+    this._scoreChangedAt.clear();
+    this._prevScores.clear();
+  }
+
+  _detectScoreChanges(states: HassStates): void {
+    for (const id of this._trackedIds ?? []) {
+      const gs = states[id]?.state;
+      const attr = states[id]?.attributes;
+      if (gs === "IN") {
+        const t = Number(attr?.team_score ?? 0);
+        const o = Number(attr?.opponent_score ?? 0);
+        const prev = this._prevScores.get(id);
+        if (prev && (prev.t !== t || prev.o !== o)) {
+          this._scoreChangedAt.set(id, Date.now());
+        }
+        this._prevScores.set(id, { t, o });
+      } else {
+        this._prevScores.delete(id);
+        this._scoreChangedAt.delete(id);
+      }
+    }
+  }
+
+  _pruneExpiredBlinks(): void {
+    if (!this._scoreChangedAt.size) return;
+    const now = Date.now();
+    const sections = this._config?.sections ?? [];
+    for (const [id, changedAt] of this._scoreChangedAt) {
+      const section = sections.find((s) => id.startsWith(s.prefix ?? ""));
+      const blinkMs = (section?.score_blink ?? 5) * 1000;
+      if (blinkMs <= 0 || now - changedAt >= blinkMs) {
+        this._scoreChangedAt.delete(id);
+      }
+    }
+  }
+
+  _armBlinkTimer(): void {
+    if (this._blinkTimer || !this._scoreChangedAt.size) return;
+    const sections = this._config?.sections ?? [];
+    const now = Date.now();
+    let minExpiry = Infinity;
+    for (const [id, changedAt] of this._scoreChangedAt) {
+      const section = sections.find((s) => id.startsWith(s.prefix ?? ""));
+      const blinkMs = (section?.score_blink ?? 5) * 1000;
+      if (blinkMs > 0) minExpiry = Math.min(minExpiry, changedAt + blinkMs);
+    }
+    if (minExpiry === Infinity) return;
+    this._blinkTimer = setTimeout(
+      () => {
+        this._blinkTimer = null;
+        if (this._hass && this._config) this._render();
+      },
+      Math.max(50, minExpiry - now)
+    );
   }
 
   _buildTrackedIds(stateKeys: string[]): void {
@@ -165,6 +231,8 @@ export class SportScoreboardCard extends HTMLElement {
       const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
       this._buildTrackedIds(stateKeys);
+      this._detectScoreChanges(states);
+      this._pruneExpiredBlinks();
 
       if (!Array.isArray(sections) || !sections.length) {
         this._showError("Add at least one section to your card config.");
@@ -176,7 +244,13 @@ export class SportScoreboardCard extends HTMLElement {
       const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ""}${debug ? "position:relative;" : ""}`;
 
       const sectionTemplates = sections.map((s) =>
-        sectionHtml(s, states, this._trackedByPrefix?.get(s.prefix ?? ""), colors)
+        sectionHtml(
+          s,
+          states,
+          this._trackedByPrefix?.get(s.prefix ?? ""),
+          colors,
+          this._scoreChangedAt
+        )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
 
@@ -199,6 +273,8 @@ export class SportScoreboardCard extends HTMLElement {
         `,
         this._root
       );
+
+      this._armBlinkTimer();
     } catch (e) {
       this._showError((e as Error).message);
       // biome-ignore lint/suspicious/noConsole: intentional render error logging

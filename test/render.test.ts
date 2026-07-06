@@ -328,6 +328,53 @@ describe("sectionHtml", () => {
   });
 });
 
+describe("rowHtml score-fresh class", () => {
+  it("adds score-fresh to score and colon elements when isFresh is true", () => {
+    const el = doc(rowHtml(makeState("IN", baseAttrs), false, {}, false, true));
+    expect(el.querySelectorAll(".score-fresh").length).toBe(3);
+  });
+
+  it("does not add score-fresh by default", () => {
+    const el = doc(rowHtml(makeState("IN", baseAttrs), false));
+    expect(el.querySelector(".score-fresh")).toBeNull();
+  });
+});
+
+describe("sectionHtml scoreChangedAt", () => {
+  const section = {
+    name: "NBA",
+    prefix: "sensor.nba_",
+    limit: 10,
+    special_teams: [] as string[],
+    rank_type: "win-loss" as const,
+  };
+
+  it("marks entity as fresh when scoreChangedAt is recent", () => {
+    const states = { "sensor.nba_lal": makeState("IN", baseAttrs) };
+    const scoreChangedAt = new Map([["sensor.nba_lal", Date.now()]]);
+    const el = doc(sectionHtml(section, states, Object.keys(states), {}, scoreChangedAt));
+    expect(el.querySelector(".score-fresh")).not.toBeNull();
+  });
+
+  it("does not mark as fresh when scoreChangedAt is past the blink window", () => {
+    const states = { "sensor.nba_lal": makeState("IN", baseAttrs) };
+    const scoreChangedAt = new Map([["sensor.nba_lal", Date.now() - 10_000]]);
+    const el = doc(
+      sectionHtml({ ...section, score_blink: 5 }, states, Object.keys(states), {}, scoreChangedAt)
+    );
+    expect(el.querySelector(".score-fresh")).toBeNull();
+  });
+
+  it("does not mark as fresh when score_blink is 0", () => {
+    const states = { "sensor.nba_lal": makeState("IN", baseAttrs) };
+    const scoreChangedAt = new Map([["sensor.nba_lal", Date.now()]]);
+    const el = doc(
+      sectionHtml({ ...section, score_blink: 0 }, states, Object.keys(states), {}, scoreChangedAt)
+    );
+    expect(el.querySelector(".score-fresh")).toBeNull();
+  });
+});
+
 // ─── structural snapshots ─────────────────────────────────────────────────────
 // These backstop everything the targeted .toContain/.querySelector assertions
 // above don't name: element structure, class names, attribute order. A diff
@@ -342,5 +389,9 @@ describe("rowHtml structural snapshots", () => {
 
   it("renders with showLogos enabled", () => {
     expect(snap(rowHtml(makeState("IN", baseAttrs), true))).toMatchSnapshot();
+  });
+
+  it("renders IN with fresh score", () => {
+    expect(snap(rowHtml(makeState("IN", baseAttrs), false, {}, false, true))).toMatchSnapshot();
   });
 });

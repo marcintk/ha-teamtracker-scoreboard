@@ -56,6 +56,7 @@ export interface SectionConfig {
   limit?: number;
   special_teams?: string[];
   rank_type?: SortMode;
+  score_blink?: number;
 }
 
 export interface ColorsConfig {

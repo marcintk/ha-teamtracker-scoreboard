@@ -160,4 +160,12 @@ export const CARD_STYLES = `
     font-size: 13px;
     color: #555; /* dark gray */
   }
+
+  @keyframes score-flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  .score-fresh {
+    animation: score-flash 0.5s ease-in-out infinite;
+  }
 `;
