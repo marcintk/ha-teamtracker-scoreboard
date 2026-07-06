@@ -18,11 +18,13 @@ export function rowHtml(
   stateObj: HassEntity | null,
   special: boolean,
   colors: ColorsConfig = {},
-  opponentSpecial = false
+  opponentSpecial = false,
+  isFresh = false
 ): TemplateResult {
   const gs = (stateObj?.state ?? "") as GameState;
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
+  const freshClass = isFresh ? " score-fresh" : "";
 
   const homeColor = teamColor("home", attr, special, colors, opponentSpecial);
   const awayColor = teamColor("away", attr, special, colors, opponentSpecial);
@@ -34,9 +36,9 @@ export function rowHtml(
     <div class="team-rank" style="color:${homeColor}">${rankText("home", attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml("home", attr)}</div>
-  <div class="score score-a" style="background:${bg};color:${scoreColor("home", gs, attr, colors)}">${scoreText("home", gs, attr)}</div>
-  <div class="colon" style="background:${bg};color:${colonColor(gs)}">${gs ? ":" : ""}</div>
-  <div class="score score-b" style="background:${bg};color:${scoreColor("away", gs, attr, colors)}">${scoreText("away", gs, attr)}</div>
+  <div class="score score-a${freshClass}" style="background:${bg};color:${scoreColor("home", gs, attr, colors)}">${scoreText("home", gs, attr)}</div>
+  <div class="colon${freshClass}" style="background:${bg};color:${colonColor(gs)}">${gs ? ":" : ""}</div>
+  <div class="score score-b${freshClass}" style="background:${bg};color:${scoreColor("away", gs, attr, colors)}">${scoreText("away", gs, attr)}</div>
   <div class="logo logo-b">${logoHtml("away", attr)}</div>
   <div class="team-col team-col-b">
     <div class="team-name" style="color:${awayColor};font-weight:${isTeamSide("away", attr) ? "bold" : "normal"}">${nameText("away", attr)}</div>
@@ -51,7 +53,8 @@ export function sectionHtml(
   section: SectionConfig,
   states: HassStates,
   entityIds?: string[],
-  colors: ColorsConfig = {}
+  colors: ColorsConfig = {},
+  scoreChangedAt: Map<string, number> = new Map()
 ): TemplateResult | typeof nothing {
   const {
     name,
@@ -59,7 +62,9 @@ export function sectionHtml(
     limit = 10,
     special_teams = [],
     rank_type = "win-draw-loss",
+    score_blink = 5,
   } = section;
+  const blinkMs = score_blink * 1000;
   const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
   const entities = resolvedIds.filter((id) =>
     VALID_STATES.has((states[id]?.state ?? "") as GameState)
@@ -85,11 +90,13 @@ export function sectionHtml(
     return nameDiff !== 0 ? nameDiff : a.entityId.localeCompare(b.entityId);
   });
 
+  const now = Date.now();
   const rows = deduplicate(items, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special = false, opponentSpecial = false }) =>
-      rowHtml(states[entityId] as HassEntity, special, colors, opponentSpecial)
-    );
+    .map(({ entityId, special = false, opponentSpecial = false }) => {
+      const isFresh = blinkMs > 0 && now - (scoreChangedAt.get(entityId) ?? -Infinity) < blinkMs;
+      return rowHtml(states[entityId] as HassEntity, special, colors, opponentSpecial, isFresh);
+    });
 
   if (!rows.length) return nothing;
   return html`<div class="section-header" style=${colors.header ? `color:${colors.header}` : nothing}>${name}</div>${rows}`;
