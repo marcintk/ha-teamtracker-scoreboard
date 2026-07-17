@@ -83,6 +83,7 @@ export interface CardConfig {
   height?: string;
   colors?: ColorsConfig;
   debug?: boolean;
+  show_version?: boolean;
   lazy_refresh?: number;
   fixed_refresh?: number;
 }
