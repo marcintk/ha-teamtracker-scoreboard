@@ -78,6 +78,7 @@ sections:
 | `sections`      | list    | required | One entry per sport/league                                                       |
 | `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                    |
 | `debug`         | boolean | `false`  | Show performance overlay (see [Debug overlay](#debug-overlay))                   |
+| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                       |
 
 ### Section options
 

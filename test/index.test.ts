@@ -876,13 +876,12 @@ describe("SportScoreboardCard", () => {
       expect(card.shadowRoot?.innerHTML).toContain("position:relative");
     });
 
-    it("debug mode shows card version badge", () => {
+    it("debug mode does not show version badge", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).toContain("sc-version");
-      expect(card.shadowRoot?.innerHTML).toContain("test");
+      expect(card.shadowRoot?.innerHTML).not.toContain("sc-version");
     });
 
     it("version badge is absent when debug is false", () => {
@@ -891,6 +890,15 @@ describe("SportScoreboardCard", () => {
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       expect(card.shadowRoot?.innerHTML).not.toContain("sc-version");
+    });
+
+    it("show_version shows version badge without debug", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], show_version: true };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(card.shadowRoot?.innerHTML).toContain("sc-version");
+      expect(card.shadowRoot?.innerHTML).not.toContain("sc-debug");
     });
   });
 
