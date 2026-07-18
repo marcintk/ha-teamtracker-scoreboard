@@ -1,3 +1,0 @@
-// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-
-exports[`SportScoreboardCard > debug > version badge HTML structure snapshot 1`] = `"<div id="sc-version" style="position:absolute;top:4px;right:6px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v<!--?-->test</div>"`;

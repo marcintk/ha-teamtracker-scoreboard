@@ -15,3 +15,8 @@ export function doc(template: unknown): HTMLElement {
 export function snap(template: unknown): string {
   return doc(template).innerHTML.replace(/lit\$\d+\$/g, "lit$");
 }
+
+/** Same normalization for raw HTML strings (e.g. element.outerHTML). */
+export function snapHtml(html: string): string {
+  return html.replace(/<!--\?lit\$\d+\$-->/g, "<!--?-->").replace(/lit\$\d+\$/g, "lit$");
+}

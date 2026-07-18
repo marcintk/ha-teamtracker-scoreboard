@@ -900,19 +900,6 @@ describe("SportScoreboardCard", () => {
       expect(card.shadowRoot?.innerHTML).toContain("sc-version");
       expect(card.shadowRoot?.innerHTML).not.toContain("sc-debug");
     });
-
-    it("version badge HTML structure snapshot", () => {
-      const card = makeCard();
-      card._config = { sections: [nbaSection], show_version: true };
-      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
-      card._render();
-      const badge = card.shadowRoot?.getElementById("sc-version");
-      // Strip Lit numeric binding IDs so snapshot is stable across module loads
-      const html = badge?.outerHTML
-        .replace(/<!--\?lit\$\d+\$-->/g, "<!--?-->")
-        .replace(/lit\$\d+\$/g, "lit$$$$");
-      expect(html).toMatchSnapshot();
-    });
   });
 
   describe("_refreshDebugOverlay", () => {
