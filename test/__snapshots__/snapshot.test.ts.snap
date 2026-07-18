@@ -180,20 +180,20 @@ exports[`rowHtml structural snapshots > renders BYE markup 1`] = `
 "<!---->
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?lit$-->Lakers</div>
-    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?lit$-->20-10</div>
+    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
+    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
-  <div class="logo logo-a"><!--?lit$--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:transparent;color:black"><!--?lit$-->95</div>
-  <div class="colon" style="background:transparent;color:transparent"><!--?lit$-->:</div>
-  <div class="score score-b" style="background:transparent;color:black"><!--?lit$-->90</div>
-  <div class="logo logo-b"><!--?lit$--><img alt="" src="https://cdn.example.com/bos.png"></div>
+  <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
+  <div class="score score-a" style="background:transparent;color:black"><!--?-->95</div>
+  <div class="colon" style="background:transparent;color:transparent"><!--?-->:</div>
+  <div class="score score-b" style="background:transparent;color:black"><!--?-->90</div>
+  <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?lit$-->Celtics</div>
-    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?lit$-->18-12</div>
+    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
+    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?lit$--><span style="color:darkgray">Bye</span></div>
-  <div class="tv"><!--?lit$--></div>
+  <div class="message"><!--?--><span style="color:darkgray">Bye</span></div>
+  <div class="tv"><!--?--></div>
 </div>"
 `;
 
@@ -201,20 +201,20 @@ exports[`rowHtml structural snapshots > renders IN markup 1`] = `
 "<!---->
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?lit$-->Lakers</div>
-    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?lit$-->20-10</div>
+    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
+    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
-  <div class="logo logo-a"><!--?lit$--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:lightgray;color:brown"><!--?lit$-->95</div>
-  <div class="colon" style="background:lightgray;color:black"><!--?lit$-->:</div>
-  <div class="score score-b" style="background:lightgray;color:black"><!--?lit$-->90</div>
-  <div class="logo logo-b"><!--?lit$--><img alt="" src="https://cdn.example.com/bos.png"></div>
+  <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
+  <div class="score score-a" style="background:lightgray;color:brown"><!--?-->95</div>
+  <div class="colon" style="background:lightgray;color:black"><!--?-->:</div>
+  <div class="score score-b" style="background:lightgray;color:black"><!--?-->90</div>
+  <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?lit$-->Celtics</div>
-    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?lit$-->18-12</div>
+    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
+    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?lit$--><span style="color:indianred"><!--?lit$--></span><!--?lit$--><!--?--></div>
-  <div class="tv"><!--?lit$--></div>
+  <div class="message"><!--?--><span style="color:indianred"><!--?--></span><!--?--><!--?--></div>
+  <div class="tv"><!--?--></div>
 </div>"
 `;
 
@@ -222,20 +222,20 @@ exports[`rowHtml structural snapshots > renders IN with fresh score 1`] = `
 "<!---->
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?lit$-->Lakers</div>
-    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?lit$-->20-10</div>
+    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
+    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
-  <div class="logo logo-a"><!--?lit$--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a score-fresh" style="background:lightgray;color:brown"><!--?lit$-->95</div>
-  <div class="colon score-fresh" style="background:lightgray;color:black"><!--?lit$-->:</div>
-  <div class="score score-b score-fresh" style="background:lightgray;color:black"><!--?lit$-->90</div>
-  <div class="logo logo-b"><!--?lit$--><img alt="" src="https://cdn.example.com/bos.png"></div>
+  <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
+  <div class="score score-a score-fresh" style="background:lightgray;color:brown"><!--?-->95</div>
+  <div class="colon score-fresh" style="background:lightgray;color:black"><!--?-->:</div>
+  <div class="score score-b score-fresh" style="background:lightgray;color:black"><!--?-->90</div>
+  <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?lit$-->Celtics</div>
-    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?lit$-->18-12</div>
+    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
+    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?lit$--><span style="color:indianred"><!--?lit$--></span><!--?lit$--><!--?--></div>
-  <div class="tv"><!--?lit$--></div>
+  <div class="message"><!--?--><span style="color:indianred"><!--?--></span><!--?--><!--?--></div>
+  <div class="tv"><!--?--></div>
 </div>"
 `;
 
@@ -243,20 +243,20 @@ exports[`rowHtml structural snapshots > renders POST markup 1`] = `
 "<!---->
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?lit$-->Lakers</div>
-    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?lit$-->20-10</div>
+    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
+    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
-  <div class="logo logo-a"><!--?lit$--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:transparent;color:orange"><!--?lit$-->95</div>
-  <div class="colon" style="background:transparent;color:#777"><!--?lit$-->:</div>
-  <div class="score score-b" style="background:transparent;color:darkgray"><!--?lit$-->90</div>
-  <div class="logo logo-b"><!--?lit$--><img alt="" src="https://cdn.example.com/bos.png"></div>
+  <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
+  <div class="score score-a" style="background:transparent;color:orange"><!--?-->95</div>
+  <div class="colon" style="background:transparent;color:#777"><!--?-->:</div>
+  <div class="score score-b" style="background:transparent;color:darkgray"><!--?-->90</div>
+  <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?lit$-->Celtics</div>
-    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?lit$-->18-12</div>
+    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
+    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?lit$--><span style="color:orange"><!--?lit$--></span><!--?lit$--><!--?--></div>
-  <div class="tv"><!--?lit$--></div>
+  <div class="message"><!--?--><span style="color:orange"><!--?--></span><!--?--><!--?--></div>
+  <div class="tv"><!--?--></div>
 </div>"
 `;
 
@@ -264,20 +264,20 @@ exports[`rowHtml structural snapshots > renders PRE markup 1`] = `
 "<!---->
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?lit$-->Lakers</div>
-    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?lit$-->20-10</div>
+    <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
+    <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
-  <div class="logo logo-a"><!--?lit$--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:#303030;color:black"><!--?lit$-->–</div>
-  <div class="colon" style="background:#303030;color:black"><!--?lit$-->:</div>
-  <div class="score score-b" style="background:#303030;color:black"><!--?lit$-->–</div>
-  <div class="logo logo-b"><!--?lit$--><img alt="" src="https://cdn.example.com/bos.png"></div>
+  <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
+  <div class="score score-a" style="background:#303030;color:black"><!--?-->–</div>
+  <div class="colon" style="background:#303030;color:black"><!--?-->:</div>
+  <div class="score score-b" style="background:#303030;color:black"><!--?-->–</div>
+  <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?lit$-->Celtics</div>
-    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?lit$-->18-12</div>
+    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
+    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?lit$--><span style="color:darkgray"><!--?lit$--></span><!--?lit$--><!--?--></div>
-  <div class="tv"><!--?lit$--></div>
+  <div class="message"><!--?--><span style="color:darkgray"><!--?--></span><!--?--><!--?--></div>
+  <div class="tv"><!--?--></div>
 </div>"
 `;
 
@@ -285,20 +285,20 @@ exports[`rowHtml structural snapshots > renders with showLogos enabled 1`] = `
 "<!---->
 <div class="game-row">
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:var(--scoreboard-special-color, #2196F3);font-weight:bold"><!--?lit$-->Lakers</div>
-    <div class="team-rank" style="color:var(--scoreboard-special-color, #2196F3)"><!--?lit$-->20-10</div>
+    <div class="team-name" style="color:var(--scoreboard-special-color, #2196F3);font-weight:bold"><!--?-->Lakers</div>
+    <div class="team-rank" style="color:var(--scoreboard-special-color, #2196F3)"><!--?-->20-10</div>
   </div>
-  <div class="logo logo-a"><!--?lit$--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:lightgray;color:brown"><!--?lit$-->95</div>
-  <div class="colon" style="background:lightgray;color:black"><!--?lit$-->:</div>
-  <div class="score score-b" style="background:lightgray;color:black"><!--?lit$-->90</div>
-  <div class="logo logo-b"><!--?lit$--><img alt="" src="https://cdn.example.com/bos.png"></div>
+  <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
+  <div class="score score-a" style="background:lightgray;color:brown"><!--?-->95</div>
+  <div class="colon" style="background:lightgray;color:black"><!--?-->:</div>
+  <div class="score score-b" style="background:lightgray;color:black"><!--?-->90</div>
+  <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?lit$-->Celtics</div>
-    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?lit$-->18-12</div>
+    <div class="team-name" style="color:var(--scoreboard-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
+    <div class="team-rank" style="color:var(--scoreboard-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?lit$--><span style="color:indianred"><!--?lit$--></span><!--?lit$--><!--?--></div>
-  <div class="tv"><!--?lit$--></div>
+  <div class="message"><!--?--><span style="color:indianred"><!--?--></span><!--?--><!--?--></div>
+  <div class="tv"><!--?--></div>
 </div>"
 `;
 
@@ -306,16 +306,16 @@ exports[`widget structural snapshots > logoHtml 1`] = `"<!----><img alt="" src="
 
 exports[`widget structural snapshots > messageHtml BYE 1`] = `"<!----><span style="color:darkgray">Bye</span>"`;
 
-exports[`widget structural snapshots > messageHtml IN short 1`] = `"<!----><span style="color:indianred"><!--?lit$-->Q3 5:00</span><!--?lit$--><span class="msg-sub"><!--?lit$-->Touchdown - LAL</span><!--?-->"`;
+exports[`widget structural snapshots > messageHtml IN short 1`] = `"<!----><span style="color:indianred"><!--?-->Q3 5:00</span><!--?--><span class="msg-sub"><!--?-->Touchdown - LAL</span><!--?-->"`;
 
-exports[`widget structural snapshots > messageHtml IN truncated 1`] = `"<!----><span style="color:indianred"><!--?lit$-->Q3 5:00</span><!--?lit$--><span class="msg-sub tv-tooltip" data-tooltip="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"><!--?lit$-->AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&gt;</span><!--?-->"`;
+exports[`widget structural snapshots > messageHtml IN truncated 1`] = `"<!----><span style="color:indianred"><!--?-->Q3 5:00</span><!--?--><span class="msg-sub tv-tooltip" data-tooltip="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"><!--?-->AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&gt;</span><!--?-->"`;
 
-exports[`widget structural snapshots > messageHtml POST 1`] = `"<!----><span style="color:orange"><!--?lit$-->Final</span><!--?lit$--><span class="msg-sub"><!--?lit$-->LAL leads 2-1</span><!--?-->"`;
+exports[`widget structural snapshots > messageHtml POST 1`] = `"<!----><span style="color:orange"><!--?-->Final</span><!--?--><span class="msg-sub"><!--?-->LAL leads 2-1</span><!--?-->"`;
 
-exports[`widget structural snapshots > messageHtml PRE with sub 1`] = `"<!----><span style="color:darkgray"><!--?lit$-->2h</span><!--?lit$--><span class="msg-sub"><!--?lit$-->Houston, LAL -3.5</span><!--?-->"`;
+exports[`widget structural snapshots > messageHtml PRE with sub 1`] = `"<!----><span style="color:darkgray"><!--?-->2h</span><!--?--><span class="msg-sub"><!--?-->Houston, LAL -3.5</span><!--?-->"`;
 
-exports[`widget structural snapshots > tvHtml IN 1`] = `"<!----><span class="tv-badge" style="background:indianred"><!--?lit$-->ESP&gt;</span>"`;
+exports[`widget structural snapshots > tvHtml IN 1`] = `"<!----><span class="tv-badge" style="background:indianred"><!--?-->ESP&gt;</span>"`;
 
-exports[`widget structural snapshots > tvHtml PRE single 1`] = `"<!----><span class="tv-badge" style="background:#666"><!--?lit$-->ESP&gt;</span>"`;
+exports[`widget structural snapshots > tvHtml PRE single 1`] = `"<!----><span class="tv-badge" style="background:#666"><!--?-->ESP&gt;</span>"`;
 
-exports[`widget structural snapshots > tvHtml multi-network 1`] = `"<!----><span class="tv-tooltip" data-tooltip="ESPN · ESPN2 · TNT"><!--?lit$--><span class="tv-badge" style="background:#666"><!--?lit$-->ESP&gt;</span></span>"`;
+exports[`widget structural snapshots > tvHtml multi-network 1`] = `"<!----><span class="tv-tooltip" data-tooltip="ESPN · ESPN2 · TNT"><!--?--><span class="tv-badge" style="background:#666"><!--?-->ESP&gt;</span></span>"`;
