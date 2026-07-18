@@ -1,10 +1,10 @@
 /// <reference path="../node_modules/ha-card-shared/globals.d.ts" />
+
+import { DebugMetrics, SubscriptionManager } from "ha-card-shared/runtime";
 import { html, nothing, render } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { DebugMetrics } from "./debug.js";
 import { sectionHtml } from "./render.js";
 import { CARD_STYLES } from "./styles.js";
-import { SubscriptionManager } from "./subscription.js";
 import type { CardConfig, HassStates, HomeAssistant } from "./types.js";
 
 const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
@@ -72,7 +72,7 @@ export class SportScoreboardCard extends HTMLElement {
       return;
     }
 
-    if (!this._subscription._unsub && this._hasRelevantChange(hass, prevHass) && this._config) {
+    if (!this._subscription.active && this._hasRelevantChange(hass, prevHass) && this._config) {
       this._scheduleRender();
     }
   }
@@ -258,7 +258,7 @@ export class SportScoreboardCard extends HTMLElement {
         html`
           ${STYLE_BLOCK}
           <ha-card style=${haCardStyle || nothing}>
-            ${debug ? unsafeHTML(this._debug.html()) : nothing}
+            ${debug ? unsafeHTML(`<div id="sc-debug" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:11px;line-height:1;padding:2px 6px;pointer-events:none;">${this._debug.tableHtml()}</div>`) : nothing}
             ${
               show_version
                 ? html`<div id="sc-version" style="position:absolute;top:2px;right:4px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>`

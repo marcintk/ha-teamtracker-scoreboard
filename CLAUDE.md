@@ -7,17 +7,15 @@
 Every `src/*.ts` module has a corresponding `test/*.test.ts`. New source files must ship with their
 test file.
 
-| Source file           | Test file                   | Responsibility                                                                       |
-| --------------------- | --------------------------- | ------------------------------------------------------------------------------------ |
-| `src/index.ts`        | `test/index.test.ts`        | Custom element class, HA lifecycle hooks, entity cache, render orchestration         |
-| `src/debug.ts`        | `test/debug.test.ts`        | `DebugMetrics` — timestamp tracking, windowed counts, overlay HTML                   |
-| `src/subscription.ts` | `test/subscription.test.ts` | `SubscriptionManager` — WebSocket subscribe/unsubscribe with stale-gen guard         |
-| `src/render.ts`       | `test/render.test.ts`       | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows      |
-| `src/display.ts`      | `test/display.test.ts`      | Pure value helpers: colors, text snippets (no HTML output)                           |
-| `src/widgets.ts`      | `test/widgets.test.ts`      | HTML generators: `logoHtml()`, `tvHtml()`, `messageHtml()`                           |
-| `src/sorting.ts`      | `test/sorting.test.ts`      | `winRatio()`, `sortKeyFor()`, `resolveSortMode()`, `deduplicate()` — ranking & dedup |
-| `src/styles.ts`       | `test/styles.test.ts`       | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render        |
-| `src/utils.ts`        | `test/utils.test.ts`        | `safeLogoUrl()`, `VALID_STATES` — URL guard, valid state set                         |
+| Source file      | Test file              | Responsibility                                                                                     |
+| ---------------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/index.ts`   | `test/index.test.ts`   | Custom element class, HA lifecycle hooks, entity cache, render orchestration                       |
+| `src/render.ts`  | `test/render.test.ts`  | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows                    |
+| `src/display.ts` | `test/display.test.ts` | Pure value helpers: colors, text snippets (no HTML output)                                         |
+| `src/widgets.ts` | `test/widgets.test.ts` | HTML generators: `logoHtml()`, `tvHtml()`, `messageHtml()`                                         |
+| `src/sorting.ts` | `test/sorting.test.ts` | `winRatio()`, `sortKeyFor()`, `resolveSortMode()`, `deduplicate()` — ranking & dedup               |
+| `src/styles.ts`  | `test/styles.test.ts`  | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render                      |
+| `src/utils.ts`   | `test/utils.test.ts`   | `safeLogoUrl()`, `VALID_STATES` — URL guard, valid state set (timeAgo from ha-card-shared/runtime) |
 
 ## Architecture Notes
 
