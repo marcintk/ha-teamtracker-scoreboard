@@ -38,12 +38,8 @@ export interface HassEntity {
 
 export type HassStates = Record<string, HassEntity>;
 
-export interface HassConnection {
-  subscribeEvents(
-    callback: (event: { data: { entity_id: string } }) => void,
-    eventType: string
-  ): Promise<() => void>;
-}
+import type { HasSubscribeEvents } from "ha-card-shared/runtime";
+export type HassConnection = HasSubscribeEvents;
 
 export interface HomeAssistant {
   states: HassStates;
