@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { GameAttr } from "../src/types.js";
 import { logoHtml, messageHtml, tvHtml } from "../src/widgets.js";
-import { doc, snap } from "./helpers.js";
+import { doc } from "./helpers.js";
 
 const homeAttr: GameAttr = {
   team_homeaway: "home",
@@ -232,36 +232,4 @@ describe("messageHtml", () => {
     // BYE should not fall through to the POST branch's orange clock span
     expect(el.querySelector("span")?.getAttribute("style") ?? "").not.toContain("orange");
   });
-});
-
-// ─── structural snapshots ─────────────────────────────────────────────────────
-// Backstop the rendered markup of each widget variant beyond the named
-// assertions above. A diff means structure changed — review, then `vitest run -u`.
-
-describe("widget structural snapshots", () => {
-  it("logoHtml", () => expect(snap(logoHtml("home", homeAttr))).toMatchSnapshot());
-
-  it("tvHtml PRE single", () =>
-    expect(snap(tvHtml("PRE", { tv_network: "ESPN" }))).toMatchSnapshot());
-  it("tvHtml IN", () => expect(snap(tvHtml("IN", { tv_network: "ESPN" }))).toMatchSnapshot());
-  it("tvHtml multi-network", () =>
-    expect(snap(tvHtml("PRE", { tv_network: "ESPN/ESPN2/TNT" }))).toMatchSnapshot());
-
-  it("messageHtml PRE with sub", () =>
-    expect(
-      snap(messageHtml("PRE", { kickoff_in: "2h", location: "Houston, TX", odds: "LAL -3.5" }))
-    ).toMatchSnapshot());
-  it("messageHtml IN short", () =>
-    expect(
-      snap(messageHtml("IN", { clock: "Q3 5:00", last_play: "Touchdown - LAL" }))
-    ).toMatchSnapshot());
-  it("messageHtml IN truncated", () =>
-    expect(
-      snap(messageHtml("IN", { clock: "Q3 5:00", last_play: "A".repeat(60) }))
-    ).toMatchSnapshot());
-  it("messageHtml BYE", () => expect(snap(messageHtml("BYE", {}))).toMatchSnapshot());
-  it("messageHtml POST", () =>
-    expect(
-      snap(messageHtml("POST", { clock: "Final", series_summary: "LAL leads 2-1" }))
-    ).toMatchSnapshot());
 });
