@@ -360,7 +360,7 @@ describe("SportScoreboardCard", () => {
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       card._render();
-      expect(card._debug._data.rendered).toHaveLength(2);
+      expect(card._debug.counts("rendered").hour3).toBe(2);
     });
 
     it("tracks each distinct render call including after content change", () => {
@@ -373,7 +373,7 @@ describe("SportScoreboardCard", () => {
         "sensor.nba_lal": makeState("IN", { ...baseAttrs, team_score: "5" }),
       });
       card._render();
-      expect(card._debug._data.rendered).toHaveLength(3);
+      expect(card._debug.counts("rendered").hour3).toBe(3);
     });
   });
 
@@ -478,12 +478,12 @@ describe("SportScoreboardCard", () => {
     it("stores the unsubscribe function after subscription resolves", async () => {
       const card = makeCard();
       card.setConfig({ sections: [nbaSection] });
-      const { hass, unsub } = makeHassWithConnection({
+      const { hass } = makeHassWithConnection({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
       });
       card.hass = hass;
       await Promise.resolve();
-      expect(card._subscription._unsub).toBe(unsub);
+      expect(card._subscription.active).toBe(true);
     });
 
     it("WS callback schedules render via _renderTimer for a tracked entity", async () => {
@@ -605,7 +605,7 @@ describe("SportScoreboardCard", () => {
       expect(card._renderTimer).not.toBeNull();
       card._clearSubscription();
       expect(unsub).toHaveBeenCalledTimes(1);
-      expect(card._subscription._unsub).toBeNull();
+      expect(card._subscription.active).toBe(false);
       expect(card._renderTimer).toBeNull();
     });
 
@@ -633,7 +633,7 @@ describe("SportScoreboardCard", () => {
       await Promise.resolve();
       card.disconnectedCallback();
       expect(unsub).toHaveBeenCalledTimes(1);
-      expect(card._subscription._unsub).toBeNull();
+      expect(card._subscription.active).toBe(false);
     });
 
     it("setConfig with active subscription unsubscribes then re-subscribes", async () => {
@@ -663,7 +663,7 @@ describe("SportScoreboardCard", () => {
       await Promise.resolve();
       // stale .then() must call unsub() to clean up, not store it
       expect(unsub).toHaveBeenCalledTimes(1);
-      expect(card._subscription._unsub).toBeNull();
+      expect(card._subscription.active).toBe(false);
     });
 
     it("silently ignores subscribeEvents rejection and falls back to diffing", async () => {
@@ -673,7 +673,7 @@ describe("SportScoreboardCard", () => {
       card.hass = { states: { "sensor.nba_lal": makeState("PRE", baseAttrs) }, connection };
       await Promise.resolve();
       await Promise.resolve(); // let rejection propagate through .catch
-      expect(card._subscription._unsub).toBeNull();
+      expect(card._subscription.active).toBe(false);
     });
 
     it("new connection object triggers re-subscribe (HA reconnect)", async () => {
@@ -710,7 +710,7 @@ describe("SportScoreboardCard", () => {
       await Promise.resolve();
       const callback = getCallback(connection.subscribeEvents);
       callback({ data: { entity_id: "sensor.nba_lal" } });
-      expect(card._debug._data.events).toHaveLength(1);
+      expect(card._debug.counts("events").hour3).toBe(1);
     });
 
     it("WS event does not increment events when debug is false", async () => {
@@ -723,7 +723,7 @@ describe("SportScoreboardCard", () => {
       await Promise.resolve();
       const callback = getCallback(connection.subscribeEvents);
       callback({ data: { entity_id: "sensor.nba_lal" } });
-      expect(card._debug._data.events).toHaveLength(0);
+      expect(card._debug.counts("events").hour3).toBe(0);
     });
 
     it("_scheduleRender increments filtered when debug is true and no timer is active", () => {
@@ -732,7 +732,7 @@ describe("SportScoreboardCard", () => {
       card._hass = makeHass({});
       card._trackedIds = new Set();
       card._scheduleRender();
-      expect(card._debug._data.filtered).toHaveLength(1);
+      expect(card._debug.counts("filtered").hour3).toBe(1);
     });
 
     it("_scheduleRender does not increment filtered when timer is already active", () => {
@@ -742,7 +742,7 @@ describe("SportScoreboardCard", () => {
       card._trackedIds = new Set();
       card._scheduleRender();
       card._scheduleRender(); // dropped — timer active
-      expect(card._debug._data.filtered).toHaveLength(1);
+      expect(card._debug.counts("filtered").hour3).toBe(1);
     });
 
     it("_render increments rendered metric when debug is true", () => {
@@ -750,7 +750,7 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card._debug._data.rendered).toHaveLength(1);
+      expect(card._debug.counts("rendered").hour3).toBe(1);
     });
 
     it("_render does not increment rendered when debug is false", () => {
@@ -758,7 +758,7 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card._debug._data.rendered).toHaveLength(0);
+      expect(card._debug.counts("rendered").hour3).toBe(0);
     });
 
     it("debug pane is present in rendered HTML when debug is true", () => {
