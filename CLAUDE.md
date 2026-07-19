@@ -1,21 +1,21 @@
-@node_modules/ha-card-shared/CLAUDE-SHARED.md @package.json @TODO.md
+@node_modules/ha-card-shared/CLAUDE-SHARED.md @package.json
 
 # ha-teamtracker-scoreboard-card
 
-## Module Map
+## Design Invariants
 
-Every `src/*.ts` module has a corresponding `test/*.test.ts`. New source files must ship with their
-test file.
-
-| Source file      | Test file              | Responsibility                                                                                     |
-| ---------------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| `src/index.ts`   | `test/index.test.ts`   | Custom element class, HA lifecycle hooks, entity cache, render orchestration                       |
-| `src/render.ts`  | `test/render.test.ts`  | `rowHtml()` — one game row; `sectionHtml()` — filter, sort, dedup, combine rows                    |
-| `src/display.ts` | `test/display.test.ts` | Pure value helpers: colors, text snippets (no HTML output)                                         |
-| `src/widgets.ts` | `test/widgets.test.ts` | HTML generators: `logoHtml()`, `tvHtml()`, `messageHtml()`                                         |
-| `src/sorting.ts` | `test/sorting.test.ts` | `winRatio()`, `sortKeyFor()`, `resolveSortMode()`, `deduplicate()` — ranking & dedup               |
-| `src/styles.ts`  | `test/styles.test.ts`  | CSS string exported as `CARD_STYLES`, injected into Shadow DOM on each render                      |
-| `src/utils.ts`   | `test/utils.test.ts`   | `safeLogoUrl()`, `VALID_STATES` — URL guard, valid state set (timeAgo from ha-card-shared/runtime) |
+- **Render reads state, not events**: `_scheduleRender()` always uses `_hass.states` — never the
+  `state_changed` event payload. Changing this breaks consistency guarantees.
+- **Logo URLs must be HTTPS**: `safeLogoUrl()` guards every logo path. No raw URL interpolation into
+  templates.
+- **Lit escapes text; no manual escaping**: all interpolated text in `html` templates is
+  auto-escaped. Do not add manual escaping — double-escaping will corrupt output.
+- **Sort auto-switches out of regular season**: `resolveSortMode()` must override to `by-date` for
+  any non-regular-season entity (playoffs, off-season, undefined). Do not short-circuit this logic.
+- **Deduplication is `by-date` only**: the two-pass dedup algorithm (`deduplicate()`) must not run
+  in `by-record` mode — it assumes date-keyed game identity.
+- **Every `src/*.ts` has a `test/*.test.ts`**: new source files must ship with their test file.
+  Coverage must stay at 100%.
 
 ## Architecture Notes
 
@@ -33,13 +33,3 @@ test file.
   regular.
 - **Deduplication** (`by-date` mode only): two-pass algorithm — pass 1 builds home/special key sets,
   pass 2 filters keeping home sensor > away sensor per game key.
-
-## TODO.md discipline
-
-`TODO.md` is the canonical list of known bugs and open issues.
-
-- **When a new bug is found** — add to `TODO.md` with a one-line summary, the affected file:line,
-  and a brief fix description.
-- **When a bug is fixed and merged** — remove its entry in the same PR that fixes it.
-- **Do not leave stale entries.** If a fix makes an entry obsolete, remove it and note why in the PR
-  description.
