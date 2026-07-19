@@ -22,14 +22,9 @@
 - **Shadow DOM / Lit rendering**: Lit's `render()` patches the shadow DOM on every render —
   efficient diffing, no full `innerHTML` replacement.
 - **WebSocket subscription**: card subscribes to `state_changed` events on first `set hass`;
-  callback calls `_scheduleRender()`, which arms a debounce timer (`_renderTimer`). Rendering always
-  uses `_hass.states`, not the event payload.
+  callback calls `_scheduleRender()`, which arms a debounce timer (`_renderTimer`).
 - **Entity filter**: `_trackedIds` (Set) is built once per config from section prefixes; reset on
   `setConfig`, rebuilt lazily on next `set hass`.
-- **Security**: Lit auto-escapes all interpolated text values in `html` templates — no manual
-  escaping needed in render paths. Logo URLs validated HTTPS via `safeLogoUrl()`.
-- **Sort mode resolution**: `resolveSortMode()` in `sorting.ts` auto-switches to `by-date` when any
-  entity reports a non-regular season (playoffs, off-season, …); undefined season is treated as
-  regular.
-- **Deduplication** (`by-date` mode only): two-pass algorithm — pass 1 builds home/special key sets,
-  pass 2 filters keeping home sensor > away sensor per game key.
+- **Sort mode resolution**: undefined season is treated as regular (triggers no auto-switch).
+- **Deduplication** (`by-date` mode only): two-pass — pass 1 builds home/special key sets, pass 2
+  keeps home sensor over away sensor per game key.
