@@ -4,27 +4,18 @@
 
 ## Design Invariants
 
-- **Render reads state, not events**: `_scheduleRender()` always uses `_hass.states` — never the
-  `state_changed` event payload. Changing this breaks consistency guarantees.
-- **Logo URLs must be HTTPS**: `safeLogoUrl()` guards every logo path. No raw URL interpolation into
-  templates.
-- **Lit escapes text; no manual escaping**: all interpolated text in `html` templates is
-  auto-escaped. Do not add manual escaping — double-escaping will corrupt output.
-- **Sort auto-switches out of regular season**: `resolveSortMode()` must override to `by-date` for
-  any non-regular-season entity (playoffs, off-season, undefined). Do not short-circuit this logic.
-- **Deduplication is `by-date` only**: the two-pass dedup algorithm (`deduplicate()`) must not run
-  in `by-record` mode — it assumes date-keyed game identity.
-- **Every `src/*.ts` has a `test/*.test.ts`**: new source files must ship with their test file.
-  Coverage must stay at 100%.
+Durable behavioral/UX constraints. Preserve unless the user explicitly changes them.
+
+- Sort switches to `by-date` automatically during non-regular season (playoffs, off-season);
+  undefined season counts as regular
+- `by-date` mode shows one entry per game: home sensor wins over away sensor when both exist
+- Team logos render only for HTTPS URLs; non-HTTPS is silently dropped
 
 ## Architecture Notes
 
-- **Shadow DOM / Lit rendering**: Lit's `render()` patches the shadow DOM on every render —
-  efficient diffing, no full `innerHTML` replacement.
-- **WebSocket subscription**: card subscribes to `state_changed` events on first `set hass`;
-  callback calls `_scheduleRender()`, which arms a debounce timer (`_renderTimer`).
-- **Entity filter**: `_trackedIds` (Set) is built once per config from section prefixes; reset on
+- **WebSocket subscription**: subscribed to `state_changed` on first `set hass`; callback arms
+  `_renderTimer` debounce. Rendering always reads `_hass.states` — never the event payload.
+- **Entity filter**: `_trackedIds` (Set) built from section prefixes once per config; reset on
   `setConfig`, rebuilt lazily on next `set hass`.
-- **Sort mode resolution**: undefined season is treated as regular (triggers no auto-switch).
-- **Deduplication** (`by-date` mode only): two-pass — pass 1 builds home/special key sets, pass 2
-  keeps home sensor over away sensor per game key.
+- **Deduplication** (`by-date` only): two-pass — pass 1 builds home/special key sets, pass 2 keeps
+  home sensor over away sensor per game key.
