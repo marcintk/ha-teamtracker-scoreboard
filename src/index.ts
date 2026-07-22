@@ -243,7 +243,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ""}${debug || show_version ? "position:relative;" : ""}`;
 
-      let rowBudget: number | undefined;
+      let rowBudgets: Map<number, number> | undefined;
       if (height) {
         const heightPx = parseInt(String(height), 10);
         if (Number.isFinite(heightPx)) {
@@ -251,18 +251,45 @@ export class SportScoreboardCard extends HTMLElement {
           const headerHeight = 23;
           const rowHeight = 29;
           const totalHeaderHeight = sections.length * headerHeight;
-          rowBudget = Math.floor((heightPx - cardPadding - totalHeaderHeight) / rowHeight);
+          const totalBudget = Math.floor((heightPx - cardPadding - totalHeaderHeight) / rowHeight);
+
+          // Distribute budget across sections proportionally to their limits
+          const totalLimit = sections.reduce((sum, s) => sum + (s.limit ?? 10), 0);
+          let remaining = totalBudget;
+          rowBudgets = new Map();
+
+          sections.forEach((s, idx) => {
+            const sectionLimit = s.limit ?? 10;
+            const proportionalBudget = Math.floor((sectionLimit / totalLimit) * totalBudget);
+            const allocated = Math.min(sectionLimit, Math.max(0, proportionalBudget));
+            rowBudgets!.set(idx, allocated);
+            remaining -= allocated;
+          });
+
+          // Distribute any remaining rows to sections that can use them
+          if (remaining > 0) {
+            for (let idx = 0; idx < sections.length && remaining > 0; idx++) {
+              const section = sections[idx];
+              if (!section) continue;
+              const current = rowBudgets.get(idx) ?? 0;
+              const sectionLimit = section.limit ?? 10;
+              if (current < sectionLimit) {
+                rowBudgets.set(idx, current + 1);
+                remaining--;
+              }
+            }
+          }
         }
       }
 
-      const sectionTemplates = sections.map((s) =>
+      const sectionTemplates = sections.map((s, idx) =>
         sectionHtml(
           s,
           states,
           this._trackedByPrefix?.get(s.prefix ?? ""),
           colors,
           this._scoreChangedAt,
-          rowBudget
+          rowBudgets?.get(idx)
         )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
