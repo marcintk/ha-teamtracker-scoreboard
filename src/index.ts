@@ -267,16 +267,13 @@ export class SportScoreboardCard extends HTMLElement {
           });
 
           // Distribute any remaining rows to sections that can use them
-          if (remaining > 0) {
-            for (let idx = 0; idx < sections.length && remaining > 0; idx++) {
-              const section = sections[idx];
-              if (!section) continue;
-              const current = rowBudgets.get(idx) ?? 0;
-              const sectionLimit = section.limit ?? 10;
-              if (current < sectionLimit) {
-                rowBudgets.set(idx, current + 1);
-                remaining--;
-              }
+          for (let idx = 0; idx < sections.length; idx++) {
+            if (remaining <= 0) break;
+            const current = rowBudgets.get(idx) ?? 0;
+            const sectionLimit = sections[idx]!.limit ?? 10;
+            if (current < sectionLimit) {
+              rowBudgets.set(idx, current + 1);
+              remaining--;
             }
           }
         }
