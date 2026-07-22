@@ -241,9 +241,9 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track("rendered");
 
-      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ""}${debug || show_version ? "position:relative;" : ""}`;
+      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}`;
 
-      let rowBudgets: Map<number, number> | undefined;
+      let rowBudget: number | undefined;
       if (height) {
         const heightPx = parseInt(String(height), 10);
         if (Number.isFinite(heightPx)) {
@@ -251,42 +251,18 @@ export class SportScoreboardCard extends HTMLElement {
           const headerHeight = 23;
           const rowHeight = 29;
           const totalHeaderHeight = sections.length * headerHeight;
-          const totalBudget = Math.floor((heightPx - cardPadding - totalHeaderHeight) / rowHeight);
-
-          // Distribute budget across sections proportionally to their limits
-          const totalLimit = sections.reduce((sum, s) => sum + (s.limit ?? 10), 0);
-          let remaining = totalBudget;
-          rowBudgets = new Map();
-
-          sections.forEach((s, idx) => {
-            const sectionLimit = s.limit ?? 10;
-            const proportionalBudget = Math.floor((sectionLimit / totalLimit) * totalBudget);
-            const allocated = Math.min(sectionLimit, Math.max(0, proportionalBudget));
-            rowBudgets!.set(idx, allocated);
-            remaining -= allocated;
-          });
-
-          // Distribute any remaining rows to sections that can use them
-          for (let idx = 0; idx < sections.length; idx++) {
-            if (remaining <= 0) break;
-            const current = rowBudgets.get(idx) ?? 0;
-            const sectionLimit = sections[idx]!.limit ?? 10;
-            if (current < sectionLimit) {
-              rowBudgets.set(idx, current + 1);
-              remaining--;
-            }
-          }
+          rowBudget = Math.floor((heightPx - cardPadding - totalHeaderHeight) / rowHeight);
         }
       }
 
-      const sectionTemplates = sections.map((s, idx) =>
+      const sectionTemplates = sections.map((s) =>
         sectionHtml(
           s,
           states,
           this._trackedByPrefix?.get(s.prefix ?? ""),
           colors,
           this._scoreChangedAt,
-          rowBudgets?.get(idx)
+          rowBudget
         )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
