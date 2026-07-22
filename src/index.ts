@@ -241,7 +241,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track("rendered");
 
-      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};` : ""}${debug || show_version ? "position:relative;" : ""}`;
+      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}`;
 
       let rowBudget: number | undefined;
       if (height) {
