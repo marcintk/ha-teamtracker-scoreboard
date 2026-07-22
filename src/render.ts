@@ -54,7 +54,8 @@ export function sectionHtml(
   states: HassStates,
   entityIds?: string[],
   colors: ColorsConfig = {},
-  scoreChangedAt: Map<string, number> = new Map()
+  scoreChangedAt: Map<string, number> = new Map(),
+  rowBudget?: number
 ): TemplateResult | typeof nothing {
   const {
     name,
@@ -91,8 +92,9 @@ export function sectionHtml(
   });
 
   const now = Date.now();
+  const effectiveLimit = rowBudget !== undefined ? Math.min(limit, rowBudget) : limit;
   const rows = deduplicate(items, sortMode, states)
-    .slice(0, limit)
+    .slice(0, effectiveLimit)
     .map(({ entityId, special = false, opponentSpecial = false }) => {
       const isFresh = blinkMs > 0 && now - (scoreChangedAt.get(entityId) ?? -Infinity) < blinkMs;
       return rowHtml(states[entityId] as HassEntity, special, colors, opponentSpecial, isFresh);

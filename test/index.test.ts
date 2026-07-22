@@ -310,6 +310,20 @@ describe("SportScoreboardCard", () => {
       expect(card.shadowRoot?.innerHTML).toContain("300px");
     });
 
+    it("handles non-numeric height gracefully without setting row budget", () => {
+      const card = makeCard();
+      card._config = { sections: [{ ...nbaSection, limit: 5 }], height: "auto" };
+      const states = Object.fromEntries(
+        Array.from({ length: 10 }, (_, i) => [
+          `sensor.nba_team${i}`,
+          makeState("PRE", { ...baseAttrs, team_name: `Team${i}` }),
+        ])
+      );
+      card._hass = makeHass(states);
+      card._render();
+      expect(card.shadowRoot?.querySelectorAll(".game-row").length).toBe(5);
+    });
+
     it("passes colors config through to row rendering", () => {
       const card = makeCard();
       card._config = {
