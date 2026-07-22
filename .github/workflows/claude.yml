@@ -26,5 +26,6 @@ jobs:
       - uses: anthropics/claude-code-action@beta
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          model: "claude-sonnet-4-5"
           # Let Claude read CLAUDE.md and follow the project workflow phases
           allowed_tools: "Bash,Read,Edit,Write,Glob,Grep"
