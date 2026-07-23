@@ -243,26 +243,13 @@ export class SportScoreboardCard extends HTMLElement {
 
       const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}`;
 
-      let rowBudget: number | undefined;
-      if (height) {
-        const heightPx = parseInt(String(height), 10);
-        if (Number.isFinite(heightPx)) {
-          const cardPadding = 8;
-          const headerHeight = 23;
-          const rowHeight = 29;
-          const totalHeaderHeight = sections.length * headerHeight;
-          rowBudget = Math.floor((heightPx - cardPadding - totalHeaderHeight) / rowHeight);
-        }
-      }
-
       const sectionTemplates = sections.map((s) =>
         sectionHtml(
           s,
           states,
           this._trackedByPrefix?.get(s.prefix ?? ""),
           colors,
-          this._scoreChangedAt,
-          rowBudget
+          this._scoreChangedAt
         )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
