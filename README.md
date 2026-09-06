@@ -1,6 +1,6 @@
 # TeamTracker Scoreboard Card
 
-[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz)
 [![GitHub Release](https://img.shields.io/github/release/marcintk/ha-teamtracker-scoreboard-card.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases)
 [![License](https://img.shields.io/github/license/marcintk/ha-teamtracker-scoreboard-card.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/blob/main/LICENSE)
 [![Maintenance](https://img.shields.io/maintenance/yes/2026)](https://github.com/marcintk/ha-teamtracker-scoreboard-card)
@@ -25,12 +25,11 @@ league files.
 
 ### Via HACS (recommended)
 
-1. In HACS → Frontend → click the three-dot menu → **Custom repositories**
-   - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard-card` (exact URL)
-   - Category: **Dashboard**
-2. Search **TeamTracker Scoreboard Card** → Install
-3. Reload your browser
-4. Add the card to your dashboard (see Configuration below)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcintk&repository=ha-teamtracker-scoreboard-card&category=plugin)
+
+Click the badge to open this card in your own HACS, or find it manually: HACS → Frontend → search
+**TeamTracker Scoreboard Card**. Then Install, reload your browser, and add the card to your
+dashboard (see Configuration below).
 
 ### Manual
 
