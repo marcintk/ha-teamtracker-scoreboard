@@ -69,15 +69,15 @@ sections:
 
 ### Options
 
-| Option          | Type    | Default  | Description                                                                      |
-| --------------- | ------- | -------- | -------------------------------------------------------------------------------- |
-| `height`        | string  | auto     | Card height (CSS value); omit to fit content                                     |
-| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately |
-| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                   |
-| `sections`      | list    | required | One entry per sport/league                                                       |
-| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                    |
-| `debug`         | boolean | `false`  | Show performance overlay (see [Debug overlay](#debug-overlay))                   |
-| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                       |
+| Option          | Type    | Default  | Description                                                                                                                            |
+| --------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `height`        | string  | auto     | Card height (CSS value); omit to fit content                                                                                           |
+| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                                       |
+| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                                         |
+| `sections`      | list    | required | One entry per sport/league                                                                                                             |
+| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                                          |
+| `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s |
+| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                                             |
 
 ### Section options
 
@@ -132,11 +132,3 @@ sections:
 | `loser`    | `darkgray`                | POST loser score                           |
 | `live`     | `indianred`               | IN game clock text and TV badge background |
 | `leading`  | `brown`                   | IN score for the currently leading team    |
-
-## Debug overlay
-
-Add `debug: true` to your card config to enable a live refresh performance overlay pinned to the
-bottom of the card. It shows three counters — **events** (raw WebSocket notifications received),
-**accepted** (events that passed the entity filter), and **renders** (actual DOM updates) — across
-six rolling time windows (1m, 5m, 15m, 30m, 1h, 3h). The timestamp shows when the last render
-completed. In debug mode the debug pane is refreshed every 5 seconds.
