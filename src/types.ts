@@ -80,6 +80,7 @@ export interface SortItem {
 export interface CardConfig {
   sections?: SectionConfig[];
   height?: string;
+  team_col_width?: string;
   colors?: ColorsConfig;
   debug?: boolean;
   show_version?: boolean;

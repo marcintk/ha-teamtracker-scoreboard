@@ -69,15 +69,16 @@ sections:
 
 ### Options
 
-| Option          | Type    | Default  | Description                                                                                                                            |
-| --------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `height`        | string  | auto     | Card height (CSS value); omit to fit content                                                                                           |
-| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                                       |
-| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                                         |
-| `sections`      | list    | required | One entry per sport/league                                                                                                             |
-| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                                          |
-| `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s |
-| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                                             |
+| Option           | Type    | Default  | Description                                                                                                                            |
+| ---------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `height`         | string  | auto     | Card height (CSS value); omit to fit content                                                                                           |
+| `lazy_refresh`   | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                                       |
+| `fixed_refresh`  | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                                         |
+| `sections`       | list    | required | One entry per sport/league                                                                                                             |
+| `colors`         | map     | —        | Override team colours (see [Colors](#colors))                                                                                          |
+| `debug`          | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s |
+| `show_version`   | boolean | `false`  | Show card version badge (top-right corner)                                                                                             |
+| `team_col_width` | string  | `99px`   | CSS width for both team-name columns (A and B); any CSS length. Sets `width` and `min-width` together                                  |
 
 ### Section options
 

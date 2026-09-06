@@ -74,6 +74,10 @@ describe("CARD_STYLES", () => {
   it("matches snapshot", () => {
     expect(CARD_STYLES).toMatchSnapshot();
   });
+
+  it("wires .team-col width to the --scoreboard-team-col-width custom property", () => {
+    expect(CARD_STYLES).toContain("width: var(--scoreboard-team-col-width, 99px)");
+  });
 });
 
 // ─── rowHtml structural snapshots ────────────────────────────────────────────

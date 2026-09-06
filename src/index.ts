@@ -227,7 +227,14 @@ export class SportScoreboardCard extends HTMLElement {
 
   _render(): void {
     try {
-      const { sections, height, colors = {}, debug, show_version } = this._config as CardConfig;
+      const {
+        sections,
+        height,
+        team_col_width,
+        colors = {},
+        debug,
+        show_version,
+      } = this._config as CardConfig;
       const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
       this._buildTrackedIds(stateKeys);
@@ -241,7 +248,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track("rendered");
 
-      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}`;
+      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}${team_col_width ? `--scoreboard-team-col-width:${String(team_col_width)};` : ""}`;
 
       const sectionTemplates = sections.map((s) =>
         sectionHtml(
