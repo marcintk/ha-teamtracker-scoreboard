@@ -90,7 +90,7 @@ sections:
 | `rank_type`     | string | `win-draw-loss` | Ranking formula for the regular season. See below                                           |
 | `score_blink`   | number | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                      |
 
-### rank_type
+### Rank type
 
 During the **regular season** the card ranks all tracked teams by their win-loss record and displays
 them top-to-bottom from highest to lowest in the standings — i.e. first place at the top, last place
