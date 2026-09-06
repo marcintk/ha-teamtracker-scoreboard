@@ -81,14 +81,15 @@ sections:
 
 ### Section options
 
-| Field           | Type   | Default         | Description                                                                                 |
-| --------------- | ------ | --------------- | ------------------------------------------------------------------------------------------- |
-| `name`          | string | required        | Header label shown above the section                                                        |
-| `prefix`        | string | required        | Entity ID prefix, e.g. `sensor.nba_`                                                        |
-| `limit`         | number | `10`            | Max rows to show                                                                            |
-| `special_teams` | list   | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos` |
-| `rank_type`     | string | `win-draw-loss` | Ranking formula for the regular season. See below                                           |
-| `score_blink`   | number | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                      |
+| Field           | Type   | Default         | Description                                                                                    |
+| --------------- | ------ | --------------- | ---------------------------------------------------------------------------------------------- |
+| `name`          | string | required        | Header label shown above the section                                                           |
+| `prefix`        | string | required        | Entity ID prefix, e.g. `sensor.nba_`                                                           |
+| `limit`         | number | `10`            | Max rows to show                                                                               |
+| `special_teams` | list   | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos`    |
+| `rank_type`     | string | `win-draw-loss` | Ranking formula for the regular season. See below                                              |
+| `season_mode`   | string | `auto`          | Override the automatic standings-vs-fixtures choice. `auto` / `regular` / `by-date`. See below |
+| `score_blink`   | number | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                         |
 
 ### Rank type
 
@@ -104,6 +105,30 @@ at the bottom. Choose the formula that matches the league:
 
 During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
 game date instead.
+
+### Season mode
+
+The switch between the standings table and the date-sorted fixture table is automatic: if any
+tracked sensor reports a `season` attribute that is set and not `regular`, the card shows the
+fixture table. Some leagues don't expose a clean season-type token — TeamTracker's Italian Serie A
+sensors, for example, report `season: 2026-27-italian-serie-a`, which the heuristic reads as "not
+the regular season" and wrongly flips to the fixture table.
+
+`season_mode` overrides the heuristic for a section, in either direction:
+
+| Value     | Effect                                                                      |
+| --------- | --------------------------------------------------------------------------- |
+| `auto`    | Default. Fixture table when any sensor's `season` is set and not `regular`. |
+| `regular` | Always rank by `rank_type`, whatever `season` says.                         |
+| `by-date` | Always the date-sorted fixture table, one row per game.                     |
+
+```yaml
+sections:
+  - name: Serie A
+    prefix: sensor.sera_
+    rank_type: win-draw-loss
+    season_mode: regular # treat as regular season even though the sensor doesn't say so
+```
 
 ### Colors
 

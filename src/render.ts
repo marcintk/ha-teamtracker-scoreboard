@@ -62,6 +62,7 @@ export function sectionHtml(
     limit = 10,
     special_teams = [],
     rank_type = "win-draw-loss",
+    season_mode = "auto",
     score_blink = 5,
   } = section;
   const blinkMs = score_blink * 1000;
@@ -71,7 +72,7 @@ export function sectionHtml(
   );
   if (!entities.length) return nothing;
 
-  const sortMode = resolveSortMode(entities, states, rank_type);
+  const sortMode = resolveSortMode(entities, states, rank_type, season_mode);
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
