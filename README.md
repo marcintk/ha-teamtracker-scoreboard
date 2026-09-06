@@ -1,11 +1,11 @@
 # TeamTracker Scoreboard Card
 
-[![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz)
 [![GitHub Release](https://img.shields.io/github/release/marcintk/ha-teamtracker-scoreboard-card.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases)
 [![License](https://img.shields.io/github/license/marcintk/ha-teamtracker-scoreboard-card.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/blob/main/LICENSE)
 [![Maintenance](https://img.shields.io/maintenance/yes/2026)](https://github.com/marcintk/ha-teamtracker-scoreboard-card)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml)
-[![Lines of code](https://sloc.xyz/github/marcintk/ha-teamtracker-scoreboard-card/?category=code)](https://github.com/marcintk/ha-teamtracker-scoreboard-card)
+[![Downloads](https://img.shields.io/github/downloads/marcintk/ha-teamtracker-scoreboard-card/total?label=downloads)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases)
 [![CI](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml)
 
 Home Assistant custom Lovelace card displaying live scores, pre-game odds, win probability, TV
@@ -25,12 +25,11 @@ league files.
 
 ### Via HACS (recommended)
 
-1. In HACS → Frontend → click the three-dot menu → **Custom repositories**
-   - Repository: `https://github.com/marcintk/ha-teamtracker-scoreboard-card` (exact URL)
-   - Category: **Dashboard**
-2. Search **TeamTracker Scoreboard Card** → Install
-3. Reload your browser
-4. Add the card to your dashboard (see Configuration below)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=marcintk&repository=ha-teamtracker-scoreboard-card&category=plugin)
+
+Click the badge to open this card in your own HACS, or find it manually: HACS → Frontend → search
+**TeamTracker Scoreboard Card**. Then Install, reload your browser, and add the card to your
+dashboard (see Configuration below).
 
 ### Manual
 
@@ -70,15 +69,15 @@ sections:
 
 ### Options
 
-| Option          | Type    | Default  | Description                                                                      |
-| --------------- | ------- | -------- | -------------------------------------------------------------------------------- |
-| `height`        | string  | auto     | Card height (CSS value); omit to fit content                                     |
-| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately |
-| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                   |
-| `sections`      | list    | required | One entry per sport/league                                                       |
-| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                    |
-| `debug`         | boolean | `false`  | Show performance overlay (see [Debug overlay](#debug-overlay))                   |
-| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                       |
+| Option          | Type    | Default  | Description                                                                                                                            |
+| --------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `height`        | string  | auto     | Card height (CSS value); omit to fit content                                                                                           |
+| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                                       |
+| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                                         |
+| `sections`      | list    | required | One entry per sport/league                                                                                                             |
+| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                                          |
+| `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s |
+| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                                             |
 
 ### Section options
 
@@ -91,7 +90,7 @@ sections:
 | `rank_type`     | string | `win-draw-loss` | Ranking formula for the regular season. See below                                           |
 | `score_blink`   | number | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                      |
 
-### rank_type
+### Rank type
 
 During the **regular season** the card ranks all tracked teams by their win-loss record and displays
 them top-to-bottom from highest to lowest in the standings — i.e. first place at the top, last place
@@ -106,7 +105,7 @@ at the bottom. Choose the formula that matches the league:
 During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
 game date instead.
 
-## Colors
+### Colors
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
@@ -133,15 +132,3 @@ sections:
 | `loser`    | `darkgray`                | POST loser score                           |
 | `live`     | `indianred`               | IN game clock text and TV badge background |
 | `leading`  | `brown`                   | IN score for the currently leading team    |
-
-## Debug overlay
-
-Add `debug: true` to your card config to enable a live refresh performance overlay pinned to the
-bottom of the card. It shows three counters — **events** (raw WebSocket notifications received),
-**accepted** (events that passed the entity filter), and **renders** (actual DOM updates) — across
-six rolling time windows (1m, 5m, 15m, 30m, 1h, 3h). The timestamp shows when the last render
-completed. In debug mode the debug pane is refreshed every 5 seconds.
-
-## Development
-
-See [CLAUDE.md](CLAUDE.md) for build commands, contributing guidelines, and release instructions.
