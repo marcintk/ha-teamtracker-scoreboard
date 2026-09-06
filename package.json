@@ -12,8 +12,7 @@
     "check": "biome check --write src/ test/",
     "typecheck": "tsc --noEmit",
     "check:ci": "tsc --noEmit && biome check src/ test/ && prettier --check \"**/*.md\"",
-    "format:md": "prettier --write \"**/*.md\"",
-    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
+    "format:md": "prettier --write \"**/*.md\""
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.10",
@@ -21,7 +20,7 @@
     "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.3.0",
     "@vitest/coverage-v8": "^4.1.11",
-    "ha-card-shared": "github:marcintk/ha-card-shared#v1.4.1",
+    "ha-card-shared": "github:marcintk/ha-card-shared#v2.1.0",
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "rollup": "^4.62.4",
