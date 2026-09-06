@@ -79,6 +79,10 @@ sections:
 | `debug`          | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s |
 | `show_version`   | boolean | `false`  | Show card version badge (top-right corner)                                                                                             |
 | `team_col_width` | string  | `99px`   | CSS width for both team-name columns (A and B); any CSS length. Sets `width` and `min-width` together                                  |
+| `logo_width`     | string  | `30px`   | CSS width of each team-logo cell (and the logo image). See [Layout dimensions](#layout-dimensions)                                     |
+| `score_width`    | string  | `34px`   | CSS width of each score cell. Widen for 3-digit totals                                                                                 |
+| `colon_width`    | string  | `9px`    | CSS width of the centre colon cell                                                                                                     |
+| `row_height`     | string  | `28px`   | CSS height of every game row (row, cells, and logo scale together)                                                                     |
 
 ### Section options
 
@@ -178,3 +182,30 @@ sections:
 | `loser`    | `darkgray`                | POST loser score                           |
 | `live`     | `indianred`               | IN game clock text and TV badge background |
 | `leading`  | `brown`                   | IN score for the currently leading team    |
+
+### Layout dimensions
+
+Every row is a fixed-size flex layout. These card-level options override the built-in pixel
+constants — each maps to a `--scoreboard-*` CSS variable that falls back to its default, so a card
+that sets none of them renders exactly as before.
+
+```yaml
+type: custom:ha-teamtracker-scoreboard-card
+row_height: 34px # roomier rows; the logo scales with it
+logo_width: 40px
+score_width: 42px # room for 3-digit basketball totals
+team_col_width: 130px
+sections:
+  - ...
+```
+
+| Option           | Default | Controls                                                                  |
+| ---------------- | ------- | ------------------------------------------------------------------------- |
+| `row_height`     | `28px`  | `.game-row` height, the logo / score / colon cell heights, the logo image |
+| `logo_width`     | `30px`  | Logo cell width and the logo image width (aspect ratio is preserved)      |
+| `score_width`    | `34px`  | Score cell width                                                          |
+| `colon_width`    | `9px`   | Centre colon cell width                                                   |
+| `team_col_width` | `99px`  | Both team-name column widths                                              |
+
+`getCardSize()` — the height hint Home Assistant uses for masonry layout — tracks `row_height` when
+it is a plain pixel value.

@@ -78,6 +78,22 @@ describe("CARD_STYLES", () => {
   it("wires .team-col width to the --scoreboard-team-col-width custom property", () => {
     expect(CARD_STYLES).toContain("width: var(--scoreboard-team-col-width, 99px)");
   });
+
+  it("wires logo width to the --scoreboard-logo-width custom property", () => {
+    expect(CARD_STYLES).toContain("width: var(--scoreboard-logo-width, 30px)");
+  });
+
+  it("wires score width to the --scoreboard-score-width custom property", () => {
+    expect(CARD_STYLES).toContain("width: var(--scoreboard-score-width, 34px)");
+  });
+
+  it("wires colon width to the --scoreboard-colon-width custom property", () => {
+    expect(CARD_STYLES).toContain("width: var(--scoreboard-colon-width, 9px)");
+  });
+
+  it("wires row height to the --scoreboard-row-height custom property", () => {
+    expect(CARD_STYLES).toContain("height: var(--scoreboard-row-height, 28px)");
+  });
 });
 
 // ─── rowHtml structural snapshots ────────────────────────────────────────────

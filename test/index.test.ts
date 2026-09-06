@@ -101,6 +101,20 @@ describe("SportScoreboardCard", () => {
       expect(card.getCardSize()).toBe(7);
     });
 
+    it("uses row_height px value for section-based size estimate", () => {
+      const card = makeCard();
+      card._config = { sections: [{ limit: 10 }], row_height: "40px" };
+      // (1 header + 10 rows) * 40px = 440px / 50 = ceil(8.8) = 9
+      expect(card.getCardSize()).toBe(9);
+    });
+
+    it("falls back to 28px row height when row_height is non-numeric", () => {
+      const card = makeCard();
+      card._config = { sections: [{ limit: 10 }], row_height: "auto" };
+      // (1 header + 10 rows) * 28px = 308px / 50 = ceil(6.16) = 7
+      expect(card.getCardSize()).toBe(7);
+    });
+
     it("falls back to section-based size when height is non-numeric", () => {
       const card = makeCard();
       card._config = { height: "auto", sections: [{ limit: 10 }] };
@@ -935,6 +949,36 @@ describe("SportScoreboardCard", () => {
       card._render();
       expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-width");
     });
+  });
+
+  describe("layout dimension options", () => {
+    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
+      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+
+    const cases = [
+      { option: "logo_width", prop: "--scoreboard-logo-width", value: "44px" },
+      { option: "score_width", prop: "--scoreboard-score-width", value: "50px" },
+      { option: "colon_width", prop: "--scoreboard-colon-width", value: "12px" },
+      { option: "row_height", prop: "--scoreboard-row-height", value: "40px" },
+    ] as const;
+
+    for (const { option, prop, value } of cases) {
+      it(`emits ${prop} on ha-card when ${option} is configured`, () => {
+        const card = makeCard();
+        card._config = { sections: [nbaSection], [option]: value };
+        card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+        card._render();
+        expect(haCardStyle(card)).toContain(`${prop}:${value}`);
+      });
+
+      it(`does not emit ${prop} when ${option} is omitted`, () => {
+        const card = makeCard();
+        card._config = { sections: [nbaSection] };
+        card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+        card._render();
+        expect(haCardStyle(card)).not.toContain(prop);
+      });
+    }
   });
 
   describe("_refreshDebugOverlay", () => {
