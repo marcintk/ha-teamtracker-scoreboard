@@ -83,6 +83,10 @@ export interface CardConfig {
   sections?: SectionConfig[];
   height?: string;
   team_col_width?: string;
+  logo_width?: string;
+  score_width?: string;
+  colon_width?: string;
+  row_height?: string;
   colors?: ColorsConfig;
   debug?: boolean;
   show_version?: boolean;

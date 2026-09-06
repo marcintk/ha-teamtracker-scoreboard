@@ -19,7 +19,7 @@ export const CARD_STYLES = `
   .game-row {
     display: flex;
     align-items: center;
-    height: 28px;
+    height: var(--scoreboard-row-height, 28px);
     border-bottom: 1px solid rgba(255,255,255,0.04);
     gap: 0;
     position: relative;
@@ -61,29 +61,29 @@ export const CARD_STYLES = `
   }
 
   .logo {
-    width: 30px;
-    min-width: 30px;
+    width: var(--scoreboard-logo-width, 30px);
+    min-width: var(--scoreboard-logo-width, 30px);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 28px;
+    height: var(--scoreboard-row-height, 28px);
     overflow: hidden;
   }
   .logo-a { padding-right: 3px; }
   .logo-b { padding-left:  3px; }
   .logo img {
-    width: 28px;
-    height: 28px;
+    width: var(--scoreboard-logo-width, 28px);
+    height: var(--scoreboard-row-height, 28px);
     object-fit: contain;
     display: block;
   }
 
   .score {
-    width: 34px;
-    min-width: 34px;
+    width: var(--scoreboard-score-width, 34px);
+    min-width: var(--scoreboard-score-width, 34px);
     font-size: 20px;
     font-weight: bold;
-    height: 28px;
+    height: var(--scoreboard-row-height, 28px);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -93,12 +93,12 @@ export const CARD_STYLES = `
   .score-b { justify-content: flex-start; }
 
   .colon {
-    width: 9px;
-    min-width: 9px;
+    width: var(--scoreboard-colon-width, 9px);
+    min-width: var(--scoreboard-colon-width, 9px);
     font-size: 17px;
     font-weight: bold;
     text-align: center;
-    height: 28px;
+    height: var(--scoreboard-row-height, 28px);
     display: flex;
     align-items: center;
     justify-content: center;

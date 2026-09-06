@@ -14,12 +14,13 @@ index.
   stylesheet references the property; asserting it "is emitted" there doesn't prove it reached the
   element.
 - **Guardrail:** for options wired through a `--scoreboard-*` custom property on `<ha-card>`
-  (`team_col_width`, and the row-dimension map planned in #133), assert on
+  (`team_col_width`, `logo_width` / `score_width` / `colon_width` / `row_height`, and the
+  `team_width` A/B split), assert on
   `card.shadowRoot.querySelector("ha-card").getAttribute("style")`, not `innerHTML`; pair it with a
   `CARD_STYLES`-contains assertion for the stylesheet side. `test/index.test.ts` › "team_col_width"
-  and `test/snapshot.test.ts` › CARD_STYLES wiring show the split.
-- **Ref:** [#132](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/132) ·
-  2026-09-06
+  / "layout dimension options" and `test/snapshot.test.ts` › CARD_STYLES wiring show the split.
+- **Ref:** [#132](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/132),
+  [#133](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/133) · 2026-09-06
 
 ## Card shows the fixture table during the regular season / wrong standings-vs-fixtures sort
 

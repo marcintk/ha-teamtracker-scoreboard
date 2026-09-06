@@ -231,6 +231,10 @@ export class SportScoreboardCard extends HTMLElement {
         sections,
         height,
         team_col_width,
+        logo_width,
+        score_width,
+        colon_width,
+        row_height,
         colors = {},
         debug,
         show_version,
@@ -248,7 +252,19 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track("rendered");
 
-      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}${team_col_width ? `--scoreboard-team-col-width:${String(team_col_width)};` : ""}`;
+      const cssVars: Record<string, string | undefined> = {
+        "--scoreboard-team-col-width": team_col_width,
+        "--scoreboard-logo-width": logo_width,
+        "--scoreboard-score-width": score_width,
+        "--scoreboard-colon-width": colon_width,
+        "--scoreboard-row-height": row_height,
+      };
+      const varStr = Object.entries(cssVars)
+        .filter(([, v]) => v)
+        .map(([k, v]) => `${k}:${String(v)};`)
+        .join("");
+
+      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}${varStr}`;
 
       const sectionTemplates = sections.map((s) =>
         sectionHtml(
@@ -306,7 +322,9 @@ export class SportScoreboardCard extends HTMLElement {
       if (Number.isFinite(px)) return Math.ceil(px / 50);
     }
     const rows = (this._config?.sections ?? []).reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
-    return Math.max(1, Math.ceil((rows * 28) / 50));
+    const rowPx = parseInt(this._config?.row_height ?? "", 10);
+    const h = Number.isFinite(rowPx) ? rowPx : 28;
+    return Math.max(1, Math.ceil((rows * h) / 50));
   }
 
   static getStubConfig(): CardConfig {
