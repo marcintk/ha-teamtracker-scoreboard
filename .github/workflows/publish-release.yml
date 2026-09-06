@@ -8,6 +8,10 @@ on:
 
 jobs:
   release:
+    # Held at v1.4.1 on purpose. shared-publish-release.yml@v2.1.0 uploads
+    # dist/<package-name>.js, but rollup.config.mjs pins the bundle to card.js;
+    # the @v1.4.1 workflow uploads dist/card.js, which is what we build.
+    # Dependabot is told to ignore this ref in .github/dependabot.yml.
     uses: marcintk/ha-card-shared/.github/workflows/shared-publish-release.yml@v1.4.1
     permissions:
       contents: write

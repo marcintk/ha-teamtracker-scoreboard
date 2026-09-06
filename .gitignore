@@ -3,3 +3,15 @@
 node_modules/
 coverage/
 dist/
+
+# Stray shell/editor/tooling dotfiles that land in the working tree
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.idea
+.profile
+.ripgreprc
+.vscode
+.zprofile
+.zshrc
