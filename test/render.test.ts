@@ -328,6 +328,88 @@ describe("sectionHtml", () => {
   });
 });
 
+describe("standings position column", () => {
+  const section: SectionConfig = {
+    name: "NBA",
+    prefix: "sensor.nba_",
+    limit: 10,
+    special_teams: [],
+    rank_type: "win-loss",
+  };
+
+  const threeTeams = () => ({
+    "sensor.nba_aaa": makeState("PRE", {
+      ...baseAttrs,
+      team_name: "Alphas",
+      team_record: "30-5",
+    }),
+    "sensor.nba_bbb": makeState("PRE", {
+      ...baseAttrs,
+      team_name: "Betas",
+      team_record: "20-15",
+    }),
+    "sensor.nba_ccc": makeState("PRE", {
+      ...baseAttrs,
+      team_name: "Gammas",
+      team_record: "10-25",
+    }),
+  });
+
+  it("numbers rows in standings order", () => {
+    const el = doc(sectionHtml(section, threeTeams()));
+    const positions = [...el.querySelectorAll(".game-row .team-pos")].map((n) =>
+      (n.textContent ?? "").trim()
+    );
+    expect(positions).toEqual(["1", "2", "3"]);
+    const firstRow = el.querySelectorAll(".game-row")[0];
+    expect(firstRow?.textContent).toContain("Alphas");
+  });
+
+  it("renders .team-pos as the first child of .game-row", () => {
+    const el = doc(sectionHtml(section, threeTeams()));
+    const firstRow = el.querySelector(".game-row");
+    expect(firstRow?.firstElementChild?.classList.contains("team-pos")).toBe(true);
+  });
+
+  it("renders empty .team-pos cells when show_position is false", () => {
+    const el = doc(sectionHtml({ ...section, show_position: false }, threeTeams()));
+    const cells = [...el.querySelectorAll(".game-row .team-pos")];
+    expect(cells.length).toBe(3);
+    for (const cell of cells) {
+      expect((cell.textContent ?? "").trim()).toBe("");
+    }
+  });
+
+  it("renders empty .team-pos cells in by-date mode", () => {
+    const el = doc(sectionHtml({ ...section, season_mode: "by-date" }, threeTeams()));
+    const cells = [...el.querySelectorAll(".game-row .team-pos")];
+    expect(cells.length).toBe(3);
+    for (const cell of cells) {
+      expect((cell.textContent ?? "").trim()).toBe("");
+    }
+  });
+
+  it("colours the position number like a special team", () => {
+    const el = doc(sectionHtml({ ...section, special_teams: ["aaa"] }, threeTeams()));
+    const firstRow = el.querySelector(".game-row");
+    const posCell = firstRow?.querySelector(".team-pos");
+    expect(posCell?.getAttribute("style") ?? "").toContain("scoreboard-special-color");
+  });
+
+  it("rowHtml renders an empty .team-pos cell when position is omitted", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    const cell = el.querySelector(".team-pos");
+    expect(cell).not.toBeNull();
+    expect((cell?.textContent ?? "").trim()).toBe("");
+  });
+
+  it("rowHtml renders the position number when given", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false, {}, false, false, 4));
+    const cell = el.querySelector(".team-pos");
+    expect((cell?.textContent ?? "").trim()).toBe("4");
+  });
+});
+
 describe("rowHtml score-fresh class", () => {
   it("adds score-fresh to score and colon elements when isFresh is true", () => {
     const el = doc(rowHtml(makeState("IN", baseAttrs), false, {}, false, true));

@@ -56,6 +56,7 @@ export interface SectionConfig {
   rank_type?: SortMode;
   season_mode?: SeasonMode;
   score_blink?: number;
+  show_position?: boolean;
 }
 
 export interface ColorsConfig {
@@ -75,6 +76,7 @@ export interface SortItem {
   special?: boolean;
   key?: number;
   opponentSpecial?: boolean;
+  position?: number;
 }
 
 export interface CardConfig {
