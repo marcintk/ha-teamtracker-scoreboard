@@ -105,7 +105,7 @@ at the bottom. Choose the formula that matches the league:
 During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
 game date instead.
 
-## Colors
+### Colors
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
