@@ -4,7 +4,7 @@
 //   win-loss-otl:  W=2 OTL=1 L=0   (NHL, …)    record: W-L-OTL
 //   by-date: internal — auto-applied outside the regular season
 
-import type { GameAttr, HassStates, SortItem, SortMode } from "./types.js";
+import type { GameAttr, HassStates, SeasonMode, SortItem, SortMode } from "./types.js";
 
 export function winRatio(record: unknown, sortMode: SortMode): number {
   const parts = String(record ?? "0-0")
@@ -29,11 +29,16 @@ export function sortKeyFor(attr: GameAttr | null | undefined, sortMode: SortMode
   return winRatio(attr?.team_record, sortMode);
 }
 
+// seasonMode overrides the season heuristic: "by-date" or "regular" force the result;
+// "auto" (default) or any unrecognised value falls through to the non-regular-season check.
 export function resolveSortMode(
   entities: string[],
   states: HassStates,
-  rankType: SortMode
+  rankType: SortMode,
+  seasonMode: SeasonMode = "auto"
 ): SortMode {
+  if (seasonMode === "by-date") return "by-date";
+  if (seasonMode === "regular") return rankType;
   return entities.some((id) => {
     const s = states[id]?.attributes?.season;
     return s && s !== "regular";

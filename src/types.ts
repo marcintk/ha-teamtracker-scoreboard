@@ -2,6 +2,8 @@ export type GameState = "PRE" | "IN" | "POST" | "BYE";
 
 export type SortMode = "win-loss" | "win-draw-loss" | "win-loss-otl" | "by-date";
 
+export type SeasonMode = "auto" | "regular" | "by-date";
+
 export interface GameAttr {
   state?: string;
   season?: string;
@@ -52,6 +54,7 @@ export interface SectionConfig {
   limit?: number;
   special_teams?: string[];
   rank_type?: SortMode;
+  season_mode?: SeasonMode;
   score_blink?: number;
 }
 
