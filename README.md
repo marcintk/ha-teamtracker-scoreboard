@@ -140,7 +140,3 @@ bottom of the card. It shows three counters — **events** (raw WebSocket notifi
 **accepted** (events that passed the entity filter), and **renders** (actual DOM updates) — across
 six rolling time windows (1m, 5m, 15m, 30m, 1h, 3h). The timestamp shows when the last render
 completed. In debug mode the debug pane is refreshed every 5 seconds.
-
-## Development
-
-See [CLAUDE.md](CLAUDE.md) for build commands, contributing guidelines, and release instructions.
