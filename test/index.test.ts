@@ -916,6 +916,27 @@ describe("SportScoreboardCard", () => {
     });
   });
 
+  describe("team_col_width", () => {
+    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
+      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+
+    it("emits --scoreboard-team-col-width on ha-card when configured", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], team_col_width: "130px" };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-width:130px");
+    });
+
+    it("does not emit --scoreboard-team-col-width when omitted", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-width");
+    });
+  });
+
   describe("_refreshDebugOverlay", () => {
     it("patches #sc-debug innerHTML without invoking _render", () => {
       const card = makeCard();

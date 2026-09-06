@@ -29,8 +29,8 @@ export const CARD_STYLES = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 99px;
-    min-width: 60px;
+    width: var(--scoreboard-team-col-width, 99px);
+    min-width: var(--scoreboard-team-col-width, 99px);
     overflow: hidden;
   }
   .team-col-a { text-align: right; padding-right: 3px; }
