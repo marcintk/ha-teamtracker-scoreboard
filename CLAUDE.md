@@ -12,6 +12,10 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
   above
 - `by-date` mode shows one entry per game: home sensor wins over away sensor when both exist
 - Team logos render only for HTTPS URLs; non-HTTPS is silently dropped
+- Every row opens with a fixed-width position cell (`.team-pos`). In a ranking sort it holds the
+  row's 1-based rank in the full sorted list (pre-`limit`), coloured like the tracked team; under
+  `by-date` or `show_position: false` (section option, default `true`) the cell is drawn but empty,
+  so mixed standings/fixture cards stay row-aligned without a card-wide pre-pass
 
 ## Architecture Notes
 

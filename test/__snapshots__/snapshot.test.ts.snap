@@ -28,6 +28,16 @@ exports[`CARD_STYLES > matches snapshot 1`] = `
     position: relative;
   }
 
+  .team-pos {
+    width: 18px;
+    min-width: 18px;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--scoreboard-opponent-color, #777);
+    overflow: hidden;
+  }
+
   .team-col {
     display: flex;
     flex-direction: column;
@@ -179,6 +189,7 @@ exports[`SportScoreboardCard snapshots > version badge HTML 1`] = `"<div id="sc-
 exports[`rowHtml structural snapshots > renders BYE markup 1`] = `
 "<!---->
 <div class="game-row">
+  <div class="team-pos"><!--?--></div>
   <div class="team-col team-col-a">
     <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
     <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
@@ -200,6 +211,7 @@ exports[`rowHtml structural snapshots > renders BYE markup 1`] = `
 exports[`rowHtml structural snapshots > renders IN markup 1`] = `
 "<!---->
 <div class="game-row">
+  <div class="team-pos"><!--?--></div>
   <div class="team-col team-col-a">
     <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
     <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
@@ -221,6 +233,7 @@ exports[`rowHtml structural snapshots > renders IN markup 1`] = `
 exports[`rowHtml structural snapshots > renders IN with fresh score 1`] = `
 "<!---->
 <div class="game-row">
+  <div class="team-pos"><!--?--></div>
   <div class="team-col team-col-a">
     <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
     <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
@@ -242,6 +255,7 @@ exports[`rowHtml structural snapshots > renders IN with fresh score 1`] = `
 exports[`rowHtml structural snapshots > renders POST markup 1`] = `
 "<!---->
 <div class="game-row">
+  <div class="team-pos"><!--?--></div>
   <div class="team-col team-col-a">
     <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
     <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
@@ -263,6 +277,7 @@ exports[`rowHtml structural snapshots > renders POST markup 1`] = `
 exports[`rowHtml structural snapshots > renders PRE markup 1`] = `
 "<!---->
 <div class="game-row">
+  <div class="team-pos"><!--?--></div>
   <div class="team-col team-col-a">
     <div class="team-name" style="color:var(--scoreboard-team-color, var(--primary-text-color, white));font-weight:bold"><!--?-->Lakers</div>
     <div class="team-rank" style="color:var(--scoreboard-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
@@ -284,6 +299,7 @@ exports[`rowHtml structural snapshots > renders PRE markup 1`] = `
 exports[`rowHtml structural snapshots > renders with showLogos enabled 1`] = `
 "<!---->
 <div class="game-row">
+  <div class="team-pos"><!--?--></div>
   <div class="team-col team-col-a">
     <div class="team-name" style="color:var(--scoreboard-special-color, #2196F3);font-weight:bold"><!--?-->Lakers</div>
     <div class="team-rank" style="color:var(--scoreboard-special-color, #2196F3)"><!--?-->20-10</div>

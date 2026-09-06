@@ -82,15 +82,16 @@ sections:
 
 ### Section options
 
-| Field           | Type   | Default         | Description                                                                                    |
-| --------------- | ------ | --------------- | ---------------------------------------------------------------------------------------------- |
-| `name`          | string | required        | Header label shown above the section                                                           |
-| `prefix`        | string | required        | Entity ID prefix, e.g. `sensor.nba_`                                                           |
-| `limit`         | number | `10`            | Max rows to show                                                                               |
-| `special_teams` | list   | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos`    |
-| `rank_type`     | string | `win-draw-loss` | Ranking formula for the regular season. See below                                              |
-| `season_mode`   | string | `auto`          | Override the automatic standings-vs-fixtures choice. `auto` / `regular` / `by-date`. See below |
-| `score_blink`   | number | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                         |
+| Field           | Type    | Default         | Description                                                                                              |
+| --------------- | ------- | --------------- | -------------------------------------------------------------------------------------------------------- |
+| `name`          | string  | required        | Header label shown above the section                                                                     |
+| `prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                     |
+| `limit`         | number  | `10`            | Max rows to show                                                                                         |
+| `special_teams` | list    | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos`              |
+| `rank_type`     | string  | `win-draw-loss` | Ranking formula for the regular season. See below                                                        |
+| `season_mode`   | string  | `auto`          | Override the automatic standings-vs-fixtures choice. `auto` / `regular` / `by-date`. See below           |
+| `show_position` | boolean | `true`          | Show the standings-position number in the leftmost column. See [Standings position](#standings-position) |
+| `score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                                   |
 
 ### Rank type
 
@@ -106,6 +107,25 @@ at the bottom. Choose the formula that matches the league:
 
 During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
 game date instead.
+
+### Standings position
+
+In the regular season each row opens with a narrow column holding that team's **position in the
+standings** — its rank in the full sorted list, so `1` is the section leader even when `limit` hides
+the rows below it. The number is coloured like its team, so `special_teams` positions stand out too.
+
+Set `show_position: false` on a section to hide the numbers. The narrow column is still drawn
+(empty), so a card that mixes a standings section with a date-sorted one keeps every row aligned. In
+date-sorted mode (playoffs, cups, or `season_mode: by-date`) the column is always empty — there is
+no league position to show.
+
+```yaml
+sections:
+  - name: Premier League
+    prefix: sensor.epl_
+    rank_type: win-draw-loss
+    show_position: false # hide the position numbers for this section
+```
 
 ### Season mode
 

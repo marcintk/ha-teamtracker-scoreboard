@@ -6,6 +6,21 @@ index.
 
 <!-- ponytail: single file; split by area if it outgrows one screen-scroll -->
 
+## Test for a CSS-custom-property-backed option fails/passes misleadingly on `shadowRoot.innerHTML`
+
+- **Root cause:** `CARD_STYLES` is inlined into the shadow DOM as a `<style>` block, so any
+  `var(--x, fallback)` in `src/styles.ts` is _always_ present in `card.shadowRoot.innerHTML`.
+  Asserting an option is "not emitted" against `innerHTML` gives a false negative once the
+  stylesheet references the property; asserting it "is emitted" there doesn't prove it reached the
+  element.
+- **Guardrail:** for options wired through a `--scoreboard-*` custom property on `<ha-card>`
+  (`team_col_width`, and the row-dimension map planned in #133), assert on
+  `card.shadowRoot.querySelector("ha-card").getAttribute("style")`, not `innerHTML`; pair it with a
+  `CARD_STYLES`-contains assertion for the stylesheet side. `test/index.test.ts` › "team_col_width"
+  and `test/snapshot.test.ts` › CARD_STYLES wiring show the split.
+- **Ref:** [#132](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/132) ·
+  2026-09-06
+
 ## Card shows the fixture table during the regular season / wrong standings-vs-fixtures sort
 
 - **Root cause:** `resolveSortMode` treated _any_ truthy `season` attribute other than the literal

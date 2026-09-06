@@ -610,7 +610,41 @@
     row for <code>prettier</code>.
   </p>
 
-  <p><strong>Slice 2 &mdash; standings position column &mdash;</strong> <em>pending.</em></p>
+  <p><strong>Slice 2 &mdash; standings position column &mdash; accepted.</strong></p>
+  <ul class="plain">
+    <li><code>src/types.ts</code> &mdash; <code>show_position?: boolean</code> on
+      <code>SectionConfig</code>; <code>position?: number</code> on <code>SortItem</code>.</li>
+    <li><code>src/render.ts</code> &mdash; <code>rowHtml</code> gains a trailing
+      <code>position: number | null = null</code> and renders <code>&lt;div class="team-pos"&gt;</code>
+      as the first child of <code>.game-row</code> &mdash; the digit when non-null (coloured
+      <code>attr.team_homeaway === "home" ? homeColor : awayColor</code>, i.e. the tracked team's
+      colour, reusing the values already computed in the function), empty and style-less otherwise.
+      <code>sectionHtml</code> destructures <code>show_position = true</code>, builds
+      <code>ranked = items.map((it, i) =&gt; ({ ...it, position: i + 1 }))</code> after the sort and
+      feeds that into <code>deduplicate</code>, and passes
+      <code>sortMode !== "by-date" &amp;&amp; show_position ? position : null</code> to
+      <code>rowHtml</code>.</li>
+    <li><code>src/styles.ts</code> &mdash; <code>.team-pos</code> rule (18px fixed, tabular-nums,
+      centred) before <code>.team-col</code>.</li>
+    <li><code>test/render.test.ts</code> &mdash; <code>describe("standings position column")</code>,
+      7 tests: numbers in standings order; <code>.team-pos</code> is the first child; the
+      <code>#1</code> row is the best record; <code>show_position: false</code> &rArr; cell present,
+      empty; <code>by-date</code> &rArr; cell present, empty; special-team number carries the
+      special colour; <code>rowHtml</code> direct with / without the <code>position</code> arg.</li>
+    <li><code>test/__snapshots__/snapshot.test.ts.snap</code> &mdash; <code>CARD_STYLES</code> gains
+      the <code>.team-pos</code> block; the six <code>rowHtml</code> structural snapshots gain an
+      empty <code>&lt;div class="team-pos"&gt;</code> first child.</li>
+    <li><code>README.md</code> &mdash; <code>show_position</code> row in Section options; new
+      "Standings position" subsection after "Rank type".</li>
+    <li><code>CLAUDE.md</code> &mdash; design-invariant bullet for the always-drawn
+      <code>.team-pos</code> gutter.</li>
+  </ul>
+  <p>
+    Suite 273 green (7 new); typecheck, <code>check:ci</code> and 100% coverage clean. Reviewer: no
+    correctness findings. <code>/simplify</code>: collapsed the <code>trackedSide</code> local into
+    the existing <code>homeColor</code>/<code>awayColor</code> values and removed an unreachable
+    <code>?? null</code> that had dropped branch coverage to 99.75%.
+  </p>
 
   <footer>
     issue-132-standings-position-column &middot; created for /design-it &middot; renders at

@@ -19,7 +19,8 @@ export function rowHtml(
   special: boolean,
   colors: ColorsConfig = {},
   opponentSpecial = false,
-  isFresh = false
+  isFresh = false,
+  position: number | null = null
 ): TemplateResult {
   const gs = (stateObj?.state ?? "") as GameState;
   const attr = stateObj?.attributes ?? {};
@@ -28,9 +29,11 @@ export function rowHtml(
 
   const homeColor = teamColor("home", attr, special, colors, opponentSpecial);
   const awayColor = teamColor("away", attr, special, colors, opponentSpecial);
+  const posColor = attr.team_homeaway === "home" ? homeColor : awayColor;
 
   return html`
 <div class="game-row">
+  <div class="team-pos" style=${position == null ? nothing : `color:${posColor}`}>${position ?? ""}</div>
   <div class="team-col team-col-a">
     <div class="team-name" style="color:${homeColor};font-weight:${isTeamSide("home", attr) ? "bold" : "normal"}">${nameText("home", attr)}</div>
     <div class="team-rank" style="color:${homeColor}">${rankText("home", attr)}</div>
@@ -64,6 +67,7 @@ export function sectionHtml(
     rank_type = "win-draw-loss",
     season_mode = "auto",
     score_blink = 5,
+    show_position = true,
   } = section;
   const blinkMs = score_blink * 1000;
   const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
@@ -91,12 +95,22 @@ export function sectionHtml(
     return nameDiff !== 0 ? nameDiff : a.entityId.localeCompare(b.entityId);
   });
 
+  const ranked = items.map((it, i) => ({ ...it, position: i + 1 }));
+
   const now = Date.now();
-  const rows = deduplicate(items, sortMode, states)
+  const rows = deduplicate(ranked, sortMode, states)
     .slice(0, limit)
-    .map(({ entityId, special = false, opponentSpecial = false }) => {
+    .map(({ entityId, special = false, opponentSpecial = false, position }) => {
       const isFresh = blinkMs > 0 && now - (scoreChangedAt.get(entityId) ?? -Infinity) < blinkMs;
-      return rowHtml(states[entityId] as HassEntity, special, colors, opponentSpecial, isFresh);
+      const pos = sortMode !== "by-date" && show_position ? position : null;
+      return rowHtml(
+        states[entityId] as HassEntity,
+        special,
+        colors,
+        opponentSpecial,
+        isFresh,
+        pos
+      );
     });
 
   if (!rows.length) return nothing;

@@ -25,6 +25,16 @@ export const CARD_STYLES = `
     position: relative;
   }
 
+  .team-pos {
+    width: 18px;
+    min-width: 18px;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--scoreboard-opponent-color, #777);
+    overflow: hidden;
+  }
+
   .team-col {
     display: flex;
     flex-direction: column;
