@@ -76,9 +76,11 @@ sections:
 
 Every section renders as one of two things:
 
-- a **standings table** — teams ranked by record, best at the top, with a position number in the
-  gutter (this is what `rank_type` and the position column are for)
-- a **schedule** — one row per game, sorted by date, no ranking
+- a **standings table** — **one row per team**, ranked by record, best at the top, with a position
+  number in the gutter (this is what `rank_type` and the position column are for). If you track both
+  sides of a fixture, that game shows up on both teams' rows — this view doesn't merge them
+- a **schedule** — **one row per game**, sorted by date, no ranking. Home and away sensors for the
+  same game are deduplicated (the home sensor wins)
 
 By default (`view: auto`) the card picks: standings during the regular season, schedule once
 playoffs / cups / the off-season begin. Set a section's [`view`](#view) to `ranking` or `schedule`
