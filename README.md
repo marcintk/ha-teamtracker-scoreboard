@@ -51,9 +51,6 @@ Add a **Manual card** to your dashboard and paste:
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
-slide_sec: 45
-layout:
-  team_width: 80px
 sections:
   - name: Serie A
     prefix: sensor.sera_
