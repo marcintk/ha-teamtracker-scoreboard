@@ -99,8 +99,6 @@ section) picks the formula:
 | `win-draw-loss` | W=3, D=1, L=0   | `W-D-L`       | Soccer leagues, MLS, …               |
 | `win-loss-otl`  | W=2, OTL=1, L=0 | `W-L-OTL`     | NHL and leagues with overtime losses |
 
-In the schedule view `rank_type` is ignored — rows are sorted by game date.
-
 ## Configuration
 
 ### Card
