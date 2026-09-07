@@ -95,15 +95,15 @@ In the standings table teams are ordered by their win-loss record, best at the t
 
 ### Card
 
-| Option         | Type    | Default  | Description                                                                                                                                                                                                                                          |
-| -------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sections`     | list    | required | One entry per league — see [Section](#section)                                                                                                                                                                                                       |
-| `layout`       | map     | —        | Size / spacing / text-scale knobs — see [Layout](#layout)                                                                                                                                                                                            |
-| `colors`       | map     | —        | Team colour overrides — see [Colors](#colors)                                                                                                                                                                                                        |
-| `mode`         | string  | `stack`  | `stack` shows every section; `slide` shows one at a time (needs ≥ 2 sections), auto-advancing with `‹` / stop-resume / `›` header controls. With no `layout.height` the card locks to the tallest section; `prefers-reduced-motion` starts it paused |
-| `slide_sec`    | number  | `45`     | Seconds per section while `mode: slide`                                                                                                                                                                                                              |
-| `debug`        | boolean | `false`  | Pin a live-refresh overlay — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s                                                                                                                                           |
-| `show_version` | boolean | `false`  | Show the card version badge, centred at the top                                                                                                                                                                                                      |
+| Option         | Type    | Default  | Description                                                                                                                                |
+| -------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sections`     | list    | required | One entry per league — see [Section](#section)                                                                                             |
+| `layout`       | map     | —        | Size / spacing / text-scale knobs — see [Layout](#layout)                                                                                  |
+| `colors`       | map     | —        | Team colour overrides — see [Colors](#colors)                                                                                              |
+| `mode`         | string  | `stack`  | `stack` shows every section; `slide` shows one at a time (needs ≥ 2 sections), auto-advancing with `‹` / stop-resume / `›` header controls |
+| `slide_sec`    | number  | `45`     | Seconds per section while `mode: slide`                                                                                                    |
+| `debug`        | boolean | `false`  | Pin a live-refresh overlay — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s                                 |
+| `show_version` | boolean | `false`  | Show the card version badge, centred at the top                                                                                            |
 
 ### Refresh
 
