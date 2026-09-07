@@ -24,18 +24,22 @@ exports[`CARD_STYLES > matches snapshot 1`] = `
     align-items: center;
     justify-content: space-between;
     gap: 6px;
+    position: relative;
   }
   .section-title { flex: none; }
-  /* version sits between the title and the controls, centred and vertically aligned */
+  /* version is pinned to the card's horizontal centre, independent of the
+     title / control widths, and vertically centred in the header row */
   .sc-version {
-    flex: 1;
-    text-align: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     font-family: monospace;
     font-size: calc(9px * var(--scoreboard-font-scale, 1));
     font-weight: normal;
     color: #888;
     white-space: nowrap;
-    overflow: hidden;
+    pointer-events: none;
   }
   .slide-ctrls { display: inline-flex; gap: 2px; flex: none; }
   .slide-btn {
