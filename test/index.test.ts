@@ -704,10 +704,10 @@ describe("SportScoreboardCard", () => {
       for (const b of buttons) expect(b.classList.contains("slide-btn")).toBe(true);
     });
 
-    it("orders the buttons Previous / Pause / Next by title", () => {
+    it("orders the buttons Previous / Stop / Next by title", () => {
       const card = carouselCard();
       const titles = slideButtons(card).map((b) => b.getAttribute("title"));
-      expect(titles).toEqual(["Previous section", "Pause rotation", "Next section"]);
+      expect(titles).toEqual(["Previous section", "Stop rotation", "Next section"]);
     });
 
     it("renders no header buttons when slide_sec is unset", () => {
@@ -762,9 +762,9 @@ describe("SportScoreboardCard", () => {
       expect(asSlide(card)._slidePaused).toBe(true);
     });
 
-    it("clicking the Pause toggle while rotating stops the timer", () => {
+    it("clicking the Stop toggle while rotating stops the timer", () => {
       const card = carouselCard();
-      ctrl(card, "Pause rotation")?.click();
+      ctrl(card, "Stop rotation")?.click();
 
       vi.advanceTimersByTime(30_000);
       expect(headerText(card)).toContain("NBA");
@@ -777,7 +777,7 @@ describe("SportScoreboardCard", () => {
 
     it("clicking Resume after a pause restarts the timer", () => {
       const card = carouselCard();
-      ctrl(card, "Pause rotation")?.click();
+      ctrl(card, "Stop rotation")?.click();
       vi.advanceTimersByTime(30_000);
       expect(headerText(card)).toContain("NBA");
 
@@ -787,8 +787,8 @@ describe("SportScoreboardCard", () => {
       vi.advanceTimersByTime(30_000);
       expect(headerText(card)).toContain("NHL");
 
-      const toggle = ctrl(card, "Pause rotation");
-      expect(toggle?.textContent).toContain("⏸");
+      const toggle = ctrl(card, "Stop rotation");
+      expect(toggle?.textContent).toContain("⏹");
       expect(toggle?.classList.contains("paused")).toBe(false);
     });
 
@@ -886,7 +886,7 @@ describe("SportScoreboardCard", () => {
       expect(toggle).not.toBeNull();
       expect(toggle?.classList.contains("paused")).toBe(true);
       expect(toggle?.textContent).toContain("▶");
-      expect(ctrl(card, "Pause rotation")).toBeFalsy();
+      expect(ctrl(card, "Stop rotation")).toBeFalsy();
     });
 
     it("starts rotating when Resume is clicked after a reduced-motion paused start", () => {
