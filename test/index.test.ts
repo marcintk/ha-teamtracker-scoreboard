@@ -1551,15 +1551,6 @@ describe("SportScoreboardCard", () => {
       expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
     });
 
-    it("2-element array sets sides independently", () => {
-      const card = makeCard();
-      card._config = { sections: [nbaSection], team_width: ["140px", "80px"] };
-      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
-      card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:140px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:80px");
-    });
-
     it("team_width wins over team_col_width when both are set", () => {
       const card = makeCard();
       card._config = {

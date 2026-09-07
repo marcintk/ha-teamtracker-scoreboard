@@ -27,7 +27,7 @@ export const CARD_STYLES = `
     border: none;
     cursor: pointer;
     color: #888;
-    font-size: calc(13px * var(--scoreboard-font-scale, 1));
+    font-size: calc(15px * var(--scoreboard-font-scale, 1));
     line-height: 1;
     padding: 1px 4px;
     border-radius: 3px;

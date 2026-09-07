@@ -341,11 +341,10 @@ export class SportScoreboardCard extends HTMLElement {
       }
 
       const tw = team_width ?? team_col_width;
-      const [teamAW, teamBW] = Array.isArray(tw) ? tw : [tw, tw];
 
       const cssVars: Record<string, string | undefined> = {
-        "--scoreboard-team-col-a-width": teamAW,
-        "--scoreboard-team-col-b-width": teamBW,
+        "--scoreboard-team-col-a-width": tw,
+        "--scoreboard-team-col-b-width": tw,
         "--scoreboard-logo-width": logo_width,
         "--scoreboard-score-width": score_width,
         "--scoreboard-colon-width": colon_width,
