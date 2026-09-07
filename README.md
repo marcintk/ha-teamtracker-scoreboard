@@ -72,18 +72,14 @@ sections:
 
 ## Standings vs schedule
 
-Every section renders as one of two things:
+A section renders as one of two things:
 
-- a **standings table** — **one row per team**, ranked by record, best at the top, with a position
-  number in the gutter (this is what `rank_type` and the position column are for). If you track both
-  sides of a fixture, that game shows up on both teams' rows — this view doesn't merge them
-- a **schedule** — **one row per game**, sorted by date, no ranking. Home and away sensors for the
-  same game are deduplicated (the home sensor wins)
+- **standings table** — one row per team, ranked by record (see [Rank type](#rank-type))
+- **schedule** — one row per game, sorted by date; the two sensors for a game are merged into one
+  row
 
-By default (`view: auto`) a section shows the standings table when **every** tracked team reports a
-numeric win-loss record (`12-4`, `0-1-2`, `5-2-1`), and the schedule otherwise — so a cup or
-knockout stage with no records lands on the schedule on its own. Set the [`view`](#section) field to
-`ranking` or `schedule` to override.
+`view: auto` (default) picks the standings table when every team has a win-loss record (`12-4`,
+`0-1-2`), else the schedule. Force it with [`view`](#section) `ranking` or `schedule`.
 
 ## Rank type
 
