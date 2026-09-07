@@ -51,7 +51,7 @@
 <body>
 
 <h1>One knob for the whole type scale</h1>
-<p style="color:var(--muted); margin-top:-.5rem;">Prepared 2026-09-06 · PR #NNN</p>
+<p style="color:var(--muted); margin-top:-.5rem;">Prepared 2026-09-06 · PR #139</p>
 
 <div class="toc">
 <strong>Contents</strong>
@@ -77,18 +77,18 @@
 
 <div class="quiz-q">
 <p><strong>With `font_scale` unset, what is the computed `font-size` of `.score`, whose rule is now `calc(20px * var(--scoreboard-font-scale, 1))`?</strong></p>
-<button class="quiz-opt" data-correct="false">`0px` — an unset custom property makes the whole `calc()` invalid.</button>
 <button class="quiz-opt" data-correct="false">`20` with no unit, which the browser then ignores.</button>
+<button class="quiz-opt" data-correct="false">`0px` — an unset custom property makes the whole `calc()` invalid.</button>
 <button class="quiz-opt" data-correct="true">`20px` — the `var()` falls back to `1`, so the rule is unchanged from the old literal.</button>
 <button class="quiz-opt" data-correct="false">Whatever the `ha-card` base `font-size` resolves to, inherited.</button>
 </div>
 
 <div class="quiz-q">
 <p><strong>Why is the emit guard `font_scale != null &amp;&amp; font_scale !== 1` rather than just `font_scale ?`?</strong></p>
-<button class="quiz-opt" data-correct="false">`String(font_scale)` only works when the guard uses `!==`.</button>
-<button class="quiz-opt" data-correct="false">There is no difference — the `.filter(([, v]) =&gt; v)` makes both equivalent.</button>
-<button class="quiz-opt" data-correct="false">`?` is a TypeScript syntax error on an optional number.</button>
 <button class="quiz-opt" data-correct="true">A truthy check would also drop `font_scale: 0`; the explicit form lets `0` through to the stylesheet while still treating `1` and omitted as no-ops.</button>
+<button class="quiz-opt" data-correct="false">`String(font_scale)` only works when the guard uses `!==`.</button>
+<button class="quiz-opt" data-correct="false">`?` is a TypeScript syntax error on an optional number.</button>
+<button class="quiz-opt" data-correct="false">There is no difference — the `.filter(([, v]) =&gt; v)` makes both equivalent.</button>
 </div>
 
 <div class="quiz-q">
@@ -101,18 +101,18 @@
 
 <div class="quiz-q">
 <p><strong>Why is `.tv { font-size: 0 }` left as a literal when the other twelve rules were wrapped?</strong></p>
-<button class="quiz-opt" data-correct="true">That zero is a whitespace-collapse trick on the badge container, not a type size; its visible child `.tv-badge` carries the scaled size.</button>
-<button class="quiz-opt" data-correct="false">It was an oversight; it should have been wrapped too.</button>
 <button class="quiz-opt" data-correct="false">`.tv` is inside a shadow DOM boundary the custom property can&#x27;t cross.</button>
+<button class="quiz-opt" data-correct="true">That zero is a whitespace-collapse trick on the badge container, not a type size; its visible child `.tv-badge` carries the scaled size.</button>
 <button class="quiz-opt" data-correct="false">`calc()` cannot multiply zero.</button>
+<button class="quiz-opt" data-correct="false">It was an oversight; it should have been wrapped too.</button>
 </div>
 
 <div class="quiz-q">
 <p><strong>How does `font_scale` keep the relationship between roles — e.g. score staying ≈1.5× the team name?</strong></p>
-<button class="quiz-opt" data-correct="false">`_render()` computes each scaled pixel value in JavaScript from a ratio table.</button>
-<button class="quiz-opt" data-correct="false">The rules use `em` units off a single scaled base on `ha-card`.</button>
-<button class="quiz-opt" data-correct="true">Every rule multiplies its own baseline literal by the same `--scoreboard-font-scale`, so all sizes move by one common factor.</button>
 <button class="quiz-opt" data-correct="false">A per-role `--scoreboard-&lt;role&gt;-size` variable is emitted for each of the twelve rules.</button>
+<button class="quiz-opt" data-correct="false">The rules use `em` units off a single scaled base on `ha-card`.</button>
+<button class="quiz-opt" data-correct="false">`_render()` computes each scaled pixel value in JavaScript from a ratio table.</button>
+<button class="quiz-opt" data-correct="true">Every rule multiplies its own baseline literal by the same `--scoreboard-font-scale`, so all sizes move by one common factor.</button>
 </div>
 
 <script>
