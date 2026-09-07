@@ -78,28 +78,28 @@ function makeDriver(page, framesDir, clip) {
 }
 
 async function runScenario(page, d) {
-  await d.hold(10); // rest on the first section
+  await d.hold(8); // rest on the first section
 
   // step through the sections with the ▸ button (each click pauses the rotation)
   await d.click(".slide-btn.nav.next");
   await sleep(150);
-  await d.hold(12);
+  await d.hold(10);
   await d.click(".slide-btn.nav.next");
   await sleep(150);
-  await d.hold(12);
-  await d.click(".slide-btn.nav.next"); // wraps back to the first section
-  await sleep(150);
   await d.hold(10);
+  await d.click(".slide-btn.nav.next"); // wraps back to the NBA section
+  await sleep(150);
+  await d.hold(6);
 
-  // hand control back to the clock and let it auto-advance a couple of times
-  await d.click(".slide-btn.toggle");
-  await d.hold(60); // ~6s — with slide_sec 2 that's ~3 auto swaps on camera
-
-  // a live score updates on the visible section → the score blinks
+  // a live score updates on the visible (NBA) section → the score cell blinks
   await page.evaluate(() => window.__bumpScore());
   await d.hold(16);
 
-  await d.hold(8); // resting frames before the loop point
+  // hand control back to the clock and let it auto-advance once or twice
+  await d.click(".slide-btn.toggle");
+  await d.hold(24);
+
+  await d.hold(6); // resting frames before the loop point
 }
 
 async function main() {

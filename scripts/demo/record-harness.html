@@ -73,12 +73,6 @@
           opponent_name: "Kings", opponent_abbr: "SAC", opponent_record: "30-22",
           opponent_logo: L("nba", "sac"),
         }),
-        "sensor.nba_mia": g({
-          state: "PRE", team_name: "Heat", team_abbr: "MIA", team_record: "31-22",
-          team_homeaway: "home", team_logo: L("nba", "mia"), kickoff_in: "in 5h",
-          opponent_name: "Magic", opponent_abbr: "ORL", opponent_record: "29-24",
-          opponent_logo: L("nba", "orl"),
-        }),
       };
 
       const NHL = {
@@ -108,33 +102,32 @@
         }),
       };
 
+      // ESPN soccer logos are keyed by numeric team id, not a slug
       const EPL = {
         "sensor.epl_liv": g({
           state: "IN", team_name: "Liverpool", team_abbr: "LIV", team_record: "16-4-3",
-          team_homeaway: "home", team_score: 2, team_logo: L("soccer", "eng.liverpool"),
+          team_homeaway: "home", team_score: 2, team_logo: L("soccer", "364"),
           opponent_name: "Arsenal", opponent_abbr: "ARS", opponent_record: "15-5-3",
-          opponent_score: 1, opponent_logo: L("soccer", "eng.arsenal"), clock: "67'",
+          opponent_score: 1, opponent_logo: L("soccer", "359"), clock: "67'",
           tv_network: "USA",
         }),
         "sensor.epl_mci": g({
           state: "POST", team_name: "Man City", team_abbr: "MCI", team_record: "17-3-3",
-          team_homeaway: "home", team_score: 3, team_winner: true,
-          team_logo: L("soccer", "eng.manchester_city"),
+          team_homeaway: "home", team_score: 3, team_winner: true, team_logo: L("soccer", "382"),
           opponent_name: "Chelsea", opponent_abbr: "CHE", opponent_record: "11-6-6",
-          opponent_score: 1, opponent_logo: L("soccer", "eng.chelsea"), clock: "FT",
+          opponent_score: 1, opponent_logo: L("soccer", "363"), clock: "FT",
         }),
         "sensor.epl_tot": g({
           state: "PRE", team_name: "Tottenham", team_abbr: "TOT", team_record: "13-4-6",
-          team_homeaway: "home", team_logo: L("soccer", "eng.tottenham_hotspur"),
-          kickoff_in: "in 2h", opponent_name: "Newcastle", opponent_abbr: "NEW",
-          opponent_record: "12-5-6", opponent_logo: L("soccer", "eng.newcastle_united"),
-          tv_network: "NBC",
+          team_homeaway: "home", team_logo: L("soccer", "367"), kickoff_in: "in 2h",
+          opponent_name: "Newcastle", opponent_abbr: "NEW", opponent_record: "12-5-6",
+          opponent_logo: L("soccer", "361"), tv_network: "NBC",
         }),
         "sensor.epl_avl": g({
           state: "PRE", team_name: "Aston Villa", team_abbr: "AVL", team_record: "13-5-5",
-          team_homeaway: "away", team_logo: L("soccer", "eng.aston_villa"),
-          kickoff_in: "in 3h", opponent_name: "Brighton", opponent_abbr: "BHA",
-          opponent_record: "10-8-5", opponent_logo: L("soccer", "eng.brighton_and_hove_albion"),
+          team_homeaway: "away", team_logo: L("soccer", "362"), kickoff_in: "in 3h",
+          opponent_name: "Brighton", opponent_abbr: "BHA", opponent_record: "10-8-5",
+          opponent_logo: L("soccer", "331"),
         }),
       };
 
@@ -151,9 +144,9 @@
         mode: "slide",
         slide_sec: 2,
         lazy_refresh: 0, // render immediately — no debounce to fight in the recorder
-        // pin the height so every re-shoot records the same box (the tallest
-        // slide is NBA's 5 rows + header; at the default 5px row_gap that's ≈ 214px)
-        layout: { height: "224px" },
+        // pin the height so every re-shoot records the same box: 4 rows + header
+        // at the default 5px row_gap ≈ 176px
+        layout: { height: "186px" },
         sections: [
           { name: "NBA", prefix: "sensor.nba_", rank_type: "win-loss", special_teams: ["bos"] },
           { name: "NHL", prefix: "sensor.nhl_", rank_type: "win-loss-otl", special_teams: ["col"] },
