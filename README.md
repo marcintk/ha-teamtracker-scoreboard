@@ -172,7 +172,39 @@ sections:
 | `layout.team_width`  | string | `99px`  | Team-name column width; one CSS length applied to both sides              |
 | `layout.font_scale`  | number | `1`     | Uniform multiplier over every text size; raise `layout.row_height` too    |
 
-Each key maps to a `--scoreboard-*` CSS variable that falls back to its default.
+### Styling with CSS
+
+Every dimension and colour above is also a CSS custom property, each prefixed **`--ttsc-`** (unique
+to this card) and each with a built-in fallback. Setting a `layout:` / `colors:` key just writes the
+matching property inline on the card. To restyle from a theme or `card_mod` instead, set the
+property on `ha-card` (or any ancestor — custom properties inherit into the card's shadow DOM); a
+key you left out of `layout:` / `colors:` takes the CSS value, one you set there wins unless your
+rule uses `!important`.
+
+| Property                                              | Default                            | Set by                           |
+| ----------------------------------------------------- | ---------------------------------- | -------------------------------- |
+| `--ttsc-row-height`                                   | `28px`                             | `layout.row_height`              |
+| `--ttsc-logo-width`                                   | `30px`                             | `layout.logo_width`              |
+| `--ttsc-score-width`                                  | `34px`                             | `layout.score_width`             |
+| `--ttsc-colon-width`                                  | `9px`                              | `layout.colon_width`             |
+| `--ttsc-team-col-a-width` / `--ttsc-team-col-b-width` | `99px`                             | `layout.team_width` (both sides) |
+| `--ttsc-font-scale`                                   | `1`                                | `layout.font_scale`              |
+| `--ttsc-team-color`                                   | `var(--primary-text-color, white)` | `colors.team`                    |
+| `--ttsc-opponent-color`                               | `#777`                             | `colors.opponent`                |
+| `--ttsc-special-color`                                | `#2196F3`                          | `colors.special`                 |
+
+The remaining `colors:` keys (`header`, `winner`, `loser`, `live`, `leading`) have no CSS property —
+set them through the `colors:` map.
+
+```css
+/* e.g. via card_mod */
+ha-card {
+  --ttsc-row-height: 40px;
+  --ttsc-special-color: #e91e63;
+}
+```
+
+`layout.height` is applied as a plain `height` on `ha-card`, not a custom property.
 
 ### Colors
 

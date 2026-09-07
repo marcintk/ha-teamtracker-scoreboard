@@ -130,7 +130,7 @@ describe("sectionHtml", () => {
   it("marks special teams correctly using default CSS var color", () => {
     const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
     const el = doc(sectionHtml({ ...section, special_teams: ["lal"] }, states));
-    expect(el.innerHTML).toContain("scoreboard-special-color");
+    expect(el.innerHTML).toContain("ttsc-special-color");
   });
 
   it("applies config colors to special teams", () => {
@@ -141,7 +141,7 @@ describe("sectionHtml", () => {
       })
     );
     expect(el.innerHTML).toContain("gold");
-    expect(el.innerHTML).not.toContain("scoreboard-special-color");
+    expect(el.innerHTML).not.toContain("ttsc-special-color");
   });
 
   it("accepts pre-filtered entity IDs without colors", () => {
@@ -158,7 +158,7 @@ describe("sectionHtml", () => {
       })
     );
     expect(el.innerHTML).toContain("gold");
-    expect(el.innerHTML).not.toContain("scoreboard-special-color");
+    expect(el.innerHTML).not.toContain("ttsc-special-color");
   });
 
   it("applies config colors to team and opponent", () => {
@@ -303,8 +303,8 @@ describe("sectionHtml", () => {
       }),
     };
     const el = doc(sectionHtml({ ...section, special_teams: ["lal"], view: "schedule" }, states));
-    expect(el.innerHTML).toContain("scoreboard-special-color");
-    expect(el.innerHTML).toContain("scoreboard-team-color");
+    expect(el.innerHTML).toContain("ttsc-special-color");
+    expect(el.innerHTML).toContain("ttsc-team-color");
     expect(el.innerHTML).toContain("font-weight:bold");
   });
 
@@ -391,7 +391,7 @@ describe("standings position column", () => {
     const el = doc(sectionHtml({ ...section, special_teams: ["aaa"] }, threeTeams()));
     const firstRow = el.querySelector(".game-row");
     const posCell = firstRow?.querySelector(".team-pos");
-    expect(posCell?.getAttribute("style") ?? "").toContain("scoreboard-special-color");
+    expect(posCell?.getAttribute("style") ?? "").toContain("ttsc-special-color");
   });
 
   it("rowHtml renders an empty .team-pos cell when position is omitted", () => {

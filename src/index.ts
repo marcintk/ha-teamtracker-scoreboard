@@ -349,13 +349,13 @@ export class SportScoreboardCard extends HTMLElement {
       const tw = team_width;
 
       const cssVars: Record<string, string | undefined> = {
-        "--scoreboard-team-col-a-width": tw,
-        "--scoreboard-team-col-b-width": tw,
-        "--scoreboard-logo-width": logo_width,
-        "--scoreboard-score-width": score_width,
-        "--scoreboard-colon-width": colon_width,
-        "--scoreboard-row-height": row_height,
-        "--scoreboard-font-scale":
+        "--ttsc-team-col-a-width": tw,
+        "--ttsc-team-col-b-width": tw,
+        "--ttsc-logo-width": logo_width,
+        "--ttsc-score-width": score_width,
+        "--ttsc-colon-width": colon_width,
+        "--ttsc-row-height": row_height,
+        "--ttsc-font-scale":
           font_scale != null && font_scale !== 1 ? String(font_scale) : undefined,
       };
       const varStr = Object.entries(cssVars)

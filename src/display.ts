@@ -12,12 +12,11 @@ export function teamColor(
   opponentSpecial = false
 ): string {
   if (!isTeamSide(side, attr)) {
-    if (opponentSpecial) return colors.special ?? "var(--scoreboard-special-color, #2196F3)";
-    return colors.opponent ?? "var(--scoreboard-opponent-color, #777)"; /* gray */
+    if (opponentSpecial) return colors.special ?? "var(--ttsc-special-color, #2196F3)";
+    return colors.opponent ?? "var(--ttsc-opponent-color, #777)"; /* gray */
   }
-  if (special)
-    return colors.special ?? "var(--scoreboard-special-color, #2196F3)"; /* Material Blue */
-  return colors.team ?? "var(--scoreboard-team-color, var(--primary-text-color, white))";
+  if (special) return colors.special ?? "var(--ttsc-special-color, #2196F3)"; /* Material Blue */
+  return colors.team ?? "var(--ttsc-team-color, var(--primary-text-color, white))";
 }
 
 export function scoreBg(gs: GameState): string {

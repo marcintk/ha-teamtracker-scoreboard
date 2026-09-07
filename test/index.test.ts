@@ -1544,17 +1544,17 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], team_col_width: "130px" };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:130px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:130px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:130px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:130px");
     });
 
-    it("does not emit --scoreboard-team-col-a/b-width when omitted", () => {
+    it("does not emit --ttsc-team-col-a/b-width when omitted", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-a-width");
-      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-b-width");
+      expect(haCardStyle(card)).not.toContain("--ttsc-team-col-a-width");
+      expect(haCardStyle(card)).not.toContain("--ttsc-team-col-b-width");
     });
   });
 
@@ -1567,8 +1567,8 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], team_width: "120px" };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:120px");
     });
 
     it("team_width wins over team_col_width when both are set", () => {
@@ -1580,8 +1580,8 @@ describe("SportScoreboardCard", () => {
       };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:120px");
       expect(haCardStyle(card)).not.toContain("200px");
     });
 
@@ -1591,9 +1591,9 @@ describe("SportScoreboardCard", () => {
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       const style = haCardStyle(card);
-      expect(style).not.toContain("--scoreboard-team-col-a-width");
-      expect(style).not.toContain("--scoreboard-team-col-b-width");
-      expect(style).not.toContain("--scoreboard-team-col-width");
+      expect(style).not.toContain("--ttsc-team-col-a-width");
+      expect(style).not.toContain("--ttsc-team-col-b-width");
+      expect(style).not.toContain("--ttsc-team-col-width");
     });
   });
 
@@ -1602,10 +1602,10 @@ describe("SportScoreboardCard", () => {
       card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
 
     const cases = [
-      { option: "logo_width", prop: "--scoreboard-logo-width", value: "44px" },
-      { option: "score_width", prop: "--scoreboard-score-width", value: "50px" },
-      { option: "colon_width", prop: "--scoreboard-colon-width", value: "12px" },
-      { option: "row_height", prop: "--scoreboard-row-height", value: "40px" },
+      { option: "logo_width", prop: "--ttsc-logo-width", value: "44px" },
+      { option: "score_width", prop: "--ttsc-score-width", value: "50px" },
+      { option: "colon_width", prop: "--ttsc-colon-width", value: "12px" },
+      { option: "row_height", prop: "--ttsc-row-height", value: "40px" },
     ] as const;
 
     for (const { option, prop, value } of cases) {
@@ -1631,28 +1631,28 @@ describe("SportScoreboardCard", () => {
     const haCardStyle = (card: ReturnType<typeof makeCard>) =>
       card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
 
-    it("emits --scoreboard-font-scale:1.15 when font_scale is 1.15", () => {
+    it("emits --ttsc-font-scale:1.15 when font_scale is 1.15", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], font_scale: 1.15 };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-font-scale:1.15");
+      expect(haCardStyle(card)).toContain("--ttsc-font-scale:1.15");
     });
 
-    it("does not emit --scoreboard-font-scale when font_scale is omitted", () => {
+    it("does not emit --ttsc-font-scale when font_scale is omitted", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-font-scale");
+      expect(haCardStyle(card)).not.toContain("--ttsc-font-scale");
     });
 
-    it("does not emit --scoreboard-font-scale when font_scale is 1", () => {
+    it("does not emit --ttsc-font-scale when font_scale is 1", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], font_scale: 1 };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-font-scale");
+      expect(haCardStyle(card)).not.toContain("--ttsc-font-scale");
     });
   });
 
@@ -1661,11 +1661,11 @@ describe("SportScoreboardCard", () => {
       card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
 
     const cases = [
-      { key: "team_width", prop: "--scoreboard-team-col-a-width", value: "120px" },
-      { key: "logo_width", prop: "--scoreboard-logo-width", value: "44px" },
-      { key: "score_width", prop: "--scoreboard-score-width", value: "50px" },
-      { key: "colon_width", prop: "--scoreboard-colon-width", value: "12px" },
-      { key: "row_height", prop: "--scoreboard-row-height", value: "40px" },
+      { key: "team_width", prop: "--ttsc-team-col-a-width", value: "120px" },
+      { key: "logo_width", prop: "--ttsc-logo-width", value: "44px" },
+      { key: "score_width", prop: "--ttsc-score-width", value: "50px" },
+      { key: "colon_width", prop: "--ttsc-colon-width", value: "12px" },
+      { key: "row_height", prop: "--ttsc-row-height", value: "40px" },
     ] as const;
 
     for (const { key, prop, value } of cases) {
@@ -1683,16 +1683,16 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], layout: { team_width: "120px" } };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:120px");
     });
 
-    it("layout.font_scale emits --scoreboard-font-scale", () => {
+    it("layout.font_scale emits --ttsc-font-scale", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], layout: { font_scale: 1.15 } };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-font-scale:1.15");
+      expect(haCardStyle(card)).toContain("--ttsc-font-scale:1.15");
     });
 
     it("layout.height sets the ha-card height and drives getCardSize", () => {
@@ -1715,8 +1715,8 @@ describe("SportScoreboardCard", () => {
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       const style = haCardStyle(card);
-      expect(style).toContain("--scoreboard-row-height:60px");
-      expect(style).toContain("--scoreboard-team-col-a-width:120px");
+      expect(style).toContain("--ttsc-row-height:60px");
+      expect(style).toContain("--ttsc-team-col-a-width:120px");
       expect(style).not.toContain("40px");
       expect(style).not.toContain("200px");
     });
@@ -1730,7 +1730,7 @@ describe("SportScoreboardCard", () => {
       };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-row-height:40px");
+      expect(haCardStyle(card)).toContain("--ttsc-row-height:40px");
     });
   });
 
