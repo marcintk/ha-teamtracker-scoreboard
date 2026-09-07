@@ -39,13 +39,11 @@ dashboard (see Configuration below).
 
 ### Manual
 
-1. Download `card.js` from the
-   [latest release](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases/latest)
-2. Copy it to `<config>/www/ha-teamtracker-scoreboard-card/card.js` (create the folder if needed)
-3. In Home Assistant → Settings → Dashboards → Resources → **Add resource**
-   - URL: `/local/ha-teamtracker-scoreboard-card/card.js`
-   - Resource type: **JavaScript module**
-4. Reload your browser
+Drop `card.js` from the
+[latest release](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases/latest) into
+`<config>/www/ha-teamtracker-scoreboard-card/`, then register
+`/local/ha-teamtracker-scoreboard-card/card.js` as a **JavaScript Module** under Settings →
+Dashboards → Resources.
 
 ## Usage
 
