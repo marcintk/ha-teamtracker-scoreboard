@@ -51,7 +51,7 @@
 <body>
 
 <h1>Turning stacked sections into a slideshow</h1>
-<p style="color:var(--muted); margin-top:-.5rem;">Prepared 2026-09-06 · PR #NNN</p>
+<p style="color:var(--muted); margin-top:-.5rem;">Prepared 2026-09-06 · PR #141</p>
 
 <div class="toc">
 <strong>Contents</strong>
@@ -76,41 +76,41 @@
 
 <div class="quiz-q">
 <p><strong>A card has `slide_sec: 60` and exactly one section. What renders?</strong></p>
-<button class="quiz-opt" data-correct="false">The section with the ‹ ⏸ › controls, but the timer never fires.</button>
 <button class="quiz-opt" data-correct="true">That one section, stacked as usual — no controls, no timer. The carousel needs ≥ 2 sections.</button>
 <button class="quiz-opt" data-correct="false">An error: `slide_sec` requires multiple sections.</button>
+<button class="quiz-opt" data-correct="false">The section with the ‹ ⏸ › controls, but the timer never fires.</button>
 <button class="quiz-opt" data-correct="false">The section, plus an empty &#x27;no games&#x27; slide it alternates with.</button>
 </div>
 
 <div class="quiz-q">
 <p><strong>While the carousel is rotating, the user clicks `›` (next) twice. How do they get auto-advance back?</strong></p>
-<button class="quiz-opt" data-correct="true">Click the stop/resume toggle. The arrows only ever pause; the toggle is the only control that resumes.</button>
-<button class="quiz-opt" data-correct="false">Re-save the card config.</button>
 <button class="quiz-opt" data-correct="false">Click `‹` (previous) the same number of times to cancel the manual steps.</button>
 <button class="quiz-opt" data-correct="false">Wait one `slide_sec` interval — it resumes on its own after a manual step.</button>
+<button class="quiz-opt" data-correct="true">Click the stop/resume toggle. The arrows only ever pause; the toggle is the only control that resumes.</button>
+<button class="quiz-opt" data-correct="false">Re-save the card config.</button>
 </div>
 
 <div class="quiz-q">
 <p><strong>Why is the rotation timer managed by a single `_syncSlideTimer()` called from `_render`, `setConfig` and the handlers, rather than a `_startSlideTimer()` called once?</strong></p>
 <button class="quiz-opt" data-correct="false">To keep the interval duration in sync with `fixed_refresh`.</button>
-<button class="quiz-opt" data-correct="true">It is idempotent — it arms or stops the interval to match current state (config, section count, paused) — so any caller can just call it and the earlier `if (!this._slideTimer)` special case in `_render` goes away.</button>
-<button class="quiz-opt" data-correct="false">lit re-runs `setInterval` on every render, so it must be re-created each time.</button>
 <button class="quiz-opt" data-correct="false">`setConfig` is not always called before the first render.</button>
+<button class="quiz-opt" data-correct="false">lit re-runs `setInterval` on every render, so it must be re-created each time.</button>
+<button class="quiz-opt" data-correct="true">It is idempotent — it arms or stops the interval to match current state (config, section count, paused) — so any caller can just call it and the earlier `if (!this._slideTimer)` special case in `_render` goes away.</button>
 </div>
 
 <div class="quiz-q">
 <p><strong>`window.matchMedia` is read as `window.matchMedia?.(&quot;(prefers-reduced-motion: reduce)&quot;)?.matches === true`. Why the optional chaining and the explicit `=== true`?</strong></p>
+<button class="quiz-opt" data-correct="false">Style only; `window.matchMedia(...).matches` would behave identically.</button>
+<button class="quiz-opt" data-correct="false">Home Assistant strips `matchMedia` from card iframes.</button>
 <button class="quiz-opt" data-correct="true">jsdom (the test env) has no `matchMedia`, so a bare call throws; the chain makes an absent `matchMedia` read as &#x27;not reduced&#x27;, and `=== true` guards a stub that returns `{ matches: undefined }`.</button>
 <button class="quiz-opt" data-correct="false">`matchMedia` returns a Promise that must be unwrapped.</button>
-<button class="quiz-opt" data-correct="false">Home Assistant strips `matchMedia` from card iframes.</button>
-<button class="quiz-opt" data-correct="false">Style only; `window.matchMedia(...).matches` would behave identically.</button>
 </div>
 
 <div class="quiz-q">
 <p><strong>In carousel mode with no `height` set, how does the card avoid changing height as it advances between sections of different lengths?</strong></p>
-<button class="quiz-opt" data-correct="false">It animates the height change so it is less jarring.</button>
 <button class="quiz-opt" data-correct="false">It renders all sections but hides the inactive ones, so the tallest always defines the box.</button>
 <button class="quiz-opt" data-correct="true">`_render` computes the tallest slide (`max` of `1 + limit` rows × row height) and pins it as a `min-height` on `&lt;ha-card&gt;`; an explicit `height` still wins.</button>
+<button class="quiz-opt" data-correct="false">It animates the height change so it is less jarring.</button>
 <button class="quiz-opt" data-correct="false">`getCardSize()` forces Home Assistant to reserve a fixed number of rows.</button>
 </div>
 
