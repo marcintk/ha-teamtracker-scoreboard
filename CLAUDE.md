@@ -18,6 +18,11 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
   so mixed standings/fixture cards stay row-aligned without a card-wide pre-pass. A **card-level**
   `show_position: false` removes the cell entirely (`--scoreboard-position-display: none`),
   restoring the pre-position-column layout
+- With `slide_sec` set and **≥ 2 sections**, the card shows one section at a time and auto-advances
+  every `slide_sec` seconds (hard swap, wraps, empty sections take their turn). Three header
+  buttons: `‹`/`›` step and pause; the stop/resume toggle (orange while paused) is the only way back
+  to auto-advance; `prefers-reduced-motion` starts it paused. With `height` unset the card locks to
+  the tallest slide. Unset `slide_sec` / `0` / a single section ⇒ today's stacked render, unchanged
 
 ## Architecture Notes
 
@@ -27,3 +32,8 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
   `setConfig`, rebuilt lazily on next `set hass`.
 - **Deduplication** (`by-date` only): two-pass — pass 1 builds home/special key sets, pass 2 keeps
   home sensor over away sensor per game key.
+- **View state** (`slide_sec` only): `_slideIndex` / `_slidePaused` are instance fields, not derived
+  from `hass`; reset in `setConfig` beside the score caches. The rotation timer is one idempotent
+  `_syncSlideTimer()` (arms/stops to match state), called from `_render`, `setConfig` and the
+  `@click` handlers; `disconnectedCallback` calls `_stopSlideTimer()` only. This is the card's one
+  interactive-control pattern — follow it for any future click affordance.
