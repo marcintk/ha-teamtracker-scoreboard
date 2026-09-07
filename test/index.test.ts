@@ -86,8 +86,8 @@ describe("SportScoreboardCard", () => {
     it("calculates size from sections when height is absent", () => {
       const card = makeCard();
       card._config = { sections: [{ limit: 10 }, { limit: 5 }] };
-      // 2 headers + 15 rows = 17 rows * 28px = 476px / 50 = ceil(9.52) = 10
-      expect(card.getCardSize()).toBe(10);
+      // 2 headers + 15 rows = 17 rows * (28 + 2*5 gap) = 646px / 50 = ceil(12.92) = 13
+      expect(card.getCardSize()).toBe(13);
     });
 
     it("returns 1 when config is null", () => {
@@ -104,21 +104,28 @@ describe("SportScoreboardCard", () => {
     it("defaults section limit to 10 when limit is omitted", () => {
       const card = makeCard();
       card._config = { sections: [{ name: "NBA" }] };
-      // 1 header + 10 default rows = 11 rows * 28px = 308px / 50 = ceil(6.16) = 7
-      expect(card.getCardSize()).toBe(7);
+      // 11 rows * (28 + 2*5 gap) = 418px / 50 = ceil(8.36) = 9
+      expect(card.getCardSize()).toBe(9);
     });
 
     it("uses row_height px value for section-based size estimate", () => {
       const card = makeCard();
       card._config = { sections: [{ limit: 10 }], row_height: "40px" };
-      // (1 header + 10 rows) * 40px = 440px / 50 = ceil(8.8) = 9
-      expect(card.getCardSize()).toBe(9);
+      // 11 rows * (40 + 2*5 gap) = 550px / 50 = 11
+      expect(card.getCardSize()).toBe(11);
     });
 
     it("falls back to 28px row height when row_height is non-numeric", () => {
       const card = makeCard();
       card._config = { sections: [{ limit: 10 }], row_height: "auto" };
-      // (1 header + 10 rows) * 28px = 308px / 50 = ceil(6.16) = 7
+      // 11 rows * (28 + 2*5 gap) = 418px / 50 = ceil(8.36) = 9
+      expect(card.getCardSize()).toBe(9);
+    });
+
+    it("factors layout.row_gap into the size estimate", () => {
+      const card = makeCard();
+      card._config = { sections: [{ limit: 10 }], layout: { row_gap: "0px" } };
+      // 11 rows * (28 + 0 gap) = 308px / 50 = ceil(6.16) = 7
       expect(card.getCardSize()).toBe(7);
     });
 
@@ -638,8 +645,8 @@ describe("SportScoreboardCard", () => {
         mode: "slide",
         slide_sec: 30,
       } as SlideConfig;
-      // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = ceil(6.16) = 7
-      expect(carousel.getCardSize()).toBe(7);
+      // maxRows = 11; h = 28 + 2*5 gap = 38 => ceil(11 * 38 / 50) = ceil(8.36) = 9
+      expect(carousel.getCardSize()).toBe(9);
 
       const stacked = makeCard();
       stacked._config = {
@@ -648,8 +655,8 @@ describe("SportScoreboardCard", () => {
           { ...nhlSection, limit: 4 },
         ],
       };
-      // sum: (1 + 10) + (1 + 4) = 16 => ceil(16 * 28 / 50) = ceil(8.96) = 9
-      expect(stacked.getCardSize()).toBe(9);
+      // sum: 16 rows * 38 = 608 => ceil(608 / 50) = 13
+      expect(stacked.getCardSize()).toBe(13);
       expect(carousel.getCardSize()).toBeLessThan(stacked.getCardSize());
     });
 
@@ -1093,8 +1100,8 @@ describe("SportScoreboardCard", () => {
     it("getCardSize uses the default limit for carousel sections without one", () => {
       const card = makeCard();
       card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
-      // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = 7
-      expect(card.getCardSize()).toBe(7);
+      // maxRows = 11; h = 28 + 2*5 gap = 38 => ceil(11 * 38 / 50) = 9
+      expect(card.getCardSize()).toBe(9);
     });
 
     it("_syncSlideTimer is a no-op when the timer is already running", () => {
@@ -1632,6 +1639,35 @@ describe("SportScoreboardCard", () => {
       expect(badges[0]?.closest(".section-header")).not.toBeNull();
       const headers = card.shadowRoot?.querySelectorAll(".section-header") ?? [];
       expect(headers[0]?.contains(badges[0] as Node)).toBe(true);
+    });
+
+    it("moves the version badge to the first section that has games", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [
+          { name: "Empty", prefix: "sensor.mlb_", special_teams: [] },
+          { name: "NHL", prefix: "sensor.nhl_", special_teams: [] },
+        ],
+        show_version: true,
+      };
+      card._hass = makeHass({ "sensor.nhl_bos": makeState("PRE", baseAttrs) });
+      card._render();
+      const badges = card.shadowRoot?.querySelectorAll("#sc-version") ?? [];
+      expect(badges).toHaveLength(1);
+      // the only header rendered is NHL's — the badge is in it, not lost with the empty section
+      expect(badges[0]?.closest(".section-header")?.textContent).toContain("NHL");
+    });
+
+    it("drops the version badge when no section has games", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [{ name: "Empty", prefix: "sensor.mlb_", special_teams: [] }],
+        show_version: true,
+      };
+      card._hass = makeHass({ "sensor.nhl_bos": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(card.shadowRoot?.querySelector("#sc-version")).toBeNull();
+      expect(card.shadowRoot?.querySelector(".empty")).not.toBeNull();
     });
   });
 

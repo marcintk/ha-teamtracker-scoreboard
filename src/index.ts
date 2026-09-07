@@ -5,7 +5,13 @@ import { html, nothing, render, type TemplateResult } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { sectionHtml } from "./render.js";
 import { CARD_STYLES } from "./styles.js";
-import type { CardConfig, HassStates, HomeAssistant, LayoutConfig } from "./types.js";
+import type {
+  CardConfig,
+  HassStates,
+  HomeAssistant,
+  LayoutConfig,
+  SectionConfig,
+} from "./types.js";
 
 const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
 
@@ -394,7 +400,7 @@ export class SportScoreboardCard extends HTMLElement {
         ? html`<span id="sc-version" class="sc-version">v${__CARD_VERSION__}</span>`
         : nothing;
 
-      const sectionTemplates = visibleSections.map((s, i) =>
+      const renderSection = (s: SectionConfig, version: TemplateResult | typeof nothing) =>
         sectionHtml(
           s,
           states,
@@ -403,9 +409,18 @@ export class SportScoreboardCard extends HTMLElement {
           this._scoreChangedAt,
           carousel,
           slideControls,
-          i === 0 ? versionBadge : nothing
-        )
-      );
+          version
+        );
+
+      const sectionTemplates = visibleSections.map((s) => renderSection(s, nothing));
+      // the badge lives in one section header — re-render the first section that
+      // actually produced output with it, so an empty leading section can't swallow it
+      if (versionBadge !== nothing) {
+        const bi = sectionTemplates.findIndex((t) => t !== nothing);
+        if (bi >= 0) {
+          sectionTemplates[bi] = renderSection(visibleSections[bi] as SectionConfig, versionBadge);
+        }
+      }
       const hasContent = sectionTemplates.some((t) => t !== nothing);
 
       render(
@@ -443,7 +458,7 @@ export class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize(): number {
-    const { height, row_height } = this._layout();
+    const { height, row_height, row_gap } = this._layout();
     if (height) {
       const px = parseInt(height, 10);
       if (Number.isFinite(px)) return Math.ceil(px / 50);
@@ -454,7 +469,9 @@ export class SportScoreboardCard extends HTMLElement {
       ? Math.max(0, ...sections.map((s) => 1 + (s.limit ?? 10)))
       : sections.reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
     const rowPx = parseInt(row_height ?? "", 10);
-    const h = Number.isFinite(rowPx) ? rowPx : 28;
+    const gapPx = parseInt(row_gap ?? "", 10);
+    // each row is row_height + a gap above and below it — match slideMinH
+    const h = (Number.isFinite(rowPx) ? rowPx : 28) + 2 * (Number.isFinite(gapPx) ? gapPx : 5);
     return Math.max(1, Math.ceil((rows * h) / 50));
   }
 
