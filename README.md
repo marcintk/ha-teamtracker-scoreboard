@@ -1,18 +1,14 @@
 # TeamTracker Scoreboard Card
 
-[![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz)
-[![GitHub Release](https://img.shields.io/github/release/marcintk/ha-teamtracker-scoreboard-card.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases)
-[![License](https://img.shields.io/github/license/marcintk/ha-teamtracker-scoreboard-card.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/blob/main/LICENSE)
-[![Maintenance](https://img.shields.io/maintenance/yes/2026)](https://github.com/marcintk/ha-teamtracker-scoreboard-card)
-[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml)
-[![Downloads](https://img.shields.io/github/downloads/marcintk/ha-teamtracker-scoreboard-card/total?label=downloads)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases)
-[![CI](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml)
+[![TeamTracker Scoreboard Card][preview-img]][repo]
 
 Home Assistant custom Lovelace card displaying live scores, pre-game odds, win probability, TV
 network, and series info — one row per game, grouped by sport. Built on top of the
 [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
 
-[![Preview](https://raw.githubusercontent.com/marcintk/ha-teamtracker-scoreboard-card/main/docs/preview.png)](https://github.com/marcintk/ha-teamtracker-scoreboard-card)
+[![hacs_badge][hacs-shield]][hacs] [![GitHub Release][releases-shield]][releases]
+[![License][license-shield]][license] ![Maintenance][maintenance-shield] [![CI][ci-shield]][ci]
+[![Coverage][coverage-shield]][ci] [![Downloads][downloads-shield]][releases]
 
 ## Requirements
 
@@ -316,3 +312,23 @@ controls.
 When `layout.height` is not set, a rotating card locks its height to the tallest section so it
 doesn't jump between advances; an explicit `layout.height` still wins. `getCardSize()` reports one
 section rather than the sum.
+
+<!-- Reference links -->
+
+[repo]: https://github.com/marcintk/ha-teamtracker-scoreboard-card
+[hacs]: https://hacs.xyz
+[hacs-shield]: https://img.shields.io/badge/HACS-Default-41BDF5.svg
+[releases]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases
+[releases-shield]: https://img.shields.io/github/release/marcintk/ha-teamtracker-scoreboard-card.svg
+[license]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/blob/main/LICENSE
+[license-shield]: https://img.shields.io/github/license/marcintk/ha-teamtracker-scoreboard-card.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2026
+[ci]:
+  https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml
+[ci-shield]:
+  https://github.com/marcintk/ha-teamtracker-scoreboard-card/actions/workflows/build-and-test.yml/badge.svg
+[coverage-shield]: https://img.shields.io/badge/coverage-100%25-brightgreen
+[downloads-shield]:
+  https://img.shields.io/github/downloads/marcintk/ha-teamtracker-scoreboard-card/total?label=downloads
+[preview-img]:
+  https://raw.githubusercontent.com/marcintk/ha-teamtracker-scoreboard-card/main/docs/preview.png
