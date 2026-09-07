@@ -92,14 +92,6 @@ sections:
       - gb
 ```
 
-Card-level keys are optional: `slide_sec` (see [Options](#options)) and the `layout:` map (see
-[Layout & sizing](#layout--sizing)). Per section: `prefix` matches the entity IDs from the league
-file you imported (see [docs/sensors/](docs/sensors/)); `rank_type` is `win-loss` for NBA/NFL,
-`win-loss-otl` for NHL, `win-draw-loss` for the soccer leagues; and the soccer sections use
-`season_mode: regular` so the card always shows the standings table (ha-teamtracker's `season`
-attribute isn't a clean token — see [Season mode](#season-mode)). `special_teams` takes the suffix
-after the prefix (`juv` for `sensor.sera_juv`).
-
 ## Configuration
 
 ### Options
