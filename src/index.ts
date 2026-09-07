@@ -5,15 +5,16 @@ import { html, nothing, render, type TemplateResult } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { sectionHtml } from "./render.js";
 import { CARD_STYLES } from "./styles.js";
-import type {
-  CardConfig,
-  HassStates,
-  HomeAssistant,
-  LayoutConfig,
-  SectionConfig,
-} from "./types.js";
+import type { CardConfig, HassStates, HomeAssistant, LayoutConfig } from "./types.js";
 
 const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
+
+// a bare pixel length ("34" or "34px") → its number; anything else (rem, %, auto,
+// undefined) → null, so callers fall back to their default instead of a wrong number
+const asPx = (v: string | undefined): number | null => {
+  const m = /^\s*(\d+(?:\.\d+)?)\s*(?:px)?\s*$/.exec(v ?? "");
+  return m ? Number(m[1]) : null;
+};
 
 export class SportScoreboardCard extends HTMLElement {
   readonly _root: ShadowRoot;
@@ -364,11 +365,8 @@ export class SportScoreboardCard extends HTMLElement {
         : nothing;
       let slideMinH = "";
       if (carousel && !height) {
-        const rowPx = parseInt(row_height ?? "", 10);
-        const gapPx = parseInt(row_gap ?? "", 10);
         // each row is row_height + a gap above and below it
-        const slideH =
-          (Number.isFinite(rowPx) ? rowPx : 28) + 2 * (Number.isFinite(gapPx) ? gapPx : 5);
+        const slideH = (asPx(row_height) ?? 28) + 2 * (asPx(row_gap) ?? 5);
         const maxRows = Math.max(...sections.map((s) => 1 + (s.limit ?? 10)));
         slideMinH = `min-height:${maxRows * slideH}px;`;
       }
@@ -391,16 +389,18 @@ export class SportScoreboardCard extends HTMLElement {
         .map(([k, v]) => `${k}:${String(v)};`)
         .join("");
 
-      const haCardStyle = `${slideMinH}${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug ? "position:relative;" : ""}${varStr}`;
+      const haCardStyle = `${slideMinH}${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${varStr}`;
 
       const idx = ((this._slideIndex % sections.length) + sections.length) % sections.length;
       const visibleSections = carousel ? sections.slice(idx, idx + 1) : sections;
 
+      // card-level badge — sits over the top-centre of the card, shown whenever
+      // show_version is set regardless of whether any section renders
       const versionBadge = show_version
         ? html`<span id="sc-version" class="sc-version">v${__CARD_VERSION__}</span>`
         : nothing;
 
-      const renderSection = (s: SectionConfig, version: TemplateResult | typeof nothing) =>
+      const sectionTemplates = visibleSections.map((s) =>
         sectionHtml(
           s,
           states,
@@ -408,25 +408,16 @@ export class SportScoreboardCard extends HTMLElement {
           colors,
           this._scoreChangedAt,
           carousel,
-          slideControls,
-          version
-        );
-
-      const sectionTemplates = visibleSections.map((s) => renderSection(s, nothing));
-      // the badge lives in one section header — re-render the first section that
-      // actually produced output with it, so an empty leading section can't swallow it
-      if (versionBadge !== nothing) {
-        const bi = sectionTemplates.findIndex((t) => t !== nothing);
-        if (bi >= 0) {
-          sectionTemplates[bi] = renderSection(visibleSections[bi] as SectionConfig, versionBadge);
-        }
-      }
+          slideControls
+        )
+      );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
 
       render(
         html`
           ${STYLE_BLOCK}
           <ha-card style=${haCardStyle || nothing}>
+            ${versionBadge}
             ${debug ? unsafeHTML(`<div id="sc-debug" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:11px;line-height:1;padding:2px 6px;pointer-events:none;">${this._debug.tableHtml()}</div>`) : nothing}
             ${
               hasContent
@@ -459,19 +450,15 @@ export class SportScoreboardCard extends HTMLElement {
 
   getCardSize(): number {
     const { height, row_height, row_gap } = this._layout();
-    if (height) {
-      const px = parseInt(height, 10);
-      if (Number.isFinite(px)) return Math.ceil(px / 50);
-    }
+    const hpx = asPx(height);
+    if (hpx !== null) return Math.max(1, Math.ceil(hpx / 50));
     const sections = this._config?.sections ?? [];
     const carousel = this._isSlideMode();
     const rows = carousel
       ? Math.max(0, ...sections.map((s) => 1 + (s.limit ?? 10)))
       : sections.reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
-    const rowPx = parseInt(row_height ?? "", 10);
-    const gapPx = parseInt(row_gap ?? "", 10);
     // each row is row_height + a gap above and below it — match slideMinH
-    const h = (Number.isFinite(rowPx) ? rowPx : 28) + 2 * (Number.isFinite(gapPx) ? gapPx : 5);
+    const h = (asPx(row_height) ?? 28) + 2 * (asPx(row_gap) ?? 5);
     return Math.max(1, Math.ceil((rows * h) / 50));
   }
 

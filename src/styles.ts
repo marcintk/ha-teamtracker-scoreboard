@@ -4,6 +4,7 @@ export const CARD_STYLES = `
   ha-card {
     padding: 0 6px 2px;
     box-sizing: border-box;
+    position: relative; /* anchor for .sc-version and #sc-debug */
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
     font-size: calc(14px * var(--ttsc-font-scale, 1));
@@ -24,13 +25,14 @@ export const CARD_STYLES = `
     position: relative;
   }
   .section-title { flex: none; }
-  /* version is pinned to the card's horizontal centre, independent of the
-     title / control widths, and vertically centred in the header row */
+  /* card-level badge: pinned to the top-centre of the card so it shows even when
+     no section renders, independent of the header layout */
   .sc-version {
     position: absolute;
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    top: 3px;
+    transform: translateX(-50%);
+    z-index: 1;
     font-family: monospace;
     font-size: calc(9px * var(--ttsc-font-scale, 1));
     font-weight: normal;
