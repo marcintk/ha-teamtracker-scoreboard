@@ -380,8 +380,8 @@ describe("standings position column", () => {
     }
   });
 
-  it("renders empty .team-pos cells in by-date mode", () => {
-    const el = doc(sectionHtml({ ...section, season_mode: "by-date" }, threeTeams()));
+  it("renders empty .team-pos cells in schedule (by-date) view", () => {
+    const el = doc(sectionHtml({ ...section, view: "schedule" }, threeTeams()));
     const cells = [...el.querySelectorAll(".game-row .team-pos")];
     expect(cells.length).toBe(3);
     for (const cell of cells) {

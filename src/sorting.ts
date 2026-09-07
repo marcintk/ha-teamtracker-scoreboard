@@ -4,7 +4,7 @@
 //   win-loss-otl:  W=2 OTL=1 L=0   (NHL, …)    record: W-L-OTL
 //   by-date: internal — auto-applied outside the regular season
 
-import type { GameAttr, HassStates, SeasonMode, SortItem, SortMode } from "./types.js";
+import type { GameAttr, HassStates, SortItem, SortMode, ViewMode } from "./types.js";
 
 export function winRatio(record: unknown, sortMode: SortMode): number {
   const parts = String(record ?? "0-0")
@@ -29,16 +29,17 @@ export function sortKeyFor(attr: GameAttr | null | undefined, sortMode: SortMode
   return winRatio(attr?.team_record, sortMode);
 }
 
-// seasonMode overrides the season heuristic: "by-date" or "regular" force the result;
-// "auto" (default) or any unrecognised value falls through to the non-regular-season check.
+// view overrides the season heuristic: "schedule" or "ranking" force the result;
+// "auto" (default) or any unrecognised value falls through to the season-attribute check
+// ("regular" here is ha-teamtracker's own season token, not a card config value).
 export function resolveSortMode(
   entities: string[],
   states: HassStates,
   rankType: SortMode,
-  seasonMode: SeasonMode = "auto"
+  view: ViewMode = "auto"
 ): SortMode {
-  if (seasonMode === "by-date") return "by-date";
-  if (seasonMode === "regular") return rankType;
+  if (view === "schedule") return "by-date";
+  if (view === "ranking") return rankType;
   return entities.some((id) => {
     const s = states[id]?.attributes?.season;
     return s && s !== "regular";

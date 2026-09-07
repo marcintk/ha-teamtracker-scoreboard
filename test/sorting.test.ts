@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { deduplicate, resolveSortMode, sortKeyFor, winRatio } from "../src/sorting.js";
-import type { GameAttr, HassStates, SeasonMode } from "../src/types.js";
+import type { GameAttr, HassStates, ViewMode } from "../src/types.js";
 
 const s = (attrs: GameAttr): HassStates[string] => ({ state: "", attributes: attrs });
 
@@ -244,48 +244,42 @@ describe("resolveSortMode", () => {
     expect(resolveSortMode([], {}, "win-loss-otl")).toBe("win-loss-otl");
   });
 
-  describe("seasonMode override (4th parameter)", () => {
-    it("seasonMode='regular' forces rank_type even when a sensor reports a descriptive season label", () => {
-      const seasonMode: SeasonMode = "regular";
+  describe("view override (4th parameter)", () => {
+    it("view='ranking' forces rank_type even when a sensor reports a descriptive season label", () => {
+      const view: ViewMode = "ranking";
       const states: HassStates = {
         "sensor.a": s({ season: "2026-27-italian-serie-a" }),
       };
-      expect(resolveSortMode(["sensor.a"], states, "win-draw-loss", seasonMode)).toBe(
-        "win-draw-loss"
-      );
+      expect(resolveSortMode(["sensor.a"], states, "win-draw-loss", view)).toBe("win-draw-loss");
     });
 
-    it("seasonMode='by-date' forces by-date even when every sensor reports season='regular'", () => {
-      const seasonMode: SeasonMode = "by-date";
+    it("view='schedule' forces by-date even when every sensor reports season='regular'", () => {
+      const view: ViewMode = "schedule";
       const states: HassStates = {
         "sensor.a": s({ season: "regular" }),
         "sensor.b": s({ season: "regular" }),
       };
-      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", seasonMode)).toBe(
-        "by-date"
-      );
+      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", view)).toBe("by-date");
     });
 
-    it("seasonMode='auto' passed explicitly behaves like today (by-date on non-regular season)", () => {
-      const seasonMode: SeasonMode = "auto";
+    it("view='auto' passed explicitly behaves like today (by-date on non-regular season)", () => {
+      const view: ViewMode = "auto";
       const states: HassStates = {
         "sensor.a": s({ season: "regular" }),
         "sensor.b": s({ season: "playoffs" }),
       };
-      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", seasonMode)).toBe(
-        "by-date"
-      );
+      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", view)).toBe("by-date");
     });
 
-    it("an unrecognised seasonMode value (config typo) falls through to the auto heuristic", () => {
-      const seasonMode = "fixtures" as SeasonMode; // no validation layer — mirrors rank_type
+    it("an unrecognised view value (config typo) falls through to the auto heuristic", () => {
+      const view = "fixtures" as ViewMode; // no validation layer — mirrors rank_type
       const regularOnly: HassStates = { "sensor.a": s({ season: "regular" }) };
       const withPlayoffs: HassStates = {
         "sensor.a": s({ season: "regular" }),
         "sensor.b": s({ season: "playoffs" }),
       };
-      expect(resolveSortMode(["sensor.a"], regularOnly, "win-loss", seasonMode)).toBe("win-loss");
-      expect(resolveSortMode(["sensor.a", "sensor.b"], withPlayoffs, "win-loss", seasonMode)).toBe(
+      expect(resolveSortMode(["sensor.a"], regularOnly, "win-loss", view)).toBe("win-loss");
+      expect(resolveSortMode(["sensor.a", "sensor.b"], withPlayoffs, "win-loss", view)).toBe(
         "by-date"
       );
     });

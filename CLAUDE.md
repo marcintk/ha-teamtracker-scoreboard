@@ -7,10 +7,11 @@
 Durable behavioral/UX constraints. Preserve unless the user explicitly changes them.
 
 - Sort switches to `by-date` automatically during non-regular season (playoffs, off-season);
-  undefined season counts as regular. A section's `season_mode` (`auto` | `regular` | `by-date`)
-  overrides this heuristic in either direction; `auto` is the default and preserves the behaviour
-  above
-- `by-date` mode shows one entry per game: home sensor wins over away sensor when both exist
+  undefined season counts as regular. A section's `view` (`auto` | `ranking` | `schedule`) overrides
+  this heuristic in either direction; `auto` is the default and preserves the behaviour above.
+  (`ranking` forces the standings table, `schedule` forces the date-sorted list; the internal
+  `SortMode` value for the latter is still `by-date`.)
+- `schedule` / `by-date` shows one entry per game: home sensor wins over away sensor when both exist
 - Team logos render only for HTTPS URLs; non-HTTPS is silently dropped
 - Every row opens with a fixed-width position cell (`.team-pos`). In a ranking sort it holds the
   row's 1-based rank in the full sorted list (pre-`limit`), coloured like the tracked team; under

@@ -68,7 +68,7 @@ export function sectionHtml(
     limit = 10,
     special_teams = [],
     rank_type = "win-draw-loss",
-    season_mode = "auto",
+    view = "auto",
     score_blink = 5,
     show_position = true,
   } = section;
@@ -85,7 +85,7 @@ export function sectionHtml(
     html`${header}<div class="empty">No games found — check your section prefixes.</div>`;
   if (!entities.length) return carousel ? emptyHtml() : nothing;
 
-  const sortMode = resolveSortMode(entities, states, rank_type, season_mode);
+  const sortMode = resolveSortMode(entities, states, rank_type, view);
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;

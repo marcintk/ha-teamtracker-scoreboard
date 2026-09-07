@@ -55,14 +55,14 @@ sections:
   - name: Serie A
     prefix: sensor.sera_
     limit: 20
-    season_mode: regular
+    view: ranking
     rank_type: win-draw-loss
     special_teams:
       - juv
   - name: Primera Division
     prefix: sensor.liga_
     limit: 20
-    season_mode: regular
+    view: ranking
     rank_type: win-draw-loss
   - name: NBA Scoreboard
     prefix: sensor.nba_
@@ -71,6 +71,18 @@ sections:
     special_teams:
       - sa
 ```
+
+## Standings vs schedule
+
+Every section renders as one of two things:
+
+- a **standings table** — teams ranked by record, best at the top, with a position number in the
+  gutter (this is what `rank_type` and the position column are for)
+- a **schedule** — one row per game, sorted by date, no ranking
+
+By default (`view: auto`) the card picks: standings during the regular season, schedule once
+playoffs / cups / the off-season begin. Set a section's [`view`](#view) to `ranking` or `schedule`
+to pin it.
 
 ## Configuration
 
@@ -106,8 +118,8 @@ These two knobs tune that cadence.
 | `prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                     |
 | `limit`         | number  | `10`            | Max rows to show                                                                                         |
 | `special_teams` | list    | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos`              |
-| `rank_type`     | string  | `win-draw-loss` | Ranking formula for the regular season. See below                                                        |
-| `season_mode`   | string  | `auto`          | Override the automatic standings-vs-fixtures choice. `auto` / `regular` / `by-date`. See below           |
+| `rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table. See [Rank type](#rank-type)                                     |
+| `view`          | string  | `auto`          | `auto` / `ranking` / `schedule` — what the section shows. See [View](#view)                              |
 | `show_position` | boolean | `true`          | Show the standings-position number in the leftmost column. See [Standings position](#standings-position) |
 | `score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                                   |
 
@@ -133,9 +145,9 @@ standings** — its rank in the full sorted list, so `1` is the section leader e
 the rows below it. The number is coloured like its team, so `special_teams` positions stand out too.
 
 Set `show_position: false` on a **section** to hide the numbers. The narrow column is still drawn
-(empty), so a card that mixes a standings section with a date-sorted one keeps every row aligned. In
-date-sorted mode (playoffs, cups, or `season_mode: by-date`) the column is always empty — there is
-no league position to show.
+(empty), so a card that mixes a standings section with a schedule one keeps every row aligned. In
+the schedule view (playoffs, cups, or `view: schedule`) the column is always empty — there is no
+league position to show.
 
 Set `show_position: false` at the **card** level to remove the column entirely — no gutter on any
 row, restoring the pre-position-column layout. Use this when no section ever shows standings.
@@ -148,28 +160,27 @@ sections:
     show_position: false # hide the position numbers for this section
 ```
 
-### Season mode
+### View
 
-The switch between the standings table and the date-sorted fixture table is automatic: if any
-tracked sensor reports a `season` attribute that is set and not `regular`, the card shows the
-fixture table. Some leagues don't expose a clean season-type token — TeamTracker's Italian Serie A
-sensors, for example, report `season: 2026-27-italian-serie-a`, which the heuristic reads as "not
-the regular season" and wrongly flips to the fixture table.
+`view` decides what a section shows (see [Standings vs schedule](#standings-vs-schedule)):
 
-`season_mode` overrides the heuristic for a section, in either direction:
+| Value      | Section shows                                                                                                 |
+| ---------- | ------------------------------------------------------------------------------------------------------------- |
+| `auto`     | **Default.** Standings table in the regular season; switches to the schedule for playoffs / cups / off-season |
+| `ranking`  | Always the standings table, ranked by `rank_type`                                                             |
+| `schedule` | Always the date-sorted schedule, one row per game                                                             |
 
-| Value     | Effect                                                                      |
-| --------- | --------------------------------------------------------------------------- |
-| `auto`    | Default. Fixture table when any sensor's `season` is set and not `regular`. |
-| `regular` | Always rank by `rank_type`, whatever `season` says.                         |
-| `by-date` | Always the date-sorted fixture table, one row per game.                     |
+`auto` reads each sensor's `season` attribute: anything set and not `"regular"` (`post`, `playoffs`,
+…) means the schedule. Some leagues don't publish a clean token — TeamTracker's Italian Serie A
+sensors report `season: 2026-27-italian-serie-a`, which `auto` misreads as "not the regular season"
+and flips to the schedule. Pin `view: ranking` there:
 
 ```yaml
 sections:
   - name: Serie A
     prefix: sensor.sera_
     rank_type: win-draw-loss
-    season_mode: regular # treat as regular season even though the sensor doesn't say so
+    view: ranking # the sensor's season label isn't a clean token
 ```
 
 ### Colors
