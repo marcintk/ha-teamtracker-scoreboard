@@ -78,29 +78,29 @@ function makeDriver(page, framesDir, clip) {
 }
 
 async function runScenario(page, d) {
-  await d.hold(8); // rest on the first section
+  await d.hold(20); // rest on the first section — long enough to read all 6 rows
 
   // rotation starts paused (prefers-reduced-motion); step through the sections
-  // with the ▸ button
+  // with the ▸ button, holding on each long enough to read it
   await d.click(".slide-btn.nav.next");
-  await sleep(150);
-  await d.hold(10);
+  await sleep(200);
+  await d.hold(24);
   await d.click(".slide-btn.nav.next");
-  await sleep(150);
-  await d.hold(10);
+  await sleep(200);
+  await d.hold(24);
   await d.click(".slide-btn.nav.next"); // wraps back to the NBA section
-  await sleep(150);
-  await d.hold(6);
+  await sleep(200);
+  await d.hold(16);
 
   // a live score updates on the visible (NBA) section → the score cell blinks
   await page.evaluate(() => window.__bumpScore());
-  await d.hold(16);
+  await d.hold(28);
 
-  // start the clock with the ▮▮/▶ toggle and let it auto-advance once or twice
+  // start the clock with the ▮▮/▶ toggle and let it auto-advance once (slide_sec 4)
   await d.click(".slide-btn.toggle");
-  await d.hold(24);
+  await d.hold(56);
 
-  await d.hold(6); // resting frames before the loop point
+  await d.hold(12); // resting frames before the loop point
 }
 
 async function main() {

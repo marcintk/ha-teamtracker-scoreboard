@@ -46,32 +46,49 @@
       // one game per tracked sensor. `state` is the ha-teamtracker sensor state.
       const g = (o) => ({ state: o.state, attributes: o });
 
+      // relative ISO timestamps so the by-date (schedule) sort has something to
+      // order by: live games float to the top, then everything else by |date − now|
+      const now = Date.now();
+      const at = (min) => new Date(now + min * 60000).toISOString();
+
       const NBA = {
         "sensor.nba_bos": g({
           state: "IN", team_name: "Celtics", team_abbr: "BOS", team_record: "41-12",
           team_homeaway: "home", team_score: 88, team_logo: L("nba", "bos"),
           opponent_name: "Lakers", opponent_abbr: "LAL", opponent_record: "30-23",
           opponent_score: 84, opponent_logo: L("nba", "lal"),
-          clock: "Q3 4:12", tv_network: "ESPN", last_play: "Tatum 3PT jumper",
+          clock: "Q3 4:12", tv_network: "ESPN", last_play: "Tatum 3PT jumper", date: at(-45),
         }),
         "sensor.nba_den": g({
           state: "POST", team_name: "Nuggets", team_abbr: "DEN", team_record: "38-15",
           team_homeaway: "home", team_score: 120, team_winner: true, team_logo: L("nba", "den"),
           opponent_name: "Suns", opponent_abbr: "PHX", opponent_record: "29-24",
-          opponent_score: 111, opponent_logo: L("nba", "phx"), clock: "Final",
+          opponent_score: 111, opponent_logo: L("nba", "phx"), clock: "Final", date: at(-190),
         }),
         "sensor.nba_nyk": g({
           state: "PRE", team_name: "Knicks", team_abbr: "NY", team_record: "34-19",
           team_homeaway: "home", team_logo: L("nba", "ny"), kickoff_in: "in 2h",
           opponent_name: "Bucks", opponent_abbr: "MIL", opponent_record: "35-18",
           opponent_logo: L("nba", "mil"), tv_network: "TNT",
-          location: "New York, NY", odds: "NY -1.5",
+          location: "New York, NY", odds: "NY -1.5", date: at(95),
         }),
         "sensor.nba_gs": g({
           state: "PRE", team_name: "Warriors", team_abbr: "GS", team_record: "28-25",
           team_homeaway: "away", team_logo: L("nba", "gs"), kickoff_in: "in 3h",
           opponent_name: "Kings", opponent_abbr: "SAC", opponent_record: "30-22",
-          opponent_logo: L("nba", "sac"),
+          opponent_logo: L("nba", "sac"), date: at(175),
+        }),
+        "sensor.nba_mia": g({
+          state: "POST", team_name: "Heat", team_abbr: "MIA", team_record: "33-20",
+          team_homeaway: "home", team_score: 104, team_winner: true, team_logo: L("nba", "mia"),
+          opponent_name: "Magic", opponent_abbr: "ORL", opponent_record: "28-25",
+          opponent_score: 98, opponent_logo: L("nba", "orl"), clock: "Final", date: at(-250),
+        }),
+        "sensor.nba_phi": g({
+          state: "PRE", team_name: "76ers", team_abbr: "PHI", team_record: "31-22",
+          team_homeaway: "home", team_logo: L("nba", "phi"), kickoff_in: "in 4h",
+          opponent_name: "Raptors", opponent_abbr: "TOR", opponent_record: "24-29",
+          opponent_logo: L("nba", "tor"), tv_network: "NBA TV", date: at(260),
         }),
       };
 
@@ -81,24 +98,38 @@
           team_homeaway: "home", team_score: 3, team_logo: L("nhl", "col"),
           opponent_name: "Stars", opponent_abbr: "DAL", opponent_record: "33-16-6",
           opponent_score: 2, opponent_logo: L("nhl", "dal"), clock: "2nd 6:40", tv_network: "TNT",
+          date: at(-38),
         }),
         "sensor.nhl_bos": g({
           state: "POST", team_name: "Bruins", team_abbr: "BOS", team_record: "35-12-9",
           team_homeaway: "home", team_score: 4, team_winner: true, team_logo: L("nhl", "bos"),
           opponent_name: "Maple Leafs", opponent_abbr: "TOR", opponent_record: "32-15-8",
-          opponent_score: 1, opponent_logo: L("nhl", "tor"), clock: "Final",
+          opponent_score: 1, opponent_logo: L("nhl", "tor"), clock: "Final", date: at(-205),
         }),
         "sensor.nhl_nyr": g({
           state: "PRE", team_name: "Rangers", team_abbr: "NYR", team_record: "36-16-3",
           team_homeaway: "home", team_logo: L("nhl", "nyr"), kickoff_in: "in 1h",
           opponent_name: "Devils", opponent_abbr: "NJ", opponent_record: "27-22-6",
-          opponent_logo: L("nhl", "nj"), tv_network: "MSG",
+          opponent_logo: L("nhl", "nj"), tv_network: "MSG", date: at(60),
         }),
         "sensor.nhl_edm": g({
           state: "PRE", team_name: "Oilers", team_abbr: "EDM", team_record: "33-19-2",
           team_homeaway: "away", team_logo: L("nhl", "edm"), kickoff_in: "in 4h",
           opponent_name: "Golden Knights", opponent_abbr: "VGK", opponent_record: "31-18-6",
-          opponent_logo: L("nhl", "vgk"),
+          opponent_logo: L("nhl", "vgk"), date: at(230),
+        }),
+        "sensor.nhl_tb": g({
+          state: "IN", team_name: "Lightning", team_abbr: "TB", team_record: "30-20-5",
+          team_homeaway: "home", team_score: 1, team_logo: L("nhl", "tb"),
+          opponent_name: "Panthers", opponent_abbr: "FLA", opponent_record: "34-15-5",
+          opponent_score: 1, opponent_logo: L("nhl", "fla"), clock: "1st 12:03",
+          tv_network: "ESPN+", date: at(-12),
+        }),
+        "sensor.nhl_car": g({
+          state: "PRE", team_name: "Hurricanes", team_abbr: "CAR", team_record: "35-16-4",
+          team_homeaway: "home", team_logo: L("nhl", "car"), kickoff_in: "in 2h",
+          opponent_name: "Capitals", opponent_abbr: "WSH", opponent_record: "29-19-7",
+          opponent_logo: L("nhl", "wsh"), date: at(140),
         }),
       };
 
@@ -109,25 +140,37 @@
           team_homeaway: "home", team_score: 2, team_logo: L("soccer", "364"),
           opponent_name: "Arsenal", opponent_abbr: "ARS", opponent_record: "15-5-3",
           opponent_score: 1, opponent_logo: L("soccer", "359"), clock: "67'",
-          tv_network: "USA",
+          tv_network: "USA", date: at(-63),
         }),
         "sensor.epl_mci": g({
           state: "POST", team_name: "Man City", team_abbr: "MCI", team_record: "17-3-3",
           team_homeaway: "home", team_score: 3, team_winner: true, team_logo: L("soccer", "382"),
           opponent_name: "Chelsea", opponent_abbr: "CHE", opponent_record: "11-6-6",
-          opponent_score: 1, opponent_logo: L("soccer", "363"), clock: "FT",
+          opponent_score: 1, opponent_logo: L("soccer", "363"), clock: "FT", date: at(-150),
         }),
         "sensor.epl_tot": g({
           state: "PRE", team_name: "Tottenham", team_abbr: "TOT", team_record: "13-4-6",
           team_homeaway: "home", team_logo: L("soccer", "367"), kickoff_in: "in 2h",
           opponent_name: "Newcastle", opponent_abbr: "NEW", opponent_record: "12-5-6",
-          opponent_logo: L("soccer", "361"), tv_network: "NBC",
+          opponent_logo: L("soccer", "361"), tv_network: "NBC", date: at(115),
         }),
         "sensor.epl_avl": g({
           state: "PRE", team_name: "Aston Villa", team_abbr: "AVL", team_record: "13-5-5",
           team_homeaway: "away", team_logo: L("soccer", "362"), kickoff_in: "in 3h",
           opponent_name: "Brighton", opponent_abbr: "BHA", opponent_record: "10-8-5",
-          opponent_logo: L("soccer", "331"),
+          opponent_logo: L("soccer", "331"), date: at(185),
+        }),
+        "sensor.epl_eve": g({
+          state: "POST", team_name: "Everton", team_abbr: "EVE", team_record: "9-7-7",
+          team_homeaway: "home", team_score: 2, team_winner: true, team_logo: L("soccer", "368"),
+          opponent_name: "Fulham", opponent_abbr: "FUL", opponent_record: "8-8-7",
+          opponent_score: 0, opponent_logo: L("soccer", "370"), clock: "FT", date: at(-230),
+        }),
+        "sensor.epl_whu": g({
+          state: "PRE", team_name: "West Ham", team_abbr: "WHU", team_record: "10-6-7",
+          team_homeaway: "home", team_logo: L("soccer", "371"), kickoff_in: "in 5h",
+          opponent_name: "Brentford", opponent_abbr: "BRE", opponent_record: "9-7-7",
+          opponent_logo: L("soccer", "337"), tv_network: "Peacock", date: at(300),
         }),
       };
 
@@ -142,24 +185,17 @@
       card.id = "demo-card";
       card.setConfig({
         mode: "slide",
-        slide_sec: 2,
+        slide_sec: 4,
         lazy_refresh: 0, // render immediately — no debounce to fight in the recorder
-        // pin the height so every re-shoot records the same box: 4 rows + header
-        // at the default 5px row_gap ≈ 176px
-        layout: { height: "186px" },
-        // view: standings — the default is `schedule`; the demo shows the standings table.
-        // show_position: true — the position gutter is off by default.
+        // pin the height so every re-shoot records the same box: 6 rows + header
+        // at the default 5px row_gap ≈ 262px
+        layout: { height: "268px" },
+        // view: schedule (the default) — one row per game, live games first then
+        // every other game by nearness to now.
         sections: [
-          { name: "NBA", prefix: "sensor.nba_", view: "standings", show_position: true, rank_type: "win-loss", special_teams: ["bos"] },
-          { name: "NHL", prefix: "sensor.nhl_", view: "standings", show_position: true, rank_type: "win-loss-otl", special_teams: ["col"] },
-          {
-            name: "Premier League",
-            prefix: "sensor.epl_",
-            view: "standings",
-            show_position: true,
-            rank_type: "win-draw-loss",
-            special_teams: ["liv"],
-          },
+          { name: "NBA", prefix: "sensor.nba_", view: "schedule", special_teams: ["bos"] },
+          { name: "NHL", prefix: "sensor.nhl_", view: "schedule", special_teams: ["col"] },
+          { name: "Premier League", prefix: "sensor.epl_", view: "schedule", special_teams: ["liv"] },
         ],
       });
       document.getElementById("wrap").appendChild(card);
