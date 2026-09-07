@@ -11,7 +11,9 @@ index.
 - **Context:** `slide_sec` (#140) added the card's first `@click` control, first view-state not
   derived from `hass` (`_slideIndex`, `_slidePaused`), and a rotation timer. Bare `HTMLElement` +
   standalone lit `render()` — no `LitElement`, no reactive props, so a field change does nothing
-  until something calls `_render()`.
+  until something calls `_render()`. (#143 later split the trigger: `mode: slide` gates the
+  carousel, `slide_sec` is just the interval, default 45 — "should run" is now
+  `_isSlideMode() && !_slidePaused`.)
 - **Pattern to copy:** view-state fields are constructor-inited and reset in `setConfig` next to the
   `_scoreChangedAt` / `_prevScores` clears (new config = fresh view). The timer is a single
   idempotent `_syncSlideTimer()` — it arms iff `(should run) && !this._slideTimer` and stops iff
@@ -54,19 +56,19 @@ index.
   Asserting an option is "not emitted" against `innerHTML` gives a false negative once the
   stylesheet references the property; asserting it "is emitted" there doesn't prove it reached the
   element.
-- **Guardrail:** for options wired through a `--scoreboard-*` custom property on `<ha-card>`
-  (`team_col_width`, `logo_width` / `score_width` / `colon_width` / `row_height`, and the
-  `team_width` A/B split), assert on
-  `card.shadowRoot.querySelector("ha-card").getAttribute("style")`, not `innerHTML`; pair it with a
-  `CARD_STYLES`-contains assertion for the stylesheet side. `test/index.test.ts` › "team_col_width"
-  / "layout dimension options" and `test/snapshot.test.ts` › CARD_STYLES wiring show the split.
+- **Guardrail:** for options wired through a `--ttsc-*` custom property on `<ha-card>` (the
+  `layout:` map — `height` excepted, it's a plain `height` — plus the three `colors` keys with a
+  property), assert on `card.shadowRoot.querySelector("ha-card").getAttribute("style")`, not
+  `innerHTML`; pair it with a `CARD_STYLES`-contains assertion for the stylesheet side.
+  `test/index.test.ts` › "layout: map" and `test/snapshot.test.ts` › CARD_STYLES wiring show the
+  split. (The `--scoreboard-*` prefix was renamed to `--ttsc-*` in #143; the card-level
+  `show_position` / `--scoreboard-position-display` switch was removed the same batch — a stylesheet
+  assertion on `shadowRoot.innerHTML` for `position:relative` broke there for exactly this reason.)
 - **Also:** the `cssVars` table in `_render` is serialised through `.filter(([, v]) => v)`, so a
   value routed through it whose "off"/"default" state is falsy needs an _explicit_ comparison, not a
-  truthy check. A boolean "off" flag (`show_position` → `--scoreboard-position-display: none`)
-  compares `option === false`, never `!option` (`!option` also fires on `0` / `""`). A numeric
-  option with a non-zero baseline (`font_scale`, default `1`) emits on
-  `font_scale != null && font_scale !== 1` — so `0` still reaches CSS as `--scoreboard-font-scale:0`
-  (a valid `calc()` operand; intentional GIGO, no validation) and the `1` no-op is not emitted.
+  truthy check. A numeric option with a non-zero baseline (`font_scale`, default `1`) emits on
+  `font_scale != null && font_scale !== 1` — so `0` still reaches CSS as `--ttsc-font-scale:0` (a
+  valid `calc()` operand; intentional GIGO, no validation) and the `1` no-op is not emitted.
 - **Also:** wrapping a `styles.ts` literal in `calc(Npx * var(--x, 1))` changes `CARD_STYLES`, so
   the `toMatchSnapshot()` test in `test/snapshot.test.ts` must be refreshed (`vitest -u`). The
   `code-writer` role can't write `test/`, so the driver (or `test-writer`) regenerates it; a
@@ -77,14 +79,16 @@ index.
   [#134](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/134),
   [#136](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/136) · 2026-09-06
 
-## Card shows the fixture table during the regular season / wrong standings-vs-fixtures sort
+## Wrong standings-vs-schedule choice for a section
 
 - **Root cause:** `resolveSortMode` treated _any_ truthy `season` attribute other than the literal
   `"regular"` as non-regular, so leagues that emit a descriptive `season` label (TeamTracker Serie
-  A: `2026-27-italian-serie-a`) tripped a false positive and there was no config escape hatch either
-  way.
-- **Guardrail:** section option `season_mode` (`auto` | `regular` | `by-date`, default `auto`)
-  short-circuits the heuristic in `src/sorting.ts`; `test/sorting.test.ts` › "seasonMode override
-  (4th parameter)" pins both forced directions and the unrecognised-value fall-through.
-- **Ref:** [#130](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/130) ·
-  2026-09-06
+  A: `2026-27-italian-serie-a`) tripped a false positive.
+- **Guardrail (current):** the `season` attribute is **no longer consulted**. A section's `view`
+  (`auto` | `ranking` | `schedule`, default `schedule` since #143) decides directly; `auto` shows
+  the standings table only when every tracked entity has a numeric `team_record`. `src/sorting.ts` ›
+  `resolveSortMode`; `test/sorting.test.ts` › "view override (4th parameter)" pins the forced
+  directions and the unrecognised-value fall-through. Schedule ordering (live → `|date − now|`) is
+  pinned in `test/render.test.ts`.
+- **Ref:** [#130](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/130) (original),
+  #143 (season heuristic removed) · 2026-09-06
