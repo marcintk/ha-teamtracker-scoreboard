@@ -25,7 +25,8 @@ export function rowHtml(
   colors: ColorsConfig = {},
   opponentSpecial = false,
   isFresh = false,
-  position: number | null = null
+  // number → the rank; `null` → an empty gutter cell (alignment); `undefined` → no cell
+  position: number | null | undefined = undefined
 ): TemplateResult {
   const gs = (stateObj?.state ?? "") as GameState;
   const attr = stateObj?.attributes ?? {};
@@ -38,7 +39,7 @@ export function rowHtml(
 
   return html`
 <div class="game-row">
-  <div class="team-pos" style=${position == null ? nothing : `color:${posColor}`}>${position ?? ""}</div>
+  ${position === undefined ? nothing : html`<div class="team-pos" style=${position === null ? nothing : `color:${posColor}`}>${position ?? ""}</div>`}
   <div class="team-col team-col-a">
     <div class="team-name" style="color:${homeColor};font-weight:${isTeamSide("home", attr) ? "bold" : "normal"}">${nameText("home", attr)}</div>
     <div class="team-rank" style="color:${homeColor}">${rankText("home", attr)}</div>
@@ -75,7 +76,7 @@ export function sectionHtml(
     rank_type = "win-draw-loss",
     view = "schedule",
     score_blink = 5,
-    show_position = true,
+    show_position = false,
   } = section;
   const blinkMs = score_blink * 1000;
   const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
@@ -126,7 +127,9 @@ export function sectionHtml(
     .slice(0, limit)
     .map(({ entityId, special = false, opponentSpecial = false, position }) => {
       const isFresh = blinkMs > 0 && now - (scoreChangedAt.get(entityId) ?? -Infinity) < blinkMs;
-      const pos = sortMode !== "by-date" && show_position ? position : null;
+      // no cell unless the section opts in; then the rank in a ranking view, or a
+      // blank cell in the schedule (keeps rows aligned in a mixed card)
+      const pos = !show_position ? undefined : sortMode === "by-date" ? null : position;
       return rowHtml(
         states[entityId] as HassEntity,
         special,

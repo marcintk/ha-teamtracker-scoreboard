@@ -196,7 +196,7 @@ describe("sectionHtml", () => {
     };
     const s: SectionConfig = { name: "NBA", prefix: "sensor.nba_", limit: 10, special_teams: [] };
     const el = doc(sectionHtml(s, states));
-    expect((el.querySelector(".team-pos")?.textContent ?? "").trim()).toBe("");
+    expect(el.querySelector(".team-pos")).toBeNull();
   });
 
   const H = 3600_000;
@@ -368,6 +368,7 @@ describe("standings position column", () => {
     special_teams: [],
     rank_type: "win-loss",
     view: "ranking",
+    show_position: true,
   };
 
   const threeTeams = () => ({
@@ -404,13 +405,9 @@ describe("standings position column", () => {
     expect(firstRow?.firstElementChild?.classList.contains("team-pos")).toBe(true);
   });
 
-  it("renders empty .team-pos cells when show_position is false", () => {
+  it("omits .team-pos cells entirely when show_position is false", () => {
     const el = doc(sectionHtml({ ...section, show_position: false }, threeTeams()));
-    const cells = [...el.querySelectorAll(".game-row .team-pos")];
-    expect(cells.length).toBe(3);
-    for (const cell of cells) {
-      expect((cell.textContent ?? "").trim()).toBe("");
-    }
+    expect(el.querySelectorAll(".game-row .team-pos").length).toBe(0);
   });
 
   it("renders empty .team-pos cells in schedule (by-date) view", () => {
@@ -429,8 +426,13 @@ describe("standings position column", () => {
     expect(posCell?.getAttribute("style") ?? "").toContain("ttsc-special-color");
   });
 
-  it("rowHtml renders an empty .team-pos cell when position is omitted", () => {
+  it("rowHtml omits .team-pos when position is undefined", () => {
     const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    expect(el.querySelector(".team-pos")).toBeNull();
+  });
+
+  it("rowHtml renders an empty .team-pos cell when position is null", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false, {}, false, false, null));
     const cell = el.querySelector(".team-pos");
     expect(cell).not.toBeNull();
     expect((cell?.textContent ?? "").trim()).toBe("");

@@ -57,6 +57,7 @@ export interface SectionConfig {
   /** default `schedule`; `ranking` for a standings table, `auto` for the record heuristic */
   view?: ViewMode;
   score_blink?: number;
+  /** default `false`; `true` draws the position gutter (the rank in a ranking view) */
   show_position?: boolean;
 }
 

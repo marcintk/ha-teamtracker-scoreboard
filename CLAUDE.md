@@ -14,11 +14,12 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
   (live) games sort first; every other state (`PRE`/`BYE`/`POST`) shares one band ordered by
   `|date − now|`, so the next kick-off and the just-finished game sit near the top
 - Team logos render only for HTTPS URLs; non-HTTPS is silently dropped
-- Every row opens with a fixed-width position cell (`.team-pos`). In a ranking sort it holds the
-  row's 1-based rank in the full sorted list (pre-`limit`), coloured like the tracked team; under
-  `by-date` or `show_position: false` (section option, default `true`) the cell is drawn but empty,
-  so mixed standings/fixture cards stay row-aligned without a card-wide pre-pass. There is no
-  card-level position toggle — the cell is always drawn
+- `show_position` (section option, default **`false`**) draws a fixed-width position cell
+  (`.team-pos`) as the first child of every row. In a ranking sort it holds the row's 1-based rank
+  in the full sorted list (pre-`limit`), coloured like the tracked team; in `by-date` the cell is
+  drawn but blank (keeps rows aligned in a mixed standings/schedule card). When `show_position` is
+  false the cell is omitted entirely — `rowHtml`'s `position` arg is `undefined` (no cell) vs `null`
+  (blank cell) vs a number. There is no card-level toggle.
 - With `mode: slide` and **≥ 2 sections**, the card shows one section at a time and auto-advances
   every `slide_sec` seconds (default 45; `≤ 0` ⇒ 45; hard swap, wraps, empty sections take their
   turn). Three header buttons: `‹`/`›` step and pause; the stop/resume toggle (orange while paused)

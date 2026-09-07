@@ -147,14 +147,16 @@
         // pin the height so every re-shoot records the same box: 4 rows + header
         // at the default 5px row_gap ≈ 176px
         layout: { height: "186px" },
-        // view: ranking — the default is now `schedule`; the demo shows the standings table
+        // view: ranking — the default is `schedule`; the demo shows the standings table.
+        // show_position: true — the position gutter is off by default.
         sections: [
-          { name: "NBA", prefix: "sensor.nba_", view: "ranking", rank_type: "win-loss", special_teams: ["bos"] },
-          { name: "NHL", prefix: "sensor.nhl_", view: "ranking", rank_type: "win-loss-otl", special_teams: ["col"] },
+          { name: "NBA", prefix: "sensor.nba_", view: "ranking", show_position: true, rank_type: "win-loss", special_teams: ["bos"] },
+          { name: "NHL", prefix: "sensor.nhl_", view: "ranking", show_position: true, rank_type: "win-loss-otl", special_teams: ["col"] },
           {
             name: "Premier League",
             prefix: "sensor.epl_",
             view: "ranking",
+            show_position: true,
             rank_type: "win-draw-loss",
             special_teams: ["liv"],
           },
