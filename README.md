@@ -7,8 +7,8 @@ network, and series info — one row per game, grouped by sport. Built on top of
 [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
 
 [![hacs_badge][hacs-shield]][hacs] [![GitHub Release][releases-shield]][releases]
-[![License][license-shield]][license] ![Maintenance][maintenance-shield] [![CI][ci-shield]][ci]
-[![Coverage][coverage-shield]][ci] [![Downloads][downloads-shield]][releases]
+[![License][license-shield]][license] ![Maintenance][maintenance-shield]
+[![Coverage][coverage-shield]][ci] [![Downloads][downloads-shield]][releases] [![CI][ci-shield]][ci]
 
 ## Requirements
 
