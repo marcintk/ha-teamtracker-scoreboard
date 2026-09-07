@@ -100,7 +100,7 @@ Card-level options.
 | `slide_sec`     | number  | —        | Rotate sections one at a time, N seconds each; needs ≥ 2 sections (see [Rotating sections](#rotating-sections))        |
 | `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s |
 | `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                             |
-| `show_position` | boolean | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)   |
+| `show_position` | boolean | `true`   | Set `false` to drop the standings-position column from the whole card (no gutter on any row)                           |
 
 ### Refresh
 
@@ -122,7 +122,7 @@ These two knobs tune that cadence.
 | `special_teams` | list    | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos`              |
 | `rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table. See [Rank type](#rank-type)                                     |
 | `view`          | string  | `auto`          | `auto` / `ranking` / `schedule` — what the section shows. See [View](#view)                              |
-| `show_position` | boolean | `true`          | Show the standings-position number in the leftmost column. See [Standings position](#standings-position) |
+| `show_position` | boolean | `true`          | Show the standings-position number in the leftmost column; the empty gutter is still drawn for alignment |
 | `score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                                   |
 
 ### Rank type
@@ -139,28 +139,6 @@ at the bottom. Choose the formula that matches the league:
 
 During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
 game date instead.
-
-### Standings position
-
-In the regular season each row opens with a narrow column holding that team's **position in the
-standings** — its rank in the full sorted list, so `1` is the section leader even when `limit` hides
-the rows below it. The number is coloured like its team, so `special_teams` positions stand out too.
-
-Set `show_position: false` on a **section** to hide the numbers. The narrow column is still drawn
-(empty), so a card that mixes a standings section with a schedule one keeps every row aligned. In
-the schedule view (playoffs, cups, or `view: schedule`) the column is always empty — there is no
-league position to show.
-
-Set `show_position: false` at the **card** level to remove the column entirely — no gutter on any
-row, restoring the pre-position-column layout. Use this when no section ever shows standings.
-
-```yaml
-sections:
-  - name: Premier League
-    prefix: sensor.epl_
-    rank_type: win-draw-loss
-    show_position: false # hide the position numbers for this section
-```
 
 ### View
 
