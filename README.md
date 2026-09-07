@@ -107,23 +107,20 @@ card always shows the standings table (ha-teamtracker's `season` attribute isn't
 
 ### Options
 
-| Option          | Type    | Default  | Description                                                                                                                                         |
-| --------------- | ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `height`        | string  | auto     | Card height (CSS value); omit to fit content                                                                                                        |
-| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                                                    |
-| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                                                      |
-| `sections`      | list    | required | One entry per sport/league                                                                                                                          |
-| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                                                       |
-| `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s              |
-| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                                                          |
-| `show_position` | boolean | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)                                |
-| `team_width`    | string  | `99px`   | Team-name column width; one CSS length applied to both sides. See [Layout dimensions](#layout-dimensions)                                           |
-| `logo_width`    | string  | `30px`   | CSS width of each team-logo cell (and the logo image). See [Layout dimensions](#layout-dimensions)                                                  |
-| `score_width`   | string  | `34px`   | CSS width of each score cell. Widen for 3-digit totals                                                                                              |
-| `colon_width`   | string  | `9px`    | CSS width of the centre colon cell                                                                                                                  |
-| `row_height`    | string  | `28px`   | CSS height of every game row (row, cells, and logo scale together)                                                                                  |
-| `font_scale`    | number  | `1`      | Uniform multiplier over every text size in the card. See [Typography scale](#typography-scale)                                                      |
-| `slide_sec`     | number  | —        | Show one section at a time, auto-advancing every N seconds, with playback controls. Needs ≥ 2 sections. See [Rotating sections](#rotating-sections) |
+Behavioural card-level options. Everything that controls **size, spacing, and text scale** —
+`height`, `row_height`, `team_width`, `logo_width`, `score_width`, `colon_width`, `font_scale` —
+lives in [Layout & sizing](#layout--sizing). `slide_sec` is in
+[Rotating sections](#rotating-sections).
+
+| Option          | Type    | Default  | Description                                                                                                            |
+| --------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                       |
+| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                         |
+| `sections`      | list    | required | One entry per sport/league                                                                                             |
+| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                          |
+| `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s |
+| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                             |
+| `show_position` | boolean | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)   |
 
 ### Section options
 
@@ -227,36 +224,40 @@ sections:
 | `live`     | `indianred`               | IN game clock text and TV badge background |
 | `leading`  | `brown`                   | IN score for the currently leading team    |
 
-### Layout dimensions
+### Layout & sizing
 
-Every row is a fixed-size flex layout. These card-level options override the built-in pixel
-constants — each maps to a `--scoreboard-*` CSS variable that falls back to its default, so a card
-that sets none of them renders exactly as before.
+Every card-level knob for size, spacing, and text scale. `height` sets the outer card box; the rest
+override the built-in pixel constants for the row layout — each maps to a `--scoreboard-*` CSS
+variable that falls back to its default, so a card that sets none of them renders exactly as before.
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
+height: 600px # fixed card box (else fits content)
 row_height: 34px # roomier rows; the logo scales with it
 logo_width: 40px
 score_width: 42px # room for 3-digit basketball totals
 team_width: 130px # widen both team-name columns
+font_scale: 1.15 # ~15% larger text throughout
 sections:
   - ...
 ```
 
-| Option        | Default | Controls                                                                  |
-| ------------- | ------- | ------------------------------------------------------------------------- |
-| `row_height`  | `28px`  | `.game-row` height, the logo / score / colon cell heights, the logo image |
-| `logo_width`  | `30px`  | Logo cell width and the logo image width (aspect ratio is preserved)      |
-| `score_width` | `34px`  | Score cell width                                                          |
-| `colon_width` | `9px`   | Centre colon cell width                                                   |
-| `team_width`  | `99px`  | Team-name column width; one CSS length applied to both sides              |
+| Option        | Type   | Default | Controls                                                                                  |
+| ------------- | ------ | ------- | ----------------------------------------------------------------------------------------- |
+| `height`      | string | auto    | Outer card height (any CSS length); omit to fit content                                   |
+| `row_height`  | string | `28px`  | `.game-row` height, the logo / score / colon cell heights, the logo image                 |
+| `logo_width`  | string | `30px`  | Logo cell width and the logo image width (aspect ratio is preserved)                      |
+| `score_width` | string | `34px`  | Score cell width — widen for 3-digit totals                                               |
+| `colon_width` | string | `9px`   | Centre colon cell width                                                                   |
+| `team_width`  | string | `99px`  | Team-name column width; one CSS length applied to both sides                              |
+| `font_scale`  | number | `1`     | Uniform multiplier over every text size — see [Typography scale](#typography-scale) below |
 
 `team_col_width` from earlier versions is still accepted as an alias for `team_width`.
 
 `getCardSize()` — the height hint Home Assistant uses for masonry layout — tracks `row_height` when
 it is a plain pixel value.
 
-### Typography scale
+#### Typography scale
 
 `font_scale` is a single multiplier applied to **every** font size in the card — score, team name,
 section header, rank, message, TV badge. The built-in sizes were tuned as a set, so scaling them
