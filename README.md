@@ -121,7 +121,20 @@ These two knobs tune that cadence.
 
 ### Section
 
-Each entry in the `sections:` list is one league:
+```yaml
+type: custom:ha-teamtracker-scoreboard-card
+sections:
+  - name: Premier League
+    prefix: sensor.epl_
+    limit: 12
+    rank_type: win-draw-loss
+    view: auto
+    special_teams:
+      - liv
+    show_position: true
+    score_blink: 5
+  - ...
+```
 
 | Field                   | Type    | Default         | Description                                                                                                                                                                                                                  |
 | ----------------------- | ------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
