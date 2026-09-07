@@ -179,13 +179,15 @@ export class SportScoreboardCard extends HTMLElement {
     return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
   }
 
-  _slideBtn(label: string, glyph: string, onClick: () => void, extra = ""): TemplateResult {
+  _slideBtn(label: string, onClick: () => void, extra: string): TemplateResult {
+    // every icon is a CSS shape keyed off `extra` (nav prev/next, toggle) — the
+    // button carries no text
     return html`<button
-      class="slide-btn${extra ? ` ${extra}` : ""}"
+      class="slide-btn ${extra}"
       title=${label}
       aria-label=${label}
       @click=${onClick}
-    >${glyph}</button>`;
+    ></button>`;
   }
 
   _refreshDebugOverlay(): void {
@@ -323,13 +325,12 @@ export class SportScoreboardCard extends HTMLElement {
 
       const carousel = (slide_sec ?? 0) > 0 && sections.length >= 2;
       const slideControls = carousel
-        ? html`<span class="slide-ctrls"
-            >${this._slideBtn("Previous section", "‹", () => this._slideStep(-1))}${this._slideBtn(
-              this._slidePaused ? "Resume rotation" : "Pause rotation",
-              this._slidePaused ? "▶" : "⏸",
+        ? html`<span class="slide-ctrls${this._slidePaused ? " paused" : ""}"
+            >${this._slideBtn("Previous section", () => this._slideStep(-1), "nav prev")}${this._slideBtn(
+              this._slidePaused ? "Resume rotation" : "Stop rotation",
               () => this._slideToggle(),
-              this._slidePaused ? "paused" : ""
-            )}${this._slideBtn("Next section", "›", () => this._slideStep(1))}</span
+              this._slidePaused ? "toggle paused" : "toggle"
+            )}${this._slideBtn("Next section", () => this._slideStep(1), "nav next")}</span
           >`
         : nothing;
       let slideMinH = "";
@@ -341,11 +342,10 @@ export class SportScoreboardCard extends HTMLElement {
       }
 
       const tw = team_width ?? team_col_width;
-      const [teamAW, teamBW] = Array.isArray(tw) ? tw : [tw, tw];
 
       const cssVars: Record<string, string | undefined> = {
-        "--scoreboard-team-col-a-width": teamAW,
-        "--scoreboard-team-col-b-width": teamBW,
+        "--scoreboard-team-col-a-width": tw,
+        "--scoreboard-team-col-b-width": tw,
         "--scoreboard-logo-width": logo_width,
         "--scoreboard-score-width": score_width,
         "--scoreboard-colon-width": colon_width,
@@ -359,12 +359,16 @@ export class SportScoreboardCard extends HTMLElement {
         .map(([k, v]) => `${k}:${String(v)};`)
         .join("");
 
-      const haCardStyle = `${slideMinH}${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}${varStr}`;
+      const haCardStyle = `${slideMinH}${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug ? "position:relative;" : ""}${varStr}`;
 
       const idx = ((this._slideIndex % sections.length) + sections.length) % sections.length;
       const visibleSections = carousel ? sections.slice(idx, idx + 1) : sections;
 
-      const sectionTemplates = visibleSections.map((s) =>
+      const versionBadge = show_version
+        ? html`<span id="sc-version" class="sc-version">v${__CARD_VERSION__}</span>`
+        : nothing;
+
+      const sectionTemplates = visibleSections.map((s, i) =>
         sectionHtml(
           s,
           states,
@@ -372,7 +376,8 @@ export class SportScoreboardCard extends HTMLElement {
           colors,
           this._scoreChangedAt,
           carousel,
-          slideControls
+          slideControls,
+          i === 0 ? versionBadge : nothing
         )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
@@ -382,11 +387,6 @@ export class SportScoreboardCard extends HTMLElement {
           ${STYLE_BLOCK}
           <ha-card style=${haCardStyle || nothing}>
             ${debug ? unsafeHTML(`<div id="sc-debug" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:11px;line-height:1;padding:2px 6px;pointer-events:none;">${this._debug.tableHtml()}</div>`) : nothing}
-            ${
-              show_version
-                ? html`<div id="sc-version" style="position:absolute;top:4px;right:6px;font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>`
-                : nothing
-            }
             ${
               hasContent
                 ? sectionTemplates

@@ -704,10 +704,10 @@ describe("SportScoreboardCard", () => {
       for (const b of buttons) expect(b.classList.contains("slide-btn")).toBe(true);
     });
 
-    it("orders the buttons Previous / Pause / Next by title", () => {
+    it("orders the buttons Previous / Stop / Next by title", () => {
       const card = carouselCard();
       const titles = slideButtons(card).map((b) => b.getAttribute("title"));
-      expect(titles).toEqual(["Previous section", "Pause rotation", "Next section"]);
+      expect(titles).toEqual(["Previous section", "Stop rotation", "Next section"]);
     });
 
     it("renders no header buttons when slide_sec is unset", () => {
@@ -758,26 +758,26 @@ describe("SportScoreboardCard", () => {
       const toggle = ctrl(card, "Resume rotation");
       expect(toggle).not.toBeNull();
       expect(toggle?.classList.contains("paused")).toBe(true);
-      expect(toggle?.textContent).toContain("▶");
+      expect(toggle?.textContent?.trim()).toBe("");
       expect(asSlide(card)._slidePaused).toBe(true);
     });
 
-    it("clicking the Pause toggle while rotating stops the timer", () => {
+    it("clicking the Stop toggle while rotating stops the timer", () => {
       const card = carouselCard();
-      ctrl(card, "Pause rotation")?.click();
+      ctrl(card, "Stop rotation")?.click();
 
       vi.advanceTimersByTime(30_000);
       expect(headerText(card)).toContain("NBA");
       expect(asSlide(card)._slidePaused).toBe(true);
 
       const toggle = ctrl(card, "Resume rotation");
-      expect(toggle?.textContent).toContain("▶");
+      expect(toggle?.textContent?.trim()).toBe("");
       expect(toggle?.classList.contains("paused")).toBe(true);
     });
 
     it("clicking Resume after a pause restarts the timer", () => {
       const card = carouselCard();
-      ctrl(card, "Pause rotation")?.click();
+      ctrl(card, "Stop rotation")?.click();
       vi.advanceTimersByTime(30_000);
       expect(headerText(card)).toContain("NBA");
 
@@ -787,8 +787,10 @@ describe("SportScoreboardCard", () => {
       vi.advanceTimersByTime(30_000);
       expect(headerText(card)).toContain("NHL");
 
-      const toggle = ctrl(card, "Pause rotation");
-      expect(toggle?.textContent).toContain("⏸");
+      const toggle = ctrl(card, "Stop rotation");
+      // stop / resume icons are CSS shapes, not glyphs — distinguish by class
+      expect(toggle?.textContent?.trim()).toBe("");
+      expect(toggle?.classList.contains("toggle")).toBe(true);
       expect(toggle?.classList.contains("paused")).toBe(false);
     });
 
@@ -885,8 +887,8 @@ describe("SportScoreboardCard", () => {
       const toggle = ctrl(card, "Resume rotation");
       expect(toggle).not.toBeNull();
       expect(toggle?.classList.contains("paused")).toBe(true);
-      expect(toggle?.textContent).toContain("▶");
-      expect(ctrl(card, "Pause rotation")).toBeFalsy();
+      expect(toggle?.textContent?.trim()).toBe("");
+      expect(ctrl(card, "Stop rotation")).toBeFalsy();
     });
 
     it("starts rotating when Resume is clicked after a reduced-motion paused start", () => {
@@ -1494,7 +1496,7 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).not.toContain("sc-version");
+      expect(card.shadowRoot?.querySelector("#sc-version")).toBeNull();
     });
 
     it("version badge is absent when debug is false", () => {
@@ -1502,7 +1504,7 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).not.toContain("sc-version");
+      expect(card.shadowRoot?.querySelector("#sc-version")).toBeNull();
     });
 
     it("show_version shows version badge without debug", () => {
@@ -1510,8 +1512,26 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], show_version: true };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).toContain("sc-version");
-      expect(card.shadowRoot?.innerHTML).not.toContain("sc-debug");
+      expect(card.shadowRoot?.querySelector("#sc-version")).not.toBeNull();
+      expect(card.shadowRoot?.querySelector("#sc-debug")).toBeNull();
+    });
+
+    it("renders the version badge inside the first section header, once", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection, { name: "NHL", prefix: "sensor.nhl_", special_teams: [] }],
+        show_version: true,
+      };
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      const badges = card.shadowRoot?.querySelectorAll("#sc-version") ?? [];
+      expect(badges).toHaveLength(1);
+      expect(badges[0]?.closest(".section-header")).not.toBeNull();
+      const headers = card.shadowRoot?.querySelectorAll(".section-header") ?? [];
+      expect(headers[0]?.contains(badges[0] as Node)).toBe(true);
     });
   });
 
@@ -1549,15 +1569,6 @@ describe("SportScoreboardCard", () => {
       card._render();
       expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
       expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
-    });
-
-    it("2-element array sets sides independently", () => {
-      const card = makeCard();
-      card._config = { sections: [nbaSection], team_width: ["140px", "80px"] };
-      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
-      card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:140px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:80px");
     });
 
     it("team_width wins over team_col_width when both are set", () => {
