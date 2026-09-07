@@ -139,7 +139,7 @@ sections:
 | `section.view`          | string  | `auto`          | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `auto` = standings when every team has a numeric record, else schedule; `ranking` = always standings; `schedule` = always the date-sorted list |
 | `section.rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table — see [Rank type](#rank-type)                                                                                                                                                        |
 | `section.score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                 |
-| `section.show_position` | boolean | `true`          | Show this section's position numbers. Only applies in a `ranking` view — a `schedule` section's gutter is always blank. `false` blanks the numbers but keeps the gutter drawn so mixed sections stay row-aligned             |
+| `section.show_position` | boolean | `true`          | Show the position number (`ranking` view only). It's the rank among tracked teams, so it matches the real league table only if every team is tracked. `false` hides it but keeps the gutter for row alignment                |
 | `section.special_teams` | list    | `[]`            | Team suffixes to highlight — the part after the prefix, e.g. `bos` for `sensor.nba_bos`                                                                                                                                      |
 
 ### Layout
