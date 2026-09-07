@@ -75,8 +75,16 @@ describe("CARD_STYLES", () => {
     expect(CARD_STYLES).toMatchSnapshot();
   });
 
-  it("wires .team-col width to the --scoreboard-team-col-width custom property", () => {
-    expect(CARD_STYLES).toContain("width: var(--scoreboard-team-col-width, 99px)");
+  it("wires .team-col-a width to the nested team-col-a custom property fallback chain", () => {
+    expect(CARD_STYLES).toContain(
+      "var(--scoreboard-team-col-a-width, var(--scoreboard-team-col-width, 99px))"
+    );
+  });
+
+  it("wires .team-col-b width to the nested team-col-b custom property fallback chain", () => {
+    expect(CARD_STYLES).toContain(
+      "var(--scoreboard-team-col-b-width, var(--scoreboard-team-col-width, 99px))"
+    );
   });
 
   it("wires logo width to the --scoreboard-logo-width custom property", () => {

@@ -82,6 +82,8 @@ export interface SortItem {
 export interface CardConfig {
   sections?: SectionConfig[];
   height?: string;
+  team_width?: string | [string, string];
+  /** @deprecated use `team_width` */
   team_col_width?: string;
   logo_width?: string;
   score_width?: string;

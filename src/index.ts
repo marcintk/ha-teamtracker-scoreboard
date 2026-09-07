@@ -231,6 +231,7 @@ export class SportScoreboardCard extends HTMLElement {
         sections,
         height,
         team_col_width,
+        team_width,
         logo_width,
         score_width,
         colon_width,
@@ -252,8 +253,12 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track("rendered");
 
+      const tw = team_width ?? team_col_width;
+      const [teamAW, teamBW] = Array.isArray(tw) ? tw : [tw, tw];
+
       const cssVars: Record<string, string | undefined> = {
-        "--scoreboard-team-col-width": team_col_width,
+        "--scoreboard-team-col-a-width": teamAW,
+        "--scoreboard-team-col-b-width": teamBW,
         "--scoreboard-logo-width": logo_width,
         "--scoreboard-score-width": score_width,
         "--scoreboard-colon-width": colon_width,

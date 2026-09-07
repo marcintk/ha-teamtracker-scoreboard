@@ -462,7 +462,41 @@
     <code>30px</code> back to <code>28px</code> before the gate.
   </p>
 
-  <p><strong>Slice 2 &mdash; <code>team_width</code> + <code>team_col_width</code> alias &mdash;</strong> <em>pending.</em></p>
+  <p><strong>Slice 2 &mdash; <code>team_width</code> + <code>team_col_width</code> alias &mdash; accepted.</strong></p>
+  <ul class="plain">
+    <li><code>src/types.ts</code> &mdash; <code>team_width?: string | [string, string]</code> on
+      <code>CardConfig</code>; <code>team_col_width</code> kept with a <code>@deprecated</code>
+      JSDoc.</li>
+    <li><code>src/index.ts</code> &mdash; <code>_render()</code>:
+      <code>const tw = team_width ?? team_col_width; const [teamAW, teamBW] = Array.isArray(tw) ? tw : [tw, tw];</code>
+      &mdash; the <code>cssVars</code> entry for <code>--scoreboard-team-col-width</code> is
+      replaced by <code>--scoreboard-team-col-a-width</code> / <code>-b-width</code>. Unset values
+      are still dropped by the existing <code>.filter(([, v]) =&gt; v)</code>.</li>
+    <li><code>src/styles.ts</code> &mdash; the shared <code>.team-col</code> <code>width</code> /
+      <code>min-width</code> rules are removed; <code>.team-col-a</code> / <code>.team-col-b</code>
+      gain <code>width</code> + <code>min-width</code> of
+      <code>var(--scoreboard-team-col-a-width, var(--scoreboard-team-col-width, 99px))</code>
+      (mirror for <code>-b</code>). <code>--scoreboard-team-col-width</code> survives only as the
+      middle fallback rung &mdash; a raw-CSS escape hatch, and the resolution target for a
+      <code>team_col_width</code>-only config.</li>
+    <li><code>test/index.test.ts</code> &mdash; the <code>team_col_width</code> block is migrated
+      (the alias now emits both <code>-a</code> / <code>-b</code> properties); new
+      <code>describe("team_width")</code>: scalar &rArr; both sides, <code>[a, b]</code> &rArr;
+      independent, <code>team_width</code> wins over <code>team_col_width</code>, neither set
+      &rArr; nothing emitted.</li>
+    <li><code>test/snapshot.test.ts</code> &mdash; the stale "wires <code>.team-col</code> width"
+      assertion from #132 is dropped (its rule no longer exists); two nested-fallback assertions
+      added; <code>CARD_STYLES</code> snapshot refreshed.</li>
+    <li><code>README.md</code> &mdash; <code>team_width</code> replaces the
+      <code>team_col_width</code> row; Layout dimensions section documents the scalar/pair form,
+      the off-centre-score caveat, and the <code>team_col_width</code> alias.</li>
+  </ul>
+  <p>
+    Suite 292 green; typecheck and <code>check:ci</code> clean. Reviewer: no correctness findings;
+    degenerate array inputs (<code>[]</code>, one element, &gt;2) resolve without throwing and are
+    out of the documented contract &mdash; same no-validation stance as <code>height</code> /
+    <code>rank_type</code>. <code>/simplify</code> no changes.
+  </p>
 
   <footer>
     issue-133-layout-dimension-options &middot; created for /design-it &middot; renders at
