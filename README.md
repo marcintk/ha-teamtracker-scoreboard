@@ -87,8 +87,7 @@ knockout stage with no records lands on the schedule on its own. Set the [`view`
 
 ## Rank type
 
-In the standings table teams are ordered by their win-loss record, best at the top. `rank_type` (per
-section) picks the formula:
+In the standings table teams are ordered by their win-loss record, best at the top.
 
 | Value           | Points system   | Record format | Use for                              |
 | --------------- | --------------- | ------------- | ------------------------------------ |
