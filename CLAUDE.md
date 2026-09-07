@@ -16,9 +16,8 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
 - Every row opens with a fixed-width position cell (`.team-pos`). In a ranking sort it holds the
   row's 1-based rank in the full sorted list (pre-`limit`), coloured like the tracked team; under
   `by-date` or `show_position: false` (section option, default `true`) the cell is drawn but empty,
-  so mixed standings/fixture cards stay row-aligned without a card-wide pre-pass. A **card-level**
-  `show_position: false` removes the cell entirely (`--scoreboard-position-display: none`),
-  restoring the pre-position-column layout
+  so mixed standings/fixture cards stay row-aligned without a card-wide pre-pass. There is no
+  card-level position toggle — the cell is always drawn
 - With `slide_sec` set and **≥ 2 sections**, the card shows one section at a time and auto-advances
   every `slide_sec` seconds (hard swap, wraps, empty sections take their turn). Three header
   buttons: `‹`/`›` step and pause; the stop/resume toggle (orange while paused) is the only way back

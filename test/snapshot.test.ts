@@ -103,10 +103,6 @@ describe("CARD_STYLES", () => {
     expect(CARD_STYLES).toContain("height: var(--scoreboard-row-height, 28px)");
   });
 
-  it("wires team position display to the --scoreboard-position-display custom property", () => {
-    expect(CARD_STYLES).toContain("display: var(--scoreboard-position-display, block)");
-  });
-
   it("wraps the .score font-size in the --scoreboard-font-scale custom property", () => {
     expect(CARD_STYLES).toContain("font-size: calc(20px * var(--scoreboard-font-scale, 1))");
   });

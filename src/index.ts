@@ -310,14 +310,7 @@ export class SportScoreboardCard extends HTMLElement {
 
   _render(): void {
     try {
-      const {
-        sections,
-        colors = {},
-        debug,
-        show_version,
-        show_position,
-        slide_sec,
-      } = this._config as CardConfig;
+      const { sections, colors = {}, debug, show_version, slide_sec } = this._config as CardConfig;
       const { height, team_width, logo_width, score_width, colon_width, row_height, font_scale } =
         this._layout();
       const states = (this._hass as HomeAssistant).states;
@@ -362,7 +355,6 @@ export class SportScoreboardCard extends HTMLElement {
         "--scoreboard-score-width": score_width,
         "--scoreboard-colon-width": colon_width,
         "--scoreboard-row-height": row_height,
-        "--scoreboard-position-display": show_position === false ? "none" : undefined,
         "--scoreboard-font-scale":
           font_scale != null && font_scale !== 1 ? String(font_scale) : undefined,
       };

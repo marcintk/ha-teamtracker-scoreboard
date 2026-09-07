@@ -116,7 +116,7 @@ export const CARD_STYLES = `
   }
 
   .team-pos {
-    display: var(--scoreboard-position-display, block);
+    display: block;
     width: 18px;
     min-width: 18px;
     font-size: calc(14px * var(--scoreboard-font-scale, 1));
