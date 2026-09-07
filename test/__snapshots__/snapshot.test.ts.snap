@@ -5,7 +5,7 @@ exports[`CARD_STYLES > matches snapshot 1`] = `
   :host { display: block; }
 
   ha-card {
-    padding: 2px 6px;
+    padding: 0 6px 2px;
     box-sizing: border-box;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
@@ -211,7 +211,7 @@ exports[`CARD_STYLES > matches snapshot 1`] = `
 "
 `;
 
-exports[`SportScoreboardCard snapshots > version badge HTML 1`] = `"<div id="sc-version" style="position:absolute;top:2px;left:50%;transform:translateX(-50%);font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v<!--?-->test</div>"`;
+exports[`SportScoreboardCard snapshots > version badge HTML 1`] = `"<div id="sc-version" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v<!--?-->test</div>"`;
 
 exports[`rowHtml structural snapshots > renders BYE markup 1`] = `
 "<!---->

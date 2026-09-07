@@ -383,7 +383,7 @@ export class SportScoreboardCard extends HTMLElement {
             ${debug ? unsafeHTML(`<div id="sc-debug" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:11px;line-height:1;padding:2px 6px;pointer-events:none;">${this._debug.tableHtml()}</div>`) : nothing}
             ${
               show_version
-                ? html`<div id="sc-version" style="position:absolute;top:2px;left:50%;transform:translateX(-50%);font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>`
+                ? html`<div id="sc-version" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>`
                 : nothing
             }
             ${

@@ -2,7 +2,7 @@ export const CARD_STYLES = `
   :host { display: block; }
 
   ha-card {
-    padding: 2px 6px;
+    padding: 0 6px 2px;
     box-sizing: border-box;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
