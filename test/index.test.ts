@@ -758,7 +758,7 @@ describe("SportScoreboardCard", () => {
       const toggle = ctrl(card, "Resume rotation");
       expect(toggle).not.toBeNull();
       expect(toggle?.classList.contains("paused")).toBe(true);
-      expect(toggle?.textContent).toContain("▶");
+      expect(toggle?.textContent?.trim()).toBe("");
       expect(asSlide(card)._slidePaused).toBe(true);
     });
 
@@ -771,7 +771,7 @@ describe("SportScoreboardCard", () => {
       expect(asSlide(card)._slidePaused).toBe(true);
 
       const toggle = ctrl(card, "Resume rotation");
-      expect(toggle?.textContent).toContain("▶");
+      expect(toggle?.textContent?.trim()).toBe("");
       expect(toggle?.classList.contains("paused")).toBe(true);
     });
 
@@ -788,7 +788,9 @@ describe("SportScoreboardCard", () => {
       expect(headerText(card)).toContain("NHL");
 
       const toggle = ctrl(card, "Stop rotation");
-      expect(toggle?.textContent).toContain("■");
+      // stop / resume icons are CSS shapes, not glyphs — distinguish by class
+      expect(toggle?.textContent?.trim()).toBe("");
+      expect(toggle?.classList.contains("toggle")).toBe(true);
       expect(toggle?.classList.contains("paused")).toBe(false);
     });
 
@@ -885,7 +887,7 @@ describe("SportScoreboardCard", () => {
       const toggle = ctrl(card, "Resume rotation");
       expect(toggle).not.toBeNull();
       expect(toggle?.classList.contains("paused")).toBe(true);
-      expect(toggle?.textContent).toContain("▶");
+      expect(toggle?.textContent?.trim()).toBe("");
       expect(ctrl(card, "Stop rotation")).toBeFalsy();
     });
 

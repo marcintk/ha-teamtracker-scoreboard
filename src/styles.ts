@@ -38,30 +38,73 @@ export const CARD_STYLES = `
     white-space: nowrap;
     pointer-events: none;
   }
-  .slide-ctrls { display: inline-flex; gap: 2px; flex: none; }
+  .slide-ctrls { display: inline-flex; align-items: center; gap: 0; flex: none; }
+  /* grouped-pill treatment mirroring ha-planetary-solar-system-card's .nav
+     buttons: translucent fill, 1px divider border, shared edges collapsed, only
+     the outer corners rounded. */
   .slide-btn {
-    background: none;
-    border: none;
+    position: relative;
+    box-sizing: border-box;
     cursor: pointer;
     color: #888;
+    vertical-align: middle;
+    background: color-mix(in srgb, currentColor 15%, transparent);
+    border: 1px solid var(--divider-color, color-mix(in srgb, currentColor 25%, transparent));
+    border-radius: 0;
     /* force monochrome text glyphs so the stop/resume icon obeys 'color'
        (grey while running, orange only when stopped) rather than falling
        back to a colour emoji */
     font-variant-emoji: text;
-    font-size: calc(15px * var(--scoreboard-font-scale, 1));
+    font-size: calc(13px * var(--scoreboard-font-scale, 1));
     line-height: 1;
     padding: 0;
-    /* fixed square box so the ▶/■ glyph swap never shifts the ❮ ❯ buttons */
-    width: calc(20px * var(--scoreboard-font-scale, 1));
-    height: calc(20px * var(--scoreboard-font-scale, 1));
+    /* fixed box so the stop/resume shape swap never shifts the nav buttons */
+    min-width: calc(20px * var(--scoreboard-font-scale, 1));
+    height: calc(18px * var(--scoreboard-font-scale, 1));
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 3px;
   }
-  .slide-btn:hover { color: #ccc; }
-  .slide-btn:focus-visible { outline: 1px solid #2196F3; outline-offset: 1px; }
-  .slide-btn.paused { color: orange; }
+  .slide-btn + .slide-btn { margin-left: -1px; }
+  .slide-btn:first-child { border-radius: 6px 0 0 6px; }
+  .slide-btn:last-child { border-radius: 0 6px 6px 0; }
+  /* the stop / resume icons are drawn as CSS shapes, not font glyphs: square
+     and triangle glyphs both position off the text baseline and how far off
+     depends on the font, so a glyph never sits reliably centred. A pseudo-
+     element is a flex child of the button and lands dead centre everywhere. */
+  .slide-btn.toggle::before {
+    content: "";
+    background: currentColor;
+    width: calc(11px * var(--scoreboard-font-scale, 1));
+    height: calc(11px * var(--scoreboard-font-scale, 1));
+    border-radius: 1px;
+  }
+  .slide-btn.toggle.paused::before {
+    height: calc(12px * var(--scoreboard-font-scale, 1));
+    border-radius: 0;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  }
+  /* prev / next chevrons, also CSS shapes: a two-border corner rotated 45°.
+     The box is flex-centred and rotation is about its centre, so the chevron
+     stays centred — unlike a ❮/❯ glyph, whose size and vertical position ride
+     the font metrics and differ from machine to machine. */
+  .slide-btn.nav::before {
+    content: "";
+    width: calc(5px * var(--scoreboard-font-scale, 1));
+    height: calc(5px * var(--scoreboard-font-scale, 1));
+    border: 2px solid currentColor;
+    border-left: 0;
+    border-bottom: 0;
+  }
+  .slide-btn.nav.next::before { transform: rotate(45deg); margin-left: -1px; }
+  .slide-btn.nav.prev::before { transform: rotate(-135deg); margin-right: -1px; }
+  .slide-btn:hover { color: #ccc; background: color-mix(in srgb, currentColor 25%, transparent); z-index: 1; }
+  .slide-btn:focus-visible { outline: 1px solid #2196F3; outline-offset: 1px; z-index: 1; }
+  /* while paused the whole control group turns orange, not just the toggle */
+  .slide-ctrls.paused .slide-btn {
+    color: orange;
+    border-color: color-mix(in srgb, currentColor 35%, transparent);
+  }
 
   .game-row {
     display: flex;
@@ -76,7 +119,7 @@ export const CARD_STYLES = `
     display: var(--scoreboard-position-display, block);
     width: 18px;
     min-width: 18px;
-    font-size: calc(15px * var(--scoreboard-font-scale, 1));
+    font-size: calc(14px * var(--scoreboard-font-scale, 1));
     font-variant-numeric: tabular-nums;
     text-align: center;
     color: var(--scoreboard-opponent-color, #777);

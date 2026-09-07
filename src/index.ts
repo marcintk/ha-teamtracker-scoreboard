@@ -179,13 +179,15 @@ export class SportScoreboardCard extends HTMLElement {
     return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
   }
 
-  _slideBtn(label: string, glyph: string, onClick: () => void, extra = ""): TemplateResult {
+  _slideBtn(label: string, onClick: () => void, extra: string): TemplateResult {
+    // every icon is a CSS shape keyed off `extra` (nav prev/next, toggle) — the
+    // button carries no text
     return html`<button
-      class="slide-btn${extra ? ` ${extra}` : ""}"
+      class="slide-btn ${extra}"
       title=${label}
       aria-label=${label}
       @click=${onClick}
-    >${glyph}</button>`;
+    ></button>`;
   }
 
   _refreshDebugOverlay(): void {
@@ -323,13 +325,12 @@ export class SportScoreboardCard extends HTMLElement {
 
       const carousel = (slide_sec ?? 0) > 0 && sections.length >= 2;
       const slideControls = carousel
-        ? html`<span class="slide-ctrls"
-            >${this._slideBtn("Previous section", "❮", () => this._slideStep(-1))}${this._slideBtn(
+        ? html`<span class="slide-ctrls${this._slidePaused ? " paused" : ""}"
+            >${this._slideBtn("Previous section", () => this._slideStep(-1), "nav prev")}${this._slideBtn(
               this._slidePaused ? "Resume rotation" : "Stop rotation",
-              this._slidePaused ? "▶" : "■",
               () => this._slideToggle(),
-              this._slidePaused ? "paused" : ""
-            )}${this._slideBtn("Next section", "❯", () => this._slideStep(1))}</span
+              this._slidePaused ? "toggle paused" : "toggle"
+            )}${this._slideBtn("Next section", () => this._slideStep(1), "nav next")}</span
           >`
         : nothing;
       let slideMinH = "";

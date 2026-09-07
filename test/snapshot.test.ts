@@ -111,8 +111,9 @@ describe("CARD_STYLES", () => {
     expect(CARD_STYLES).toContain("font-size: calc(20px * var(--scoreboard-font-scale, 1))");
   });
 
-  it("paints the paused slide toggle button orange", () => {
-    expect(CARD_STYLES).toContain(".slide-btn.paused { color: orange; }");
+  it("paints the whole slide control group orange while paused", () => {
+    expect(CARD_STYLES).toContain(".slide-ctrls.paused .slide-btn {");
+    expect(CARD_STYLES).toContain("color: orange;");
   });
 
   it("makes the carousel header a flex row", () => {
