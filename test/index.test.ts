@@ -934,20 +934,70 @@ describe("SportScoreboardCard", () => {
     const haCardStyle = (card: ReturnType<typeof makeCard>) =>
       card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
 
-    it("emits --scoreboard-team-col-width on ha-card when configured", () => {
+    it("team_col_width alias sets both sides", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], team_col_width: "130px" };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-width:130px");
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:130px");
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:130px");
     });
 
-    it("does not emit --scoreboard-team-col-width when omitted", () => {
+    it("does not emit --scoreboard-team-col-a/b-width when omitted", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-width");
+      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-a-width");
+      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-b-width");
+    });
+  });
+
+  describe("team_width", () => {
+    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
+      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+
+    it("string value sets both sides", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], team_width: "120px" };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+    });
+
+    it("2-element array sets sides independently", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], team_width: ["140px", "80px"] };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:140px");
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:80px");
+    });
+
+    it("team_width wins over team_col_width when both are set", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection],
+        team_width: "120px",
+        team_col_width: "200px",
+      };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+      expect(haCardStyle(card)).not.toContain("200px");
+    });
+
+    it("emits no team column width properties when neither option is set", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      const style = haCardStyle(card);
+      expect(style).not.toContain("--scoreboard-team-col-a-width");
+      expect(style).not.toContain("--scoreboard-team-col-b-width");
+      expect(style).not.toContain("--scoreboard-team-col-width");
     });
   });
 

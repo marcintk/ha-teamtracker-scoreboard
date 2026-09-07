@@ -39,12 +39,18 @@ export const CARD_STYLES = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: var(--scoreboard-team-col-width, 99px);
-    min-width: var(--scoreboard-team-col-width, 99px);
     overflow: hidden;
   }
-  .team-col-a { text-align: right; padding-right: 3px; }
-  .team-col-b { text-align: left;  padding-left: 3px;  }
+  .team-col-a {
+    text-align: right; padding-right: 3px;
+    width: var(--scoreboard-team-col-a-width, var(--scoreboard-team-col-width, 99px));
+    min-width: var(--scoreboard-team-col-a-width, var(--scoreboard-team-col-width, 99px));
+  }
+  .team-col-b {
+    text-align: left; padding-left: 3px;
+    width: var(--scoreboard-team-col-b-width, var(--scoreboard-team-col-width, 99px));
+    min-width: var(--scoreboard-team-col-b-width, var(--scoreboard-team-col-width, 99px));
+  }
 
   .team-name {
     font-size: 13px;
