@@ -78,8 +78,8 @@ A section renders as one of two things:
 - **schedule** — one row per game, sorted by date; the two sensors for a game are merged into one
   row
 
-`view: auto` (default) picks the standings table when every team has a win-loss record (`12-4`,
-`0-1-2`), else the schedule. Force it with [`view`](#section) `ranking` or `schedule`.
+`view: auto` (default) picks the standings table when every team has a win-loss record, else the
+schedule.
 
 ## Rank type
 
