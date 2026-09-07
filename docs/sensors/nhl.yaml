@@ -1,0 +1,150 @@
+# NHL — ha-teamtracker sensor definitions
+#
+# Roster: 2026/27 NHL season (verified against ESPN, Sept 2026). All 32 teams,
+# grouped by division. Utah (team_id "UTA") plays as the Utah Mammoth.
+#
+# This file is a complete `sensor:` block. Load it as a Home Assistant
+# package (`homeassistant: packages: !include_dir_named packages/`), or
+# paste its contents into configuration.yaml (only one `sensor:` key allowed).
+# Delete any teams you don't want to track.
+#
+# After saving, restart Home Assistant (or reload YAML configuration).
+# Each entry creates one entity, e.g. sensor.nhl_bos, sensor.nhl_tor, …
+# Use the shared prefix  sensor.nhl_  in the card's `prefix` field.
+
+sensor:
+  # ── ATLANTIC ───────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "BOS"
+    name: "nhl_bos"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "BUF"
+    name: "nhl_buf"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "DET"
+    name: "nhl_det"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "FLA"
+    name: "nhl_fla"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "MTL"
+    name: "nhl_mtl"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "OTT"
+    name: "nhl_ott"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "TB"
+    name: "nhl_tb"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "TOR"
+    name: "nhl_tor"
+
+  # ── METROPOLITAN ───────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "CAR"
+    name: "nhl_car"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "CBJ"
+    name: "nhl_cbj"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "NJ"
+    name: "nhl_nj"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "NYI"
+    name: "nhl_nyi"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "NYR"
+    name: "nhl_nyr"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "PHI"
+    name: "nhl_phi"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "PIT"
+    name: "nhl_pit"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "WSH"
+    name: "nhl_wsh"
+
+  # ── CENTRAL ────────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "CHI"
+    name: "nhl_chi"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "COL"
+    name: "nhl_col"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "DAL"
+    name: "nhl_dal"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "MIN"
+    name: "nhl_min"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "NSH"
+    name: "nhl_nsh"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "STL"
+    name: "nhl_stl"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "UTA"
+    name: "nhl_uta"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "WPG"
+    name: "nhl_wpg"
+
+  # ── PACIFIC ────────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "ANA"
+    name: "nhl_ana"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "CGY"
+    name: "nhl_cgy"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "EDM"
+    name: "nhl_edm"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "LA"
+    name: "nhl_la"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "SJ"
+    name: "nhl_sj"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "SEA"
+    name: "nhl_sea"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "VAN"
+    name: "nhl_van"
+  - platform: teamtracker
+    league_id: "NHL"
+    team_id: "VGK"
+    name: "nhl_vgk"

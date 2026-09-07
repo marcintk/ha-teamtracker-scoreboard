@@ -32,6 +32,7 @@ const nbaSection = {
   limit: 10,
   special_teams: [] as string[],
   rank_type: "win-loss" as const,
+  view: "ranking" as const,
 };
 
 function makeCard(): SportScoreboardCard {
@@ -91,6 +92,12 @@ describe("SportScoreboardCard", () => {
 
     it("returns 1 when config is null", () => {
       const card = makeCard();
+      expect(card.getCardSize()).toBe(1);
+    });
+
+    it("returns 1 for mode: slide with no sections", () => {
+      const card = makeCard();
+      card._config = { mode: "slide" };
       expect(card.getCardSize()).toBe(1);
     });
 
@@ -503,6 +510,7 @@ describe("SportScoreboardCard", () => {
       limit: 5,
       special_teams: [] as string[],
       rank_type: "win-loss-otl" as const,
+      view: "ranking" as const,
     };
 
     // In carousel mode the header wraps the name in `.section-title` alongside the
@@ -528,7 +536,7 @@ describe("SportScoreboardCard", () => {
 
     it("with a single section renders one header and arms no slide timer", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], slide_sec: 30 } as SlideConfig;
+      card._config = { sections: [nbaSection], mode: "slide", slide_sec: 30 } as SlideConfig;
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       expect(headerTexts(card)).toEqual(["NBA"]);
@@ -537,7 +545,11 @@ describe("SportScoreboardCard", () => {
 
     it("with two sections renders only the first section", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
       expect(headerTexts(card)).toEqual(["NBA"]);
@@ -545,7 +557,11 @@ describe("SportScoreboardCard", () => {
 
     it("auto-advances to the next section after slide_sec seconds", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
 
@@ -555,7 +571,11 @@ describe("SportScoreboardCard", () => {
 
     it("wraps back to the first section after the last", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
 
@@ -567,7 +587,11 @@ describe("SportScoreboardCard", () => {
 
     it("keeps _slideIndex across a manual _render() call", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       asSlide(card)._slideIndex = 1;
       card._render();
@@ -578,14 +602,22 @@ describe("SportScoreboardCard", () => {
     it("resets _slideIndex to 0 on setConfig", () => {
       const card = makeCard();
       asSlide(card)._slideIndex = 1;
-      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      card.setConfig({
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig);
       expect(asSlide(card)._slideIndex).toBe(0);
     });
 
     it("clears _slideTimer on disconnectedCallback and it does not fire afterward", () => {
       const card = makeCard();
       card._hass = twoSectionHass();
-      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      card.setConfig({
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig);
       card._render();
       const renderSpy = vi.spyOn(card, "_render");
 
@@ -603,6 +635,7 @@ describe("SportScoreboardCard", () => {
           { ...nbaSection, limit: 10 },
           { ...nhlSection, limit: 4 },
         ],
+        mode: "slide",
         slide_sec: 30,
       } as SlideConfig;
       // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = ceil(6.16) = 7
@@ -622,18 +655,38 @@ describe("SportScoreboardCard", () => {
 
     it("adds a tallest-slide min-height to ha-card when height is unset", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
-      // maxRows = 1 + 10 = 11; h = 28 => 11 * 28 = 308
-      expect(style).toContain("min-height:308px");
+      // maxRows = 1 + 10 = 11; h = 28 + 2*5 gap => 11 * 38 = 418
+      expect(style).toContain("min-height:418px");
+    });
+
+    it("factors layout.row_gap into the carousel min-height", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+        layout: { row_gap: "10px" },
+      } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+      const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+      // h = 28 + 2*10 = 48 => 11 * 48 = 528
+      expect(style).toContain("min-height:528px");
     });
 
     it("lets an explicit height win over the carousel min-height", () => {
       const card = makeCard();
       card._config = {
         sections: [nbaSection, nhlSection],
+        mode: "slide",
         slide_sec: 30,
         height: "400px",
       } as SlideConfig;
@@ -641,7 +694,7 @@ describe("SportScoreboardCard", () => {
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
       expect(style).toContain("min-height:400px");
-      expect(style).not.toContain("308px");
+      expect(style).not.toContain("418px");
     });
 
     it("adds no carousel min-height when slide_sec is unset", () => {
@@ -672,6 +725,7 @@ describe("SportScoreboardCard", () => {
       limit: 5,
       special_teams: [] as string[],
       rank_type: "win-loss-otl" as const,
+      view: "ranking" as const,
     };
 
     const twoSectionHass = () =>
@@ -682,7 +736,11 @@ describe("SportScoreboardCard", () => {
 
     const carouselCard = () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
       return card;
@@ -720,7 +778,7 @@ describe("SportScoreboardCard", () => {
 
     it("renders no header buttons with a single section even when slide_sec is set", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], slide_sec: 30 } as SlideConfig;
+      card._config = { sections: [nbaSection], mode: "slide", slide_sec: 30 } as SlideConfig;
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       expect(slideButtons(card)).toHaveLength(0);
@@ -797,7 +855,11 @@ describe("SportScoreboardCard", () => {
     it("resets _slidePaused to false on setConfig", () => {
       const card = makeCard();
       asSlide(card)._slidePaused = true;
-      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      card.setConfig({
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig);
       expect(asSlide(card)._slidePaused).toBe(false);
     });
   });
@@ -823,6 +885,7 @@ describe("SportScoreboardCard", () => {
       limit: 5,
       special_teams: [] as string[],
       rank_type: "win-loss-otl" as const,
+      view: "ranking" as const,
     };
 
     const twoSectionHass = () =>
@@ -852,7 +915,7 @@ describe("SportScoreboardCard", () => {
       }));
 
     const carouselConfig = () =>
-      ({ sections: [nbaSection, nhlSection], slide_sec: 30 }) as SlideConfig;
+      ({ sections: [nbaSection, nhlSection], mode: "slide", slide_sec: 30 }) as SlideConfig;
 
     it("starts paused when the environment prefers reduced motion", () => {
       stubMatchMedia((q) => q.includes("reduce"));
@@ -954,7 +1017,7 @@ describe("SportScoreboardCard", () => {
 
     it("renders header + empty message + controls for an empty active carousel slide", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       // no matching entities at all → active section is empty
       card._hass = makeHass({ "sensor.other_x": makeState("PRE", baseAttrs) });
       card._render();
@@ -968,6 +1031,7 @@ describe("SportScoreboardCard", () => {
       const card = makeCard();
       card._config = {
         sections: [{ ...two[0], limit: 0 }, nhl],
+        mode: "slide",
         slide_sec: 30,
       } as SlideCfg;
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
@@ -978,7 +1042,12 @@ describe("SportScoreboardCard", () => {
 
     it("applies colors.header to the carousel (has-controls) header", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30, colors: { header: "tomato" } } as SlideCfg;
+      card._config = {
+        sections: two,
+        mode: "slide",
+        slide_sec: 30,
+        colors: { header: "tomato" },
+      } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -991,7 +1060,7 @@ describe("SportScoreboardCard", () => {
 
     it("_slideStep is a no-op with fewer than two sections", () => {
       const card = makeCard();
-      card._config = { sections: [two[0]], slide_sec: 30 } as SlideCfg;
+      card._config = { sections: [two[0]], mode: "slide", slide_sec: 30 } as SlideCfg;
       asC(card)._slideIndex = 0;
       expect(() => asC(card)._slideStep(1)).not.toThrow();
       expect(asC(card)._slideIndex).toBe(0);
@@ -1005,27 +1074,32 @@ describe("SportScoreboardCard", () => {
 
     it("computes the min-height from a numeric row_height and the default limit", () => {
       const card = makeCard();
-      // sections carry no `limit` → maxRows = 1 + 10; row_height 40 → min-height 440px
-      card._config = { sections: two, slide_sec: 30, row_height: "40px" } as SlideCfg;
+      // no `limit` → maxRows = 1 + 10; row_height 40 + 2*5 gap → 11 * 50 = min-height 550px
+      card._config = {
+        sections: two,
+        mode: "slide",
+        slide_sec: 30,
+        row_height: "40px",
+      } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
       });
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
-      expect(style).toContain("min-height:440px");
+      expect(style).toContain("min-height:550px");
     });
 
     it("getCardSize uses the default limit for carousel sections without one", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = 7
       expect(card.getCardSize()).toBe(7);
     });
 
     it("_syncSlideTimer is a no-op when the timer is already running", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -1039,7 +1113,7 @@ describe("SportScoreboardCard", () => {
 
     it("the rotation interval tolerates the config being torn out from under it", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -1051,7 +1125,7 @@ describe("SportScoreboardCard", () => {
 
     it("the rotation interval skips rendering when hass is gone", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -1069,6 +1143,32 @@ describe("SportScoreboardCard", () => {
       const card = makeCard();
       expect(() => asC(card)._syncSlideTimer()).not.toThrow();
       expect(asC(card)._slideTimer).toBeNull();
+    });
+
+    it("defaults to a 45s interval when slide_sec is omitted", () => {
+      const card = makeCard();
+      card._config = { sections: two, mode: "slide" } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      vi.advanceTimersByTime(44_000);
+      expect(asC(card)._slideIndex).toBe(0);
+      vi.advanceTimersByTime(1_000);
+      expect(asC(card)._slideIndex).toBe(1);
+    });
+
+    it("falls back to 45s when slide_sec is zero or negative", () => {
+      const card = makeCard();
+      card._config = { sections: two, mode: "slide", slide_sec: -5 } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      vi.advanceTimersByTime(45_000);
+      expect(asC(card)._slideIndex).toBe(1);
     });
   });
 
@@ -1544,17 +1644,17 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], team_col_width: "130px" };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:130px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:130px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:130px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:130px");
     });
 
-    it("does not emit --scoreboard-team-col-a/b-width when omitted", () => {
+    it("does not emit --ttsc-team-col-a/b-width when omitted", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-a-width");
-      expect(haCardStyle(card)).not.toContain("--scoreboard-team-col-b-width");
+      expect(haCardStyle(card)).not.toContain("--ttsc-team-col-a-width");
+      expect(haCardStyle(card)).not.toContain("--ttsc-team-col-b-width");
     });
   });
 
@@ -1567,8 +1667,8 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], team_width: "120px" };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:120px");
     });
 
     it("team_width wins over team_col_width when both are set", () => {
@@ -1580,8 +1680,8 @@ describe("SportScoreboardCard", () => {
       };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
-      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:120px");
       expect(haCardStyle(card)).not.toContain("200px");
     });
 
@@ -1591,9 +1691,9 @@ describe("SportScoreboardCard", () => {
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       const style = haCardStyle(card);
-      expect(style).not.toContain("--scoreboard-team-col-a-width");
-      expect(style).not.toContain("--scoreboard-team-col-b-width");
-      expect(style).not.toContain("--scoreboard-team-col-width");
+      expect(style).not.toContain("--ttsc-team-col-a-width");
+      expect(style).not.toContain("--ttsc-team-col-b-width");
+      expect(style).not.toContain("--ttsc-team-col-width");
     });
   });
 
@@ -1602,10 +1702,10 @@ describe("SportScoreboardCard", () => {
       card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
 
     const cases = [
-      { option: "logo_width", prop: "--scoreboard-logo-width", value: "44px" },
-      { option: "score_width", prop: "--scoreboard-score-width", value: "50px" },
-      { option: "colon_width", prop: "--scoreboard-colon-width", value: "12px" },
-      { option: "row_height", prop: "--scoreboard-row-height", value: "40px" },
+      { option: "logo_width", prop: "--ttsc-logo-width", value: "44px" },
+      { option: "score_width", prop: "--ttsc-score-width", value: "50px" },
+      { option: "colon_width", prop: "--ttsc-colon-width", value: "12px" },
+      { option: "row_height", prop: "--ttsc-row-height", value: "40px" },
     ] as const;
 
     for (const { option, prop, value } of cases) {
@@ -1627,61 +1727,111 @@ describe("SportScoreboardCard", () => {
     }
   });
 
-  describe("card-level show_position", () => {
-    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
-      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
-
-    it("emits --scoreboard-position-display:none when show_position is false", () => {
-      const card = makeCard();
-      card._config = { sections: [nbaSection], show_position: false };
-      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
-      card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-position-display:none");
-    });
-
-    it("does not emit --scoreboard-position-display when show_position is omitted", () => {
-      const card = makeCard();
-      card._config = { sections: [nbaSection] };
-      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
-      card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-position-display");
-    });
-
-    it("does not emit --scoreboard-position-display when show_position is true", () => {
-      const card = makeCard();
-      card._config = { sections: [nbaSection], show_position: true };
-      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
-      card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-position-display");
-    });
-  });
-
   describe("font_scale", () => {
     const haCardStyle = (card: ReturnType<typeof makeCard>) =>
       card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
 
-    it("emits --scoreboard-font-scale:1.15 when font_scale is 1.15", () => {
+    it("emits --ttsc-font-scale:1.15 when font_scale is 1.15", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], font_scale: 1.15 };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).toContain("--scoreboard-font-scale:1.15");
+      expect(haCardStyle(card)).toContain("--ttsc-font-scale:1.15");
     });
 
-    it("does not emit --scoreboard-font-scale when font_scale is omitted", () => {
+    it("does not emit --ttsc-font-scale when font_scale is omitted", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-font-scale");
+      expect(haCardStyle(card)).not.toContain("--ttsc-font-scale");
     });
 
-    it("does not emit --scoreboard-font-scale when font_scale is 1", () => {
+    it("does not emit --ttsc-font-scale when font_scale is 1", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], font_scale: 1 };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(haCardStyle(card)).not.toContain("--scoreboard-font-scale");
+      expect(haCardStyle(card)).not.toContain("--ttsc-font-scale");
+    });
+  });
+
+  describe("layout: map", () => {
+    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
+      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+
+    const cases = [
+      { key: "team_width", prop: "--ttsc-team-col-a-width", value: "120px" },
+      { key: "logo_width", prop: "--ttsc-logo-width", value: "44px" },
+      { key: "score_width", prop: "--ttsc-score-width", value: "50px" },
+      { key: "colon_width", prop: "--ttsc-colon-width", value: "12px" },
+      { key: "row_height", prop: "--ttsc-row-height", value: "40px" },
+      { key: "row_gap", prop: "--ttsc-row-gap", value: "6px" },
+    ] as const;
+
+    for (const { key, prop, value } of cases) {
+      it(`emits ${prop} from layout.${key}`, () => {
+        const card = makeCard();
+        card._config = { sections: [nbaSection], layout: { [key]: value } };
+        card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+        card._render();
+        expect(haCardStyle(card)).toContain(`${prop}:${value}`);
+      });
+    }
+
+    it("layout.team_width sets both team columns", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], layout: { team_width: "120px" } };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--ttsc-team-col-b-width:120px");
+    });
+
+    it("layout.font_scale emits --ttsc-font-scale", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], layout: { font_scale: 1.15 } };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--ttsc-font-scale:1.15");
+    });
+
+    it("layout.height sets the ha-card height and drives getCardSize", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], layout: { height: "600px" } };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("height:600px;");
+      expect(card.getCardSize()).toBe(12);
+    });
+
+    it("layout.* wins over the deprecated flat key when both are set", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection],
+        row_height: "40px",
+        team_col_width: "200px",
+        layout: { row_height: "60px", team_width: "120px" },
+      };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      const style = haCardStyle(card);
+      expect(style).toContain("--ttsc-row-height:60px");
+      expect(style).toContain("--ttsc-team-col-a-width:120px");
+      expect(style).not.toContain("40px");
+      expect(style).not.toContain("200px");
+    });
+
+    it("falls back to a flat key the layout map omits", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection],
+        row_height: "40px",
+        layout: { team_width: "120px" },
+      };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--ttsc-row-height:40px");
     });
   });
 

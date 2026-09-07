@@ -76,39 +76,35 @@ describe("CARD_STYLES", () => {
   });
 
   it("wires .team-col-a width to the nested team-col-a custom property fallback chain", () => {
-    expect(CARD_STYLES).toContain(
-      "var(--scoreboard-team-col-a-width, var(--scoreboard-team-col-width, 99px))"
-    );
+    expect(CARD_STYLES).toContain("var(--ttsc-team-col-a-width, var(--ttsc-team-col-width, 99px))");
   });
 
   it("wires .team-col-b width to the nested team-col-b custom property fallback chain", () => {
-    expect(CARD_STYLES).toContain(
-      "var(--scoreboard-team-col-b-width, var(--scoreboard-team-col-width, 99px))"
-    );
+    expect(CARD_STYLES).toContain("var(--ttsc-team-col-b-width, var(--ttsc-team-col-width, 99px))");
   });
 
-  it("wires logo width to the --scoreboard-logo-width custom property", () => {
-    expect(CARD_STYLES).toContain("width: var(--scoreboard-logo-width, 30px)");
+  it("wires logo width to the --ttsc-logo-width custom property", () => {
+    expect(CARD_STYLES).toContain("width: var(--ttsc-logo-width, 30px)");
   });
 
-  it("wires score width to the --scoreboard-score-width custom property", () => {
-    expect(CARD_STYLES).toContain("width: var(--scoreboard-score-width, 34px)");
+  it("wires score width to the --ttsc-score-width custom property", () => {
+    expect(CARD_STYLES).toContain("width: var(--ttsc-score-width, 34px)");
   });
 
-  it("wires colon width to the --scoreboard-colon-width custom property", () => {
-    expect(CARD_STYLES).toContain("width: var(--scoreboard-colon-width, 9px)");
+  it("wires colon width to the --ttsc-colon-width custom property", () => {
+    expect(CARD_STYLES).toContain("width: var(--ttsc-colon-width, 9px)");
   });
 
-  it("wires row height to the --scoreboard-row-height custom property", () => {
-    expect(CARD_STYLES).toContain("height: var(--scoreboard-row-height, 28px)");
+  it("wires row height to the --ttsc-row-height custom property", () => {
+    expect(CARD_STYLES).toContain("height: var(--ttsc-row-height, 28px)");
   });
 
-  it("wires team position display to the --scoreboard-position-display custom property", () => {
-    expect(CARD_STYLES).toContain("display: var(--scoreboard-position-display, block)");
+  it("wraps the .score font-size in the --ttsc-font-scale custom property", () => {
+    expect(CARD_STYLES).toContain("font-size: calc(20px * var(--ttsc-font-scale, 1))");
   });
 
-  it("wraps the .score font-size in the --scoreboard-font-scale custom property", () => {
-    expect(CARD_STYLES).toContain("font-size: calc(20px * var(--scoreboard-font-scale, 1))");
+  it("pads every game row by the --ttsc-row-gap custom property (above and below)", () => {
+    expect(CARD_STYLES).toContain("padding: var(--ttsc-row-gap, 5px) 0;");
   });
 
   it("paints the whole slide control group orange while paused", () => {

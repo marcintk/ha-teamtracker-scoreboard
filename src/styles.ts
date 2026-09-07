@@ -6,12 +6,12 @@ export const CARD_STYLES = `
     box-sizing: border-box;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
-    font-size: calc(14px * var(--scoreboard-font-scale, 1));
+    font-size: calc(14px * var(--ttsc-font-scale, 1));
   }
 
   .section-header {
-    color: #2196F3; /* Material Blue */
-    font-size: calc(15px * var(--scoreboard-font-scale, 1));
+    color: var(--ttsc-header-color, #2196F3); /* Material Blue */
+    font-size: calc(15px * var(--ttsc-font-scale, 1));
     padding: 2px 0 2px 0;
     margin-top: 1px;
   }
@@ -32,7 +32,7 @@ export const CARD_STYLES = `
     top: 50%;
     transform: translate(-50%, -50%);
     font-family: monospace;
-    font-size: calc(9px * var(--scoreboard-font-scale, 1));
+    font-size: calc(9px * var(--ttsc-font-scale, 1));
     font-weight: normal;
     color: #888;
     white-space: nowrap;
@@ -55,12 +55,12 @@ export const CARD_STYLES = `
        (grey while running, orange only when stopped) rather than falling
        back to a colour emoji */
     font-variant-emoji: text;
-    font-size: calc(13px * var(--scoreboard-font-scale, 1));
+    font-size: calc(13px * var(--ttsc-font-scale, 1));
     line-height: 1;
     padding: 0;
     /* fixed box so the stop/resume shape swap never shifts the nav buttons */
-    min-width: calc(20px * var(--scoreboard-font-scale, 1));
-    height: calc(18px * var(--scoreboard-font-scale, 1));
+    min-width: calc(20px * var(--ttsc-font-scale, 1));
+    height: calc(18px * var(--ttsc-font-scale, 1));
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -75,12 +75,12 @@ export const CARD_STYLES = `
   .slide-btn.toggle::before {
     content: "";
     background: currentColor;
-    width: calc(11px * var(--scoreboard-font-scale, 1));
-    height: calc(11px * var(--scoreboard-font-scale, 1));
+    width: calc(11px * var(--ttsc-font-scale, 1));
+    height: calc(11px * var(--ttsc-font-scale, 1));
     border-radius: 1px;
   }
   .slide-btn.toggle.paused::before {
-    height: calc(12px * var(--scoreboard-font-scale, 1));
+    height: calc(12px * var(--ttsc-font-scale, 1));
     border-radius: 0;
     clip-path: polygon(0 0, 100% 50%, 0 100%);
   }
@@ -90,8 +90,8 @@ export const CARD_STYLES = `
      the font metrics and differ from machine to machine. */
   .slide-btn.nav::before {
     content: "";
-    width: calc(5px * var(--scoreboard-font-scale, 1));
-    height: calc(5px * var(--scoreboard-font-scale, 1));
+    width: calc(5px * var(--ttsc-font-scale, 1));
+    height: calc(5px * var(--ttsc-font-scale, 1));
     border: 2px solid currentColor;
     border-left: 0;
     border-bottom: 0;
@@ -109,20 +109,27 @@ export const CARD_STYLES = `
   .game-row {
     display: flex;
     align-items: center;
-    height: var(--scoreboard-row-height, 28px);
+    height: var(--ttsc-row-height, 28px);
+    /* equal space above and below every row, so the divider sits centred in the
+       gap: <gap> · row · <gap> · line · <gap> · row · <gap> · … */
+    padding: var(--ttsc-row-gap, 5px) 0;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     gap: 0;
     position: relative;
   }
 
   .team-pos {
-    display: var(--scoreboard-position-display, block);
-    width: 18px;
-    min-width: 18px;
-    font-size: calc(14px * var(--scoreboard-font-scale, 1));
+    box-sizing: border-box;
+    display: block;
+    width: 24px;
+    min-width: 24px;
+    /* balance the card's 6px left padding so the number sits an equal gap from
+       the card edge and from the next cell */
+    padding-right: 6px;
+    font-size: calc(14px * var(--ttsc-font-scale, 1));
     font-variant-numeric: tabular-nums;
     text-align: center;
-    color: var(--scoreboard-opponent-color, #777);
+    color: var(--ttsc-opponent-color, #777);
     overflow: hidden;
   }
 
@@ -134,53 +141,53 @@ export const CARD_STYLES = `
   }
   .team-col-a {
     text-align: right; padding-right: 3px;
-    width: var(--scoreboard-team-col-a-width, var(--scoreboard-team-col-width, 99px));
-    min-width: var(--scoreboard-team-col-a-width, var(--scoreboard-team-col-width, 99px));
+    width: var(--ttsc-team-col-a-width, var(--ttsc-team-col-width, 99px));
+    min-width: var(--ttsc-team-col-a-width, var(--ttsc-team-col-width, 99px));
   }
   .team-col-b {
     text-align: left; padding-left: 3px;
-    width: var(--scoreboard-team-col-b-width, var(--scoreboard-team-col-width, 99px));
-    min-width: var(--scoreboard-team-col-b-width, var(--scoreboard-team-col-width, 99px));
+    width: var(--ttsc-team-col-b-width, var(--ttsc-team-col-width, 99px));
+    min-width: var(--ttsc-team-col-b-width, var(--ttsc-team-col-width, 99px));
   }
 
   .team-name {
-    font-size: calc(13px * var(--scoreboard-font-scale, 1));
+    font-size: calc(13px * var(--ttsc-font-scale, 1));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
   }
   .team-rank {
-    font-size: calc(9px * var(--scoreboard-font-scale, 1));
+    font-size: calc(9px * var(--ttsc-font-scale, 1));
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
   }
 
   .logo {
-    width: var(--scoreboard-logo-width, 30px);
-    min-width: var(--scoreboard-logo-width, 30px);
+    width: var(--ttsc-logo-width, 30px);
+    min-width: var(--ttsc-logo-width, 30px);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: var(--scoreboard-row-height, 28px);
+    height: var(--ttsc-row-height, 28px);
     overflow: hidden;
   }
   .logo-a { padding-right: 3px; }
   .logo-b { padding-left:  3px; }
   .logo img {
-    width: var(--scoreboard-logo-width, 28px);
-    height: var(--scoreboard-row-height, 28px);
+    width: var(--ttsc-logo-width, 28px);
+    height: var(--ttsc-row-height, 28px);
     object-fit: contain;
     display: block;
   }
 
   .score {
-    width: var(--scoreboard-score-width, 34px);
-    min-width: var(--scoreboard-score-width, 34px);
-    font-size: calc(20px * var(--scoreboard-font-scale, 1));
+    width: var(--ttsc-score-width, 34px);
+    min-width: var(--ttsc-score-width, 34px);
+    font-size: calc(20px * var(--ttsc-font-scale, 1));
     font-weight: bold;
-    height: var(--scoreboard-row-height, 28px);
+    height: var(--ttsc-row-height, 28px);
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -190,12 +197,12 @@ export const CARD_STYLES = `
   .score-b { justify-content: flex-start; }
 
   .colon {
-    width: var(--scoreboard-colon-width, 9px);
-    min-width: var(--scoreboard-colon-width, 9px);
-    font-size: calc(17px * var(--scoreboard-font-scale, 1));
+    width: var(--ttsc-colon-width, 9px);
+    min-width: var(--ttsc-colon-width, 9px);
+    font-size: calc(17px * var(--ttsc-font-scale, 1));
     font-weight: bold;
     text-align: center;
-    height: var(--scoreboard-row-height, 28px);
+    height: var(--ttsc-row-height, 28px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -208,7 +215,7 @@ export const CARD_STYLES = `
     font-size: 0;
   }
   .tv-badge {
-    font-size: calc(8px * var(--scoreboard-font-scale, 1));
+    font-size: calc(8px * var(--ttsc-font-scale, 1));
     font-weight: bold;
     color: white;
     border-radius: 3px;
@@ -227,7 +234,7 @@ export const CARD_STYLES = `
     transform: translateX(-50%);
     background: #222;
     color: #fff;
-    font-size: calc(10px * var(--scoreboard-font-scale, 1));
+    font-size: calc(10px * var(--ttsc-font-scale, 1));
     font-weight: bold;
     padding: 3px 6px;
     border-radius: 4px;
@@ -250,13 +257,13 @@ export const CARD_STYLES = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-size: calc(13px * var(--scoreboard-font-scale, 1));
+    font-size: calc(13px * var(--ttsc-font-scale, 1));
     font-weight: bold;
     line-height: 1.1;
     padding-left: 4px;
   }
   .msg-sub {
-    font-size: calc(10px * var(--scoreboard-font-scale, 1));
+    font-size: calc(10px * var(--ttsc-font-scale, 1));
     font-weight: normal;
     color: #666; /* dimgray */
     line-height: 1.1;
@@ -264,7 +271,7 @@ export const CARD_STYLES = `
 
   .empty {
     padding: 8px 4px;
-    font-size: calc(13px * var(--scoreboard-font-scale, 1));
+    font-size: calc(13px * var(--ttsc-font-scale, 1));
     color: #555; /* dark gray */
   }
 

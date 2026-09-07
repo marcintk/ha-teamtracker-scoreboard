@@ -12,12 +12,11 @@ export function teamColor(
   opponentSpecial = false
 ): string {
   if (!isTeamSide(side, attr)) {
-    if (opponentSpecial) return colors.special ?? "var(--scoreboard-special-color, #2196F3)";
-    return colors.opponent ?? "var(--scoreboard-opponent-color, #777)"; /* gray */
+    if (opponentSpecial) return colors.special ?? "var(--ttsc-special-color, #2196F3)";
+    return colors.opponent ?? "var(--ttsc-opponent-color, #777)"; /* gray */
   }
-  if (special)
-    return colors.special ?? "var(--scoreboard-special-color, #2196F3)"; /* Material Blue */
-  return colors.team ?? "var(--scoreboard-team-color, var(--primary-text-color, white))";
+  if (special) return colors.special ?? "var(--ttsc-special-color, #2196F3)"; /* Material Blue */
+  return colors.team ?? "var(--ttsc-team-color, var(--primary-text-color, white))";
 }
 
 export function scoreBg(gs: GameState): string {
@@ -37,12 +36,14 @@ export function scoreColor(
   if (gs === "IN") {
     const ts = parseFloat(String(attr.team_score ?? 0));
     const os = parseFloat(String(attr.opponent_score ?? 0));
-    return (isSide ? ts >= os : os >= ts) ? (colors.leading ?? "brown") : "black";
+    return (isSide ? ts >= os : os >= ts)
+      ? (colors.leading ?? "var(--ttsc-leading-color, brown)")
+      : "black";
   }
   if (gs === "POST") {
     return (isSide ? attr.team_winner : attr.opponent_winner)
-      ? (colors.winner ?? "orange")
-      : (colors.loser ?? "darkgray");
+      ? (colors.winner ?? "var(--ttsc-winner-color, orange)")
+      : (colors.loser ?? "var(--ttsc-loser-color, darkgray)");
   }
   return "black";
 }

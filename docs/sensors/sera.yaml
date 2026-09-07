@@ -1,0 +1,99 @@
+# Italian Serie A (SERA) — ha-teamtracker sensor definitions
+#
+# Roster: 2026/27 Serie A season (verified against ESPN, Sept 2026).
+# All 20 clubs. Promoted from Serie B this season: Venezia, Frosinone, Monza.
+# Relegated last season: Cremonese, Hellas Verona, Pisa.
+#
+# Soccer team_ids use the numeric ESPN team ID (recommended by ha-teamtracker
+# for soccer leagues — abbreviations are inconsistent across competitions).
+#
+# This file is a complete `sensor:` block. Load it as a Home Assistant
+# package (`homeassistant: packages: !include_dir_named packages/`), or
+# paste its contents into configuration.yaml (only one `sensor:` key allowed).
+# Delete any teams you don't want to track.
+#
+# After saving, restart Home Assistant (or reload YAML configuration).
+# Each entry creates one entity, e.g. sensor.sera_juv, sensor.sera_mil, …
+# Use the shared prefix  sensor.sera_  in the card's `prefix` field.
+
+sensor:
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "105"
+    name: "sera_ata" # Atalanta
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "107"
+    name: "sera_bol" # Bologna
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "2925"
+    name: "sera_cag" # Cagliari
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "2572"
+    name: "sera_com" # Como
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "109"
+    name: "sera_fio" # Fiorentina
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "4057"
+    name: "sera_fro" # Frosinone (promoted)
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "3263"
+    name: "sera_gen" # Genoa
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "110"
+    name: "sera_int" # Internazionale
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "111"
+    name: "sera_juv" # Juventus
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "112"
+    name: "sera_laz" # Lazio
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "113"
+    name: "sera_lec" # Lecce
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "103"
+    name: "sera_mil" # AC Milan
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "4007"
+    name: "sera_mon" # Monza (promoted)
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "114"
+    name: "sera_nap" # Napoli
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "115"
+    name: "sera_par" # Parma
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "104"
+    name: "sera_rom" # Roma
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "3997"
+    name: "sera_sas" # Sassuolo
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "239"
+    name: "sera_tor" # Torino
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "118"
+    name: "sera_udi" # Udinese
+  - platform: teamtracker
+    league_id: "SERA"
+    team_id: "17530"
+    name: "sera_ven" # Venezia (promoted)

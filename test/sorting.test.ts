@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { deduplicate, resolveSortMode, sortKeyFor, winRatio } from "../src/sorting.js";
-import type { GameAttr, HassStates, SeasonMode } from "../src/types.js";
+import type { GameAttr, HassStates, ViewMode } from "../src/types.js";
 
 const s = (attrs: GameAttr): HassStates[string] => ({ state: "", attributes: attrs });
 
@@ -222,70 +222,78 @@ describe("deduplicate", () => {
 });
 
 describe("resolveSortMode", () => {
-  it("returns rank_type when all entities have regular season", () => {
-    const states: HassStates = { "sensor.a": s({ season: "regular" }) };
+  it("returns rank_type when every entity has a numeric win-loss record", () => {
+    const states: HassStates = { "sensor.a": s({ team_record: "12-4" }) };
     expect(resolveSortMode(["sensor.a"], states, "win-loss")).toBe("win-loss");
   });
 
-  it("returns by-date when any entity has a non-regular season", () => {
+  it("accepts W-D-L and W-L-OTL shaped records", () => {
     const states: HassStates = {
-      "sensor.a": s({ season: "regular" }),
-      "sensor.b": s({ season: "playoffs" }),
+      "sensor.a": s({ team_record: "0-1-2" }),
+      "sensor.b": s({ team_record: "5-2-1" }),
+    };
+    expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-draw-loss")).toBe(
+      "win-draw-loss"
+    );
+  });
+
+  it("returns by-date when any entity is missing a numeric record", () => {
+    const states: HassStates = {
+      "sensor.a": s({ team_record: "12-4" }),
+      "sensor.b": s({ team_record: "" }),
     };
     expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss")).toBe("by-date");
   });
 
-  it("returns rank_type when season attribute is absent (HA startup — treat as regular)", () => {
+  it("returns by-date when the record attribute is absent (HA startup, cup fixtures)", () => {
     const states: HassStates = { "sensor.a": s({}) };
-    expect(resolveSortMode(["sensor.a"], states, "win-draw-loss")).toBe("win-draw-loss");
+    expect(resolveSortMode(["sensor.a"], states, "win-draw-loss")).toBe("by-date");
+  });
+
+  it("returns by-date for a non-numeric record string", () => {
+    const states: HassStates = { "sensor.a": s({ team_record: "12-4 (H: 6-2)" }) };
+    expect(resolveSortMode(["sensor.a"], states, "win-loss")).toBe("by-date");
   });
 
   it("returns rank_type for an empty entity list", () => {
     expect(resolveSortMode([], {}, "win-loss-otl")).toBe("win-loss-otl");
   });
 
-  describe("seasonMode override (4th parameter)", () => {
-    it("seasonMode='regular' forces rank_type even when a sensor reports a descriptive season label", () => {
-      const seasonMode: SeasonMode = "regular";
-      const states: HassStates = {
-        "sensor.a": s({ season: "2026-27-italian-serie-a" }),
-      };
-      expect(resolveSortMode(["sensor.a"], states, "win-draw-loss", seasonMode)).toBe(
+  describe("view override (4th parameter)", () => {
+    it("view='ranking' forces rank_type even when records are missing", () => {
+      const states: HassStates = { "sensor.a": s({}) };
+      expect(resolveSortMode(["sensor.a"], states, "win-draw-loss", "ranking")).toBe(
         "win-draw-loss"
       );
     });
 
-    it("seasonMode='by-date' forces by-date even when every sensor reports season='regular'", () => {
-      const seasonMode: SeasonMode = "by-date";
+    it("view='schedule' forces by-date even when every entity has a record", () => {
       const states: HassStates = {
-        "sensor.a": s({ season: "regular" }),
-        "sensor.b": s({ season: "regular" }),
+        "sensor.a": s({ team_record: "12-4" }),
+        "sensor.b": s({ team_record: "9-7" }),
       };
-      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", seasonMode)).toBe(
+      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", "schedule")).toBe(
         "by-date"
       );
     });
 
-    it("seasonMode='auto' passed explicitly behaves like today (by-date on non-regular season)", () => {
-      const seasonMode: SeasonMode = "auto";
+    it("view='auto' passed explicitly runs the record heuristic", () => {
       const states: HassStates = {
-        "sensor.a": s({ season: "regular" }),
-        "sensor.b": s({ season: "playoffs" }),
+        "sensor.a": s({ team_record: "12-4" }),
+        "sensor.b": s({}),
       };
-      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", seasonMode)).toBe(
-        "by-date"
-      );
+      expect(resolveSortMode(["sensor.a", "sensor.b"], states, "win-loss", "auto")).toBe("by-date");
     });
 
-    it("an unrecognised seasonMode value (config typo) falls through to the auto heuristic", () => {
-      const seasonMode = "fixtures" as SeasonMode; // no validation layer — mirrors rank_type
-      const regularOnly: HassStates = { "sensor.a": s({ season: "regular" }) };
-      const withPlayoffs: HassStates = {
-        "sensor.a": s({ season: "regular" }),
-        "sensor.b": s({ season: "playoffs" }),
+    it("an unrecognised view value (config typo) falls through to the auto heuristic", () => {
+      const view = "fixtures" as ViewMode; // no validation layer — mirrors rank_type
+      const allRanked: HassStates = { "sensor.a": s({ team_record: "12-4" }) };
+      const someMissing: HassStates = {
+        "sensor.a": s({ team_record: "12-4" }),
+        "sensor.b": s({}),
       };
-      expect(resolveSortMode(["sensor.a"], regularOnly, "win-loss", seasonMode)).toBe("win-loss");
-      expect(resolveSortMode(["sensor.a", "sensor.b"], withPlayoffs, "win-loss", seasonMode)).toBe(
+      expect(resolveSortMode(["sensor.a"], allRanked, "win-loss", view)).toBe("win-loss");
+      expect(resolveSortMode(["sensor.a", "sensor.b"], someMissing, "win-loss", view)).toBe(
         "by-date"
       );
     });

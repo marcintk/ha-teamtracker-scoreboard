@@ -1,0 +1,100 @@
+# Spanish La Liga / Primera División (LIGA) — ha-teamtracker sensor definitions
+#
+# Roster: 2026/27 La Liga season (verified against ESPN, Sept 2026).
+# All 20 clubs. Promoted from Segunda División this season: Racing Santander,
+# Deportivo A Coruña, Málaga. Relegated last season: Mallorca, Girona, Oviedo.
+#
+# Soccer team_ids use the numeric ESPN team ID (recommended by ha-teamtracker
+# for soccer leagues — abbreviations are inconsistent across competitions).
+#
+# This file is a complete `sensor:` block. Load it as a Home Assistant
+# package (`homeassistant: packages: !include_dir_named packages/`), or
+# paste its contents into configuration.yaml (only one `sensor:` key allowed).
+# Delete any teams you don't want to track.
+#
+# After saving, restart Home Assistant (or reload YAML configuration).
+# Each entry creates one entity, e.g. sensor.liga_rma, sensor.liga_fcb, …
+# Use the shared prefix  sensor.liga_  in the card's `prefix` field.
+# Suggested score_mode for this league: win-draw-loss.
+
+sensor:
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "96"
+    name: "liga_ala" # Alavés
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "93"
+    name: "liga_ath" # Athletic Club
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "1068"
+    name: "liga_atm" # Atlético Madrid
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "83"
+    name: "liga_fcb" # Barcelona
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "85"
+    name: "liga_cel" # Celta Vigo
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "90"
+    name: "liga_dep" # Deportivo A Coruña (promoted)
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "3751"
+    name: "liga_elc" # Elche
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "88"
+    name: "liga_esp" # Espanyol
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "2922"
+    name: "liga_get" # Getafe
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "1538"
+    name: "liga_lev" # Levante
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "99"
+    name: "liga_mal" # Málaga (promoted)
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "97"
+    name: "liga_osa" # Osasuna
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "87"
+    name: "liga_rac" # Racing Santander (promoted)
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "101"
+    name: "liga_ray" # Rayo Vallecano
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "244"
+    name: "liga_bet" # Real Betis
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "86"
+    name: "liga_rma" # Real Madrid
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "89"
+    name: "liga_rso" # Real Sociedad
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "243"
+    name: "liga_sev" # Sevilla
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "94"
+    name: "liga_val" # Valencia
+  - platform: teamtracker
+    league_id: "LIGA"
+    team_id: "102"
+    name: "liga_vil" # Villarreal

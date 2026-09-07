@@ -1,0 +1,100 @@
+# English Premier League (EPL) — ha-teamtracker sensor definitions
+#
+# Roster: 2026/27 Premier League season (verified against ESPN, Sept 2026).
+# All 20 clubs. Promoted from the Championship this season: Coventry City,
+# Ipswich Town, Hull City. Relegated last season: Wolves, Burnley, West Ham.
+#
+# Soccer team_ids use the numeric ESPN team ID (recommended by ha-teamtracker
+# for soccer leagues — abbreviations are inconsistent across competitions).
+#
+# This file is a complete `sensor:` block. Load it as a Home Assistant
+# package (`homeassistant: packages: !include_dir_named packages/`), or
+# paste its contents into configuration.yaml (only one `sensor:` key allowed).
+# Delete any teams you don't want to track.
+#
+# After saving, restart Home Assistant (or reload YAML configuration).
+# Each entry creates one entity, e.g. sensor.epl_ars, sensor.epl_liv, …
+# Use the shared prefix  sensor.epl_  in the card's `prefix` field.
+# Suggested score_mode for this league: win-draw-loss.
+
+sensor:
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "359"
+    name: "epl_ars" # Arsenal
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "362"
+    name: "epl_avl" # Aston Villa
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "349"
+    name: "epl_bou" # AFC Bournemouth
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "337"
+    name: "epl_bre" # Brentford
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "331"
+    name: "epl_bha" # Brighton & Hove Albion
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "363"
+    name: "epl_che" # Chelsea
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "388"
+    name: "epl_cov" # Coventry City (promoted)
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "384"
+    name: "epl_cry" # Crystal Palace
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "368"
+    name: "epl_eve" # Everton
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "370"
+    name: "epl_ful" # Fulham
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "306"
+    name: "epl_hul" # Hull City (promoted)
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "373"
+    name: "epl_ips" # Ipswich Town (promoted)
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "357"
+    name: "epl_lee" # Leeds United
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "364"
+    name: "epl_liv" # Liverpool
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "382"
+    name: "epl_mci" # Manchester City
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "360"
+    name: "epl_mun" # Manchester United
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "361"
+    name: "epl_new" # Newcastle United
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "393"
+    name: "epl_nfo" # Nottingham Forest
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "366"
+    name: "epl_sun" # Sunderland
+  - platform: teamtracker
+    league_id: "EPL"
+    team_id: "367"
+    name: "epl_tot" # Tottenham Hotspur

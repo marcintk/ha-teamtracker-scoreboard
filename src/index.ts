@@ -5,7 +5,7 @@ import { html, nothing, render, type TemplateResult } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { sectionHtml } from "./render.js";
 import { CARD_STYLES } from "./styles.js";
-import type { CardConfig, HassStates, HomeAssistant } from "./types.js";
+import type { CardConfig, HassStates, HomeAssistant, LayoutConfig } from "./types.js";
 
 const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
 
@@ -136,10 +136,19 @@ export class SportScoreboardCard extends HTMLElement {
     }
   }
 
+  /** slide mode is on: `mode: "slide"` with at least two sections to rotate through. */
+  _isSlideMode(): boolean {
+    return this._config?.mode === "slide" && (this._config?.sections?.length ?? 0) >= 2;
+  }
+
+  /** seconds per section in slide mode; a missing / non-positive value falls back to 45. */
+  _slideSec(): number {
+    const s = this._config?.slide_sec;
+    return typeof s === "number" && s > 0 ? s : 45;
+  }
+
   _syncSlideTimer(): void {
-    const sections = this._config?.sections ?? [];
-    const sec = this._config?.slide_sec ?? 0;
-    const shouldRun = sec > 0 && sections.length >= 2 && !this._slidePaused;
+    const shouldRun = this._isSlideMode() && !this._slidePaused;
     if (shouldRun && !this._slideTimer) {
       this._slideTimer = setInterval(() => {
         const n = this._config?.sections?.length ?? 0;
@@ -147,7 +156,7 @@ export class SportScoreboardCard extends HTMLElement {
           this._slideIndex = (this._slideIndex + 1) % n;
           if (this._hass && this._config) this._render();
         }
-      }, sec * 1000);
+      }, this._slideSec() * 1000);
     } else if (!shouldRun && this._slideTimer) {
       this._stopSlideTimer();
     }
@@ -290,24 +299,38 @@ export class SportScoreboardCard extends HTMLElement {
     return false;
   }
 
+  /**
+   * Resolve the layout knobs: values under `layout:` win, falling back to the
+   * deprecated flat card-level keys (`team_col_width` still feeds `team_width`).
+   */
+  _layout(): LayoutConfig {
+    const c = this._config;
+    const l = c?.layout ?? {};
+    return {
+      height: l.height ?? c?.height,
+      team_width: l.team_width ?? c?.team_width ?? c?.team_col_width,
+      logo_width: l.logo_width ?? c?.logo_width,
+      score_width: l.score_width ?? c?.score_width,
+      colon_width: l.colon_width ?? c?.colon_width,
+      row_height: l.row_height ?? c?.row_height,
+      row_gap: l.row_gap,
+      font_scale: l.font_scale ?? c?.font_scale,
+    };
+  }
+
   _render(): void {
     try {
+      const { sections, colors = {}, debug, show_version } = this._config as CardConfig;
       const {
-        sections,
         height,
-        team_col_width,
         team_width,
         logo_width,
         score_width,
         colon_width,
         row_height,
+        row_gap,
         font_scale,
-        colors = {},
-        debug,
-        show_version,
-        show_position,
-        slide_sec,
-      } = this._config as CardConfig;
+      } = this._layout();
       const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
       this._buildTrackedIds(stateKeys);
@@ -323,7 +346,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       this._syncSlideTimer();
 
-      const carousel = (slide_sec ?? 0) > 0 && sections.length >= 2;
+      const carousel = this._isSlideMode();
       const slideControls = carousel
         ? html`<span class="slide-ctrls${this._slidePaused ? " paused" : ""}"
             >${this._slideBtn("Previous section", () => this._slideStep(-1), "nav prev")}${this._slideBtn(
@@ -336,22 +359,25 @@ export class SportScoreboardCard extends HTMLElement {
       let slideMinH = "";
       if (carousel && !height) {
         const rowPx = parseInt(row_height ?? "", 10);
-        const slideH = Number.isFinite(rowPx) ? rowPx : 28;
+        const gapPx = parseInt(row_gap ?? "", 10);
+        // each row is row_height + a gap above and below it
+        const slideH =
+          (Number.isFinite(rowPx) ? rowPx : 28) + 2 * (Number.isFinite(gapPx) ? gapPx : 5);
         const maxRows = Math.max(...sections.map((s) => 1 + (s.limit ?? 10)));
         slideMinH = `min-height:${maxRows * slideH}px;`;
       }
 
-      const tw = team_width ?? team_col_width;
+      const tw = team_width;
 
       const cssVars: Record<string, string | undefined> = {
-        "--scoreboard-team-col-a-width": tw,
-        "--scoreboard-team-col-b-width": tw,
-        "--scoreboard-logo-width": logo_width,
-        "--scoreboard-score-width": score_width,
-        "--scoreboard-colon-width": colon_width,
-        "--scoreboard-row-height": row_height,
-        "--scoreboard-position-display": show_position === false ? "none" : undefined,
-        "--scoreboard-font-scale":
+        "--ttsc-team-col-a-width": tw,
+        "--ttsc-team-col-b-width": tw,
+        "--ttsc-logo-width": logo_width,
+        "--ttsc-score-width": score_width,
+        "--ttsc-colon-width": colon_width,
+        "--ttsc-row-height": row_height,
+        "--ttsc-row-gap": row_gap,
+        "--ttsc-font-scale":
           font_scale != null && font_scale !== 1 ? String(font_scale) : undefined,
       };
       const varStr = Object.entries(cssVars)
@@ -417,16 +443,17 @@ export class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize(): number {
-    if (this._config?.height) {
-      const px = parseInt(this._config.height, 10);
+    const { height, row_height } = this._layout();
+    if (height) {
+      const px = parseInt(height, 10);
       if (Number.isFinite(px)) return Math.ceil(px / 50);
     }
     const sections = this._config?.sections ?? [];
-    const carousel = (this._config?.slide_sec ?? 0) > 0 && sections.length >= 2;
+    const carousel = this._isSlideMode();
     const rows = carousel
       ? Math.max(0, ...sections.map((s) => 1 + (s.limit ?? 10)))
       : sections.reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
-    const rowPx = parseInt(this._config?.row_height ?? "", 10);
+    const rowPx = parseInt(row_height ?? "", 10);
     const h = Number.isFinite(rowPx) ? rowPx : 28;
     return Math.max(1, Math.ceil((rows * h) / 50));
   }

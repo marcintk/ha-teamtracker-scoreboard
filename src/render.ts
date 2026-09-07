@@ -14,13 +14,19 @@ import type { ColorsConfig, GameState, HassEntity, HassStates, SectionConfig } f
 import { VALID_STATES } from "./utils.js";
 import { logoHtml, messageHtml, tvHtml } from "./widgets.js";
 
+// schedule view: live (IN) games always sit above everything else. Every other
+// state — PRE / BYE / POST — shares one band, ordered by distance from now
+// (see the sort), so an imminent fixture and a just-finished game interleave.
+const scheduleGroup = (state: string | undefined): number => (state === "IN" ? 0 : 1);
+
 export function rowHtml(
   stateObj: HassEntity | null,
   special: boolean,
   colors: ColorsConfig = {},
   opponentSpecial = false,
   isFresh = false,
-  position: number | null = null
+  // number → the rank; `null` → an empty gutter cell (alignment); `undefined` → no cell
+  position: number | null | undefined = undefined
 ): TemplateResult {
   const gs = (stateObj?.state ?? "") as GameState;
   const attr = stateObj?.attributes ?? {};
@@ -33,7 +39,7 @@ export function rowHtml(
 
   return html`
 <div class="game-row">
-  <div class="team-pos" style=${position == null ? nothing : `color:${posColor}`}>${position ?? ""}</div>
+  ${position === undefined ? nothing : html`<div class="team-pos" style=${position === null ? nothing : `color:${posColor}`}>${position ?? ""}</div>`}
   <div class="team-col team-col-a">
     <div class="team-name" style="color:${homeColor};font-weight:${isTeamSide("home", attr) ? "bold" : "normal"}">${nameText("home", attr)}</div>
     <div class="team-rank" style="color:${homeColor}">${rankText("home", attr)}</div>
@@ -68,9 +74,9 @@ export function sectionHtml(
     limit = 10,
     special_teams = [],
     rank_type = "win-draw-loss",
-    season_mode = "auto",
+    view = "schedule",
     score_blink = 5,
-    show_position = true,
+    show_position = false,
   } = section;
   const blinkMs = score_blink * 1000;
   const resolvedIds = entityIds ?? Object.keys(states).filter((id) => id.startsWith(prefix));
@@ -85,7 +91,7 @@ export function sectionHtml(
     html`${header}<div class="empty">No games found — check your section prefixes.</div>`;
   if (!entities.length) return carousel ? emptyHtml() : nothing;
 
-  const sortMode = resolveSortMode(entities, states, rank_type, season_mode);
+  const sortMode = resolveSortMode(entities, states, rank_type, view);
 
   const items = entities.map((entityId) => {
     const attr = states[entityId]?.attributes;
@@ -97,21 +103,33 @@ export function sectionHtml(
     };
   });
 
+  const now = Date.now();
   items.sort((a, b) => {
-    const diff = sortMode === "by-date" ? a.key - b.key : b.key - a.key;
-    if (diff !== 0) return diff;
+    if (sortMode === "by-date") {
+      // live games first
+      const ga = scheduleGroup(states[a.entityId]?.state);
+      const gb = scheduleGroup(states[b.entityId]?.state);
+      if (ga !== gb) return ga - gb;
+      // then everything else by distance from now — the soonest kickoff and the
+      // most-recent final float to the top, regardless of PRE vs POST
+      const near = Math.abs(a.key - now) - Math.abs(b.key - now);
+      if (near !== 0) return near;
+    } else {
+      const diff = b.key - a.key; // best record first
+      if (diff !== 0) return diff;
+    }
     const nameDiff = a.teamName.localeCompare(b.teamName);
     return nameDiff !== 0 ? nameDiff : a.entityId.localeCompare(b.entityId);
   });
 
   const ranked = items.map((it, i) => ({ ...it, position: i + 1 }));
-
-  const now = Date.now();
   const rows = deduplicate(ranked, sortMode, states)
     .slice(0, limit)
     .map(({ entityId, special = false, opponentSpecial = false, position }) => {
       const isFresh = blinkMs > 0 && now - (scoreChangedAt.get(entityId) ?? -Infinity) < blinkMs;
-      const pos = sortMode !== "by-date" && show_position ? position : null;
+      // no cell unless the section opts in; then the rank in a ranking view, or a
+      // blank cell in the schedule (keeps rows aligned in a mixed card)
+      const pos = !show_position ? undefined : sortMode === "by-date" ? null : position;
       return rowHtml(
         states[entityId] as HassEntity,
         special,
