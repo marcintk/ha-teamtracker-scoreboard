@@ -88,6 +88,19 @@ publish a clean token — TeamTracker's Italian Serie A sensors report
 `season: 2026-27-italian-serie-a`, which `auto` misreads and flips to the schedule; pin
 `view: ranking` there. The [`view`](#section) field takes `auto` / `ranking` / `schedule`.
 
+## Rank type
+
+In the standings table teams are ordered by their win-loss record, best at the top. `rank_type` (per
+section) picks the formula:
+
+| Value           | Points system   | Record format | Use for                              |
+| --------------- | --------------- | ------------- | ------------------------------------ |
+| `win-loss`      | W=2, L=0        | `W-L`         | NBA and other W/L-only leagues       |
+| `win-draw-loss` | W=3, D=1, L=0   | `W-D-L`       | Soccer leagues, MLS, …               |
+| `win-loss-otl`  | W=2, OTL=1, L=0 | `W-L-OTL`     | NHL and leagues with overtime losses |
+
+In the schedule view `rank_type` is ignored — rows are sorted by game date.
+
 ## Configuration
 
 ### Card
@@ -126,21 +139,6 @@ One entry per league under `sections:`.
 | `view`          | string  | `auto`          | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `auto` = standings in-season, schedule for playoffs / cups / off-season; `ranking` = always standings; `schedule` = always the date-sorted list |
 | `show_position` | boolean | `true`          | Show the standings-position number in the leftmost column; the empty gutter is still drawn for alignment                                                                                                                      |
 | `score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                  |
-
-### Rank type
-
-During the **regular season** the card ranks all tracked teams by their win-loss record and displays
-them top-to-bottom from highest to lowest in the standings — i.e. first place at the top, last place
-at the bottom. Choose the formula that matches the league:
-
-| Value           | Points system   | Record format | Use for                              |
-| --------------- | --------------- | ------------- | ------------------------------------ |
-| `win-loss`      | W=2, L=0        | `W-L`         | NBA and other W/L-only leagues       |
-| `win-draw-loss` | W=3, D=1, L=0   | `W-D-L`       | Soccer leagues, MLS, …               |
-| `win-loss-otl`  | W=2, OTL=1, L=0 | `W-L-OTL`     | NHL and leagues with overtime losses |
-
-During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
-game date instead.
 
 ### Layout
 
