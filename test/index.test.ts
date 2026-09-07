@@ -505,9 +505,11 @@ describe("SportScoreboardCard", () => {
       rank_type: "win-loss-otl" as const,
     };
 
+    // In carousel mode the header wraps the name in `.section-title` alongside the
+    // control buttons; stacked headers put the name directly in `.section-header`.
     const headerTexts = (c: SportScoreboardCard) =>
       Array.from(c.shadowRoot?.querySelectorAll(".section-header") ?? []).map(
-        (el) => el.textContent
+        (el) => (el.querySelector(".section-title") ?? el).textContent
       );
 
     const twoSectionHass = () =>
@@ -649,6 +651,152 @@ describe("SportScoreboardCard", () => {
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
       expect(style).not.toContain("min-height");
+    });
+  });
+
+  describe("slide_sec controls", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    type SlideConfig = NonNullable<SportScoreboardCard["_config"]> & { slide_sec?: number };
+    type SlideCard = SportScoreboardCard & {
+      _slideIndex: number;
+      _slideTimer: ReturnType<typeof setInterval> | null;
+      _slidePaused: boolean;
+    };
+    const asSlide = (c: SportScoreboardCard) => c as unknown as SlideCard;
+
+    const nhlSection = {
+      name: "NHL",
+      prefix: "sensor.nhl_",
+      limit: 5,
+      special_teams: [] as string[],
+      rank_type: "win-loss-otl" as const,
+    };
+
+    const twoSectionHass = () =>
+      makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+
+    const carouselCard = () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+      return card;
+    };
+
+    const slideButtons = (c: SportScoreboardCard) =>
+      Array.from(c.shadowRoot?.querySelectorAll<HTMLButtonElement>(".section-header button") ?? []);
+
+    const ctrl = (c: SportScoreboardCard, title: string) =>
+      c.shadowRoot?.querySelector<HTMLButtonElement>(`.section-header button[title="${title}"]`);
+
+    const headerText = (c: SportScoreboardCard) =>
+      c.shadowRoot?.querySelector(".section-header")?.textContent ?? "";
+
+    it("renders exactly three slide-btn buttons in the header in carousel mode", () => {
+      const card = carouselCard();
+      const buttons = slideButtons(card);
+      expect(buttons).toHaveLength(3);
+      for (const b of buttons) expect(b.classList.contains("slide-btn")).toBe(true);
+    });
+
+    it("orders the buttons Previous / Pause / Next by title", () => {
+      const card = carouselCard();
+      const titles = slideButtons(card).map((b) => b.getAttribute("title"));
+      expect(titles).toEqual(["Previous section", "Pause rotation", "Next section"]);
+    });
+
+    it("renders no header buttons when slide_sec is unset", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection] };
+      card._hass = twoSectionHass();
+      card._render();
+      expect(slideButtons(card)).toHaveLength(0);
+    });
+
+    it("renders no header buttons with a single section even when slide_sec is set", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], slide_sec: 30 } as SlideConfig;
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(slideButtons(card)).toHaveLength(0);
+    });
+
+    it("clicking Next section advances to the second section", () => {
+      const card = carouselCard();
+      expect(headerText(card)).toContain("NBA");
+      ctrl(card, "Next section")?.click();
+      expect(headerText(card)).toContain("NHL");
+    });
+
+    it("clicking Next section on the last section wraps to the first", () => {
+      const card = carouselCard();
+      ctrl(card, "Next section")?.click();
+      expect(headerText(card)).toContain("NHL");
+      ctrl(card, "Next section")?.click();
+      expect(headerText(card)).toContain("NBA");
+    });
+
+    it("clicking Previous section on the first section wraps to the last", () => {
+      const card = carouselCard();
+      ctrl(card, "Previous section")?.click();
+      expect(headerText(card)).toContain("NHL");
+    });
+
+    it("clicking Next section pauses rotation and flips the toggle to Resume", () => {
+      const card = carouselCard();
+      ctrl(card, "Next section")?.click();
+      expect(headerText(card)).toContain("NHL");
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NHL");
+
+      const toggle = ctrl(card, "Resume rotation");
+      expect(toggle).not.toBeNull();
+      expect(toggle?.classList.contains("paused")).toBe(true);
+      expect(toggle?.textContent).toContain("▶");
+      expect(asSlide(card)._slidePaused).toBe(true);
+    });
+
+    it("clicking the Pause toggle while rotating stops the timer", () => {
+      const card = carouselCard();
+      ctrl(card, "Pause rotation")?.click();
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NBA");
+      expect(asSlide(card)._slidePaused).toBe(true);
+
+      const toggle = ctrl(card, "Resume rotation");
+      expect(toggle?.textContent).toContain("▶");
+      expect(toggle?.classList.contains("paused")).toBe(true);
+    });
+
+    it("clicking Resume after a pause restarts the timer", () => {
+      const card = carouselCard();
+      ctrl(card, "Pause rotation")?.click();
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NBA");
+
+      ctrl(card, "Resume rotation")?.click();
+      expect(asSlide(card)._slidePaused).toBe(false);
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NHL");
+
+      const toggle = ctrl(card, "Pause rotation");
+      expect(toggle?.textContent).toContain("⏸");
+      expect(toggle?.classList.contains("paused")).toBe(false);
+    });
+
+    it("resets _slidePaused to false on setConfig", () => {
+      const card = makeCard();
+      asSlide(card)._slidePaused = true;
+      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      expect(asSlide(card)._slidePaused).toBe(false);
     });
   });
 

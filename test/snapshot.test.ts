@@ -110,6 +110,14 @@ describe("CARD_STYLES", () => {
   it("wraps the .score font-size in the --scoreboard-font-scale custom property", () => {
     expect(CARD_STYLES).toContain("font-size: calc(20px * var(--scoreboard-font-scale, 1))");
   });
+
+  it("paints the paused slide toggle button orange", () => {
+    expect(CARD_STYLES).toContain(".slide-btn.paused { color: orange; }");
+  });
+
+  it("makes the carousel header a flex row", () => {
+    expect(CARD_STYLES).toContain(".section-header.has-controls {");
+  });
 });
 
 // ─── rowHtml structural snapshots ────────────────────────────────────────────

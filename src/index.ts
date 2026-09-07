@@ -1,7 +1,7 @@
 /// <reference path="../node_modules/ha-card-shared/globals.d.ts" />
 
 import { DebugMetrics, SubscriptionManager } from "ha-card-shared/runtime";
-import { html, nothing, render } from "lit";
+import { html, nothing, render, type TemplateResult } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { sectionHtml } from "./render.js";
 import { CARD_STYLES } from "./styles.js";
@@ -19,6 +19,7 @@ export class SportScoreboardCard extends HTMLElement {
   _blinkTimer: ReturnType<typeof setTimeout> | null;
   _slideTimer: ReturnType<typeof setInterval> | null;
   _slideIndex: number;
+  _slidePaused: boolean;
   _trackedIds: Set<string> | null;
   _trackedByPrefix: Map<string, string[]> | null;
   _subscription: SubscriptionManager;
@@ -37,6 +38,7 @@ export class SportScoreboardCard extends HTMLElement {
     this._blinkTimer = null;
     this._slideTimer = null;
     this._slideIndex = 0;
+    this._slidePaused = false;
     this._trackedIds = null;
     this._trackedByPrefix = null;
     this._subscription = new SubscriptionManager();
@@ -53,8 +55,10 @@ export class SportScoreboardCard extends HTMLElement {
     this._scoreChangedAt.clear();
     this._prevScores.clear();
     this._slideIndex = 0;
+    this._slidePaused = false;
     this._startFixedTimer();
-    this._startSlideTimer();
+    this._stopSlideTimer();
+    this._syncSlideTimer();
     if (this._hass) {
       this._render();
       this._subscribe();
@@ -132,11 +136,11 @@ export class SportScoreboardCard extends HTMLElement {
     }
   }
 
-  _startSlideTimer(): void {
-    this._stopSlideTimer();
+  _syncSlideTimer(): void {
     const sections = this._config?.sections ?? [];
     const sec = this._config?.slide_sec ?? 0;
-    if (sec > 0 && sections.length >= 2) {
+    const shouldRun = sec > 0 && sections.length >= 2 && !this._slidePaused;
+    if (shouldRun && !this._slideTimer) {
       this._slideTimer = setInterval(() => {
         const n = this._config?.sections?.length ?? 0;
         if (n >= 2) {
@@ -144,6 +148,8 @@ export class SportScoreboardCard extends HTMLElement {
           if (this._hass && this._config) this._render();
         }
       }, sec * 1000);
+    } else if (!shouldRun && this._slideTimer) {
+      this._stopSlideTimer();
     }
   }
 
@@ -152,6 +158,30 @@ export class SportScoreboardCard extends HTMLElement {
       clearInterval(this._slideTimer);
       this._slideTimer = null;
     }
+  }
+
+  _slideStep(dir: number): void {
+    const n = this._config?.sections?.length ?? 0;
+    if (n < 2) return;
+    this._slideIndex = (((this._slideIndex + dir) % n) + n) % n;
+    this._slidePaused = true;
+    this._syncSlideTimer();
+    this._render();
+  }
+
+  _slideToggle(): void {
+    this._slidePaused = !this._slidePaused;
+    this._syncSlideTimer();
+    this._render();
+  }
+
+  _slideBtn(label: string, glyph: string, onClick: () => void, extra = ""): TemplateResult {
+    return html`<button
+      class="slide-btn${extra ? ` ${extra}` : ""}"
+      title=${label}
+      aria-label=${label}
+      @click=${onClick}
+    >${glyph}</button>`;
   }
 
   _refreshDebugOverlay(): void {
@@ -285,9 +315,19 @@ export class SportScoreboardCard extends HTMLElement {
 
       if (debug) this._debug.track("rendered");
 
-      if (!this._slideTimer) this._startSlideTimer();
+      this._syncSlideTimer();
 
       const carousel = (slide_sec ?? 0) > 0 && sections.length >= 2;
+      const slideControls = carousel
+        ? html`<span class="slide-ctrls"
+            >${this._slideBtn("Previous section", "‹", () => this._slideStep(-1))}${this._slideBtn(
+              this._slidePaused ? "Resume rotation" : "Pause rotation",
+              this._slidePaused ? "▶" : "⏸",
+              () => this._slideToggle(),
+              this._slidePaused ? "paused" : ""
+            )}${this._slideBtn("Next section", "›", () => this._slideStep(1))}</span
+          >`
+        : nothing;
       let slideMinH = "";
       if (carousel && !height) {
         const rowPx = parseInt(row_height ?? "", 10);
@@ -327,7 +367,8 @@ export class SportScoreboardCard extends HTMLElement {
           this._trackedByPrefix?.get(s.prefix ?? ""),
           colors,
           this._scoreChangedAt,
-          carousel
+          carousel,
+          slideControls
         )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
