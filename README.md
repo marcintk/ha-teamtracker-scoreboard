@@ -86,21 +86,21 @@ By default (`view: auto`) the card decides per section from each sensor's `seaso
 anything set and not `"regular"` (`post`, `playoffs`, …) means the schedule. Some leagues don't
 publish a clean token — TeamTracker's Italian Serie A sensors report
 `season: 2026-27-italian-serie-a`, which `auto` misreads and flips to the schedule; pin
-`view: ranking` there. The [`view`](#section-options) field takes `auto` / `ranking` / `schedule`.
+`view: ranking` there. The [`view`](#section) field takes `auto` / `ranking` / `schedule`.
 
 ## Configuration
 
-### Options
+### Card
 
 | Option          | Type    | Default  | Description                                                                                                                                                                                                                           |
 | --------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sections`      | list    | required | One entry per sport/league                                                                                                                                                                                                            |
-| `layout`        | map     | —        | Size, spacing and text-scale knobs (see [Layout & sizing](#layout--sizing))                                                                                                                                                           |
-| `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                                                                                                                                         |
+| `sections`      | list    | required | One entry per league — see [Section](#section)                                                                                                                                                                                        |
 | `slide_sec`     | number  | —        | Show one section at a time, auto-advancing every N seconds (needs ≥ 2 sections); header gets `‹` / stop-resume / `›` controls. With no `layout.height`, the card locks to the tallest section. `prefers-reduced-motion` starts paused |
-| `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s                                                                                                                |
-| `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                                                                                                                                            |
-| `show_position` | boolean | `true`   | Set `false` to drop the standings-position column from the whole card (no gutter on any row)                                                                                                                                          |
+| `show_position` | boolean | `true`   | Set `false` to drop the standings-position gutter from the whole card                                                                                                                                                                 |
+| `show_version`  | boolean | `false`  | Show the card version badge (top-right corner)                                                                                                                                                                                        |
+| `debug`         | boolean | `false`  | Pin a live-refresh overlay — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s                                                                                                                            |
+| `layout`        | map     | —        | Size / spacing / text-scale knobs — see [Layout](#layout)                                                                                                                                                                             |
+| `colors`        | map     | —        | Team colour overrides — see [Colors](#colors)                                                                                                                                                                                         |
 
 ### Refresh
 
@@ -112,18 +112,20 @@ These two knobs tune that cadence.
 | `lazy_refresh`  | number | `1`     | Seconds to debounce after the first event before rendering; `0` = render at once |
 | `fixed_refresh` | number | `60`    | Re-render every N seconds regardless of events; `0` = disabled                   |
 
-### Section options
+### Section
+
+One entry per league under `sections:`.
 
 | Field           | Type    | Default         | Description                                                                                                                                                                                                                   |
 | --------------- | ------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`          | string  | required        | Header label shown above the section                                                                                                                                                                                          |
 | `prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                                                                                                                                          |
 | `limit`         | number  | `10`            | Max rows to show                                                                                                                                                                                                              |
-| `special_teams` | list    | `[]`            | Team suffixes to highlight. Use the part after the prefix — e.g. `bos` for `sensor.nba_bos`                                                                                                                                   |
-| `rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table. See [Rank type](#rank-type)                                                                                                                                                          |
+| `special_teams` | list    | `[]`            | Team suffixes to highlight — the part after the prefix, e.g. `bos` for `sensor.nba_bos`                                                                                                                                       |
+| `rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table — see [Rank type](#rank-type)                                                                                                                                                         |
 | `view`          | string  | `auto`          | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `auto` = standings in-season, schedule for playoffs / cups / off-season; `ranking` = always standings; `schedule` = always the date-sorted list |
 | `show_position` | boolean | `true`          | Show the standings-position number in the leftmost column; the empty gutter is still drawn for alignment                                                                                                                      |
-| `score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket. Set to `0` to disable.                                                                                                                                                        |
+| `score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                  |
 
 ### Rank type
 
@@ -140,7 +142,37 @@ at the bottom. Choose the formula that matches the league:
 During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by
 game date instead.
 
+### Layout
+
+`layout` (map) — size, spacing and text scale. Each key maps to a `--scoreboard-*` CSS variable that
+falls back to its default.
+
+```yaml
+type: custom:ha-teamtracker-scoreboard-card
+layout:
+  height: 600px # fixed card box (else fits content)
+  row_height: 34px # roomier rows; the logo scales with it
+  logo_width: 40px
+  score_width: 42px # room for 3-digit basketball totals
+  team_width: 130px # widen both team-name columns
+  font_scale: 1.15 # ~15% larger text throughout
+sections:
+  - ...
+```
+
+| Key                  | Type   | Default | Description                                                               |
+| -------------------- | ------ | ------- | ------------------------------------------------------------------------- |
+| `layout.height`      | string | auto    | Outer card height (any CSS length); omit to fit content                   |
+| `layout.row_height`  | string | `28px`  | `.game-row` height, the logo / score / colon cell heights, the logo image |
+| `layout.logo_width`  | string | `30px`  | Logo cell width and the logo image width (aspect ratio preserved)         |
+| `layout.score_width` | string | `34px`  | Score cell width — widen for 3-digit totals                               |
+| `layout.colon_width` | string | `9px`   | Centre colon cell width                                                   |
+| `layout.team_width`  | string | `99px`  | Team-name column width; one CSS length applied to both sides              |
+| `layout.font_scale`  | number | `1`     | Uniform multiplier over every text size; raise `layout.row_height` too    |
+
 ### Colors
+
+`colors` (map) — override any of these:
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
@@ -157,43 +189,16 @@ sections:
   - ...
 ```
 
-| Key        | Default                   | Description                                |
-| ---------- | ------------------------- | ------------------------------------------ |
-| `team`     | `white`                   | Your tracked team name                     |
-| `opponent` | `#777` (Gray)             | Opponent name                              |
-| `special`  | `#2196F3` (Material Blue) | `special_teams` highlight                  |
-| `header`   | `#2196F3` (Material Blue) | Section header label                       |
-| `winner`   | `orange`                  | POST winner score and final clock          |
-| `loser`    | `darkgray`                | POST loser score                           |
-| `live`     | `indianred`               | IN game clock text and TV badge background |
-| `leading`  | `brown`                   | IN score for the currently leading team    |
-
-### Layout & sizing
-
-Size, spacing and text-scale knobs live under one `layout:` map (like `colors:`):
-
-```yaml
-type: custom:ha-teamtracker-scoreboard-card
-layout:
-  height: 600px # fixed card box (else fits content)
-  row_height: 34px # roomier rows; the logo scales with it
-  logo_width: 40px
-  score_width: 42px # room for 3-digit basketball totals
-  team_width: 130px # widen both team-name columns
-  font_scale: 1.15 # ~15% larger text throughout
-sections:
-  - ...
-```
-
-| `layout:` key | Type   | Default | Controls                                                                  |
-| ------------- | ------ | ------- | ------------------------------------------------------------------------- |
-| `height`      | string | auto    | Outer card height (any CSS length); omit to fit content                   |
-| `row_height`  | string | `28px`  | `.game-row` height, the logo / score / colon cell heights, the logo image |
-| `logo_width`  | string | `30px`  | Logo cell width and the logo image width (aspect ratio is preserved)      |
-| `score_width` | string | `34px`  | Score cell width — widen for 3-digit totals                               |
-| `colon_width` | string | `9px`   | Centre colon cell width                                                   |
-| `team_width`  | string | `99px`  | Team-name column width; one CSS length applied to both sides              |
-| `font_scale`  | number | `1`     | Uniform multiplier over every text size; raise `row_height` alongside it  |
+| Key               | Default                   | Description                                |
+| ----------------- | ------------------------- | ------------------------------------------ |
+| `colors.team`     | `white`                   | Your tracked team name                     |
+| `colors.opponent` | `#777` (gray)             | Opponent name                              |
+| `colors.special`  | `#2196F3` (Material Blue) | `special_teams` highlight                  |
+| `colors.header`   | `#2196F3` (Material Blue) | Section header label                       |
+| `colors.winner`   | `orange`                  | POST winner score and final clock          |
+| `colors.loser`    | `darkgray`                | POST loser score                           |
+| `colors.live`     | `indianred`               | IN game clock text and TV badge background |
+| `colors.leading`  | `brown`                   | IN score for the currently leading team    |
 
 <!-- Reference links -->
 
