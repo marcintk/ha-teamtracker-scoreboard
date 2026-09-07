@@ -162,11 +162,6 @@ sections:
   - ...
 ```
 
-Each key also exposes a `--ttsc-*` CSS custom property (unique to this card) with a built-in
-fallback. Setting the `layout:` key writes it inline; to restyle from a theme or `card_mod`, set the
-property on `ha-card` instead — it inherits into the card's shadow DOM, and a key you leave out of
-`layout:` takes the CSS value (one you set there wins unless your rule uses `!important`).
-
 | Key                  | Type   | Default | CSS property                                          | Controls                                                                  |
 | -------------------- | ------ | ------- | ----------------------------------------------------- | ------------------------------------------------------------------------- |
 | `layout.height`      | string | auto    | — (plain `height` on `ha-card`)                       | Outer card height (any CSS length); omit to fit content                   |
@@ -176,6 +171,9 @@ property on `ha-card` instead — it inherits into the card's shadow DOM, and a 
 | `layout.colon_width` | string | `9px`   | `--ttsc-colon-width`                                  | Centre colon cell width                                                   |
 | `layout.team_width`  | string | `99px`  | `--ttsc-team-col-a-width` / `--ttsc-team-col-b-width` | Team-name column width; one CSS length applied to both sides              |
 | `layout.font_scale`  | number | `1`     | `--ttsc-font-scale`                                   | Uniform multiplier over every text size; raise `layout.row_height` too    |
+
+The `--ttsc-*` properties (unique to this card) can also be set on `ha-card` from a theme or
+`card_mod` — a `layout:` key wins over the CSS unless your rule uses `!important`.
 
 ### Colors
 
