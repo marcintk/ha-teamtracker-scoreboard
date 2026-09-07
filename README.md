@@ -164,8 +164,6 @@ sections:
 
 ### Colors
 
-`colors` (map) — override any of these:
-
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
 colors:
