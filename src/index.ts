@@ -136,10 +136,19 @@ export class SportScoreboardCard extends HTMLElement {
     }
   }
 
+  /** slide mode is on: `mode: "slide"` with at least two sections to rotate through. */
+  _isSlideMode(): boolean {
+    return this._config?.mode === "slide" && (this._config?.sections?.length ?? 0) >= 2;
+  }
+
+  /** seconds per section in slide mode; a missing / non-positive value falls back to 45. */
+  _slideSec(): number {
+    const s = this._config?.slide_sec;
+    return typeof s === "number" && s > 0 ? s : 45;
+  }
+
   _syncSlideTimer(): void {
-    const sections = this._config?.sections ?? [];
-    const sec = this._config?.slide_sec ?? 0;
-    const shouldRun = sec > 0 && sections.length >= 2 && !this._slidePaused;
+    const shouldRun = this._isSlideMode() && !this._slidePaused;
     if (shouldRun && !this._slideTimer) {
       this._slideTimer = setInterval(() => {
         const n = this._config?.sections?.length ?? 0;
@@ -147,7 +156,7 @@ export class SportScoreboardCard extends HTMLElement {
           this._slideIndex = (this._slideIndex + 1) % n;
           if (this._hass && this._config) this._render();
         }
-      }, sec * 1000);
+      }, this._slideSec() * 1000);
     } else if (!shouldRun && this._slideTimer) {
       this._stopSlideTimer();
     }
@@ -310,7 +319,7 @@ export class SportScoreboardCard extends HTMLElement {
 
   _render(): void {
     try {
-      const { sections, colors = {}, debug, show_version, slide_sec } = this._config as CardConfig;
+      const { sections, colors = {}, debug, show_version } = this._config as CardConfig;
       const { height, team_width, logo_width, score_width, colon_width, row_height, font_scale } =
         this._layout();
       const states = (this._hass as HomeAssistant).states;
@@ -328,7 +337,7 @@ export class SportScoreboardCard extends HTMLElement {
 
       this._syncSlideTimer();
 
-      const carousel = (slide_sec ?? 0) > 0 && sections.length >= 2;
+      const carousel = this._isSlideMode();
       const slideControls = carousel
         ? html`<span class="slide-ctrls${this._slidePaused ? " paused" : ""}"
             >${this._slideBtn("Previous section", () => this._slideStep(-1), "nav prev")}${this._slideBtn(
@@ -427,7 +436,7 @@ export class SportScoreboardCard extends HTMLElement {
       if (Number.isFinite(px)) return Math.ceil(px / 50);
     }
     const sections = this._config?.sections ?? [];
-    const carousel = (this._config?.slide_sec ?? 0) > 0 && sections.length >= 2;
+    const carousel = this._isSlideMode();
     const rows = carousel
       ? Math.max(0, ...sections.map((s) => 1 + (s.limit ?? 10)))
       : sections.reduce((n, s) => n + 1 + (s.limit ?? 10), 0);

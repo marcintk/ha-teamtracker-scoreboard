@@ -118,6 +118,8 @@ export interface CardConfig {
   show_version?: boolean;
   lazy_refresh?: number;
   fixed_refresh?: number;
-  /** card-level: rotate sections as a slideshow, N seconds each (needs ≥2 sections) */
+  /** `stack` (default) shows every section; `slide` rotates one at a time (needs ≥2 sections) */
+  mode?: "stack" | "slide";
+  /** seconds per section while `mode: slide` (default 45; ≤0 falls back to 45) */
   slide_sec?: number;
 }

@@ -94,6 +94,12 @@ describe("SportScoreboardCard", () => {
       expect(card.getCardSize()).toBe(1);
     });
 
+    it("returns 1 for mode: slide with no sections", () => {
+      const card = makeCard();
+      card._config = { mode: "slide" };
+      expect(card.getCardSize()).toBe(1);
+    });
+
     it("defaults section limit to 10 when limit is omitted", () => {
       const card = makeCard();
       card._config = { sections: [{ name: "NBA" }] };
@@ -528,7 +534,7 @@ describe("SportScoreboardCard", () => {
 
     it("with a single section renders one header and arms no slide timer", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], slide_sec: 30 } as SlideConfig;
+      card._config = { sections: [nbaSection], mode: "slide", slide_sec: 30 } as SlideConfig;
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       expect(headerTexts(card)).toEqual(["NBA"]);
@@ -537,7 +543,11 @@ describe("SportScoreboardCard", () => {
 
     it("with two sections renders only the first section", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
       expect(headerTexts(card)).toEqual(["NBA"]);
@@ -545,7 +555,11 @@ describe("SportScoreboardCard", () => {
 
     it("auto-advances to the next section after slide_sec seconds", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
 
@@ -555,7 +569,11 @@ describe("SportScoreboardCard", () => {
 
     it("wraps back to the first section after the last", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
 
@@ -567,7 +585,11 @@ describe("SportScoreboardCard", () => {
 
     it("keeps _slideIndex across a manual _render() call", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       asSlide(card)._slideIndex = 1;
       card._render();
@@ -578,14 +600,22 @@ describe("SportScoreboardCard", () => {
     it("resets _slideIndex to 0 on setConfig", () => {
       const card = makeCard();
       asSlide(card)._slideIndex = 1;
-      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      card.setConfig({
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig);
       expect(asSlide(card)._slideIndex).toBe(0);
     });
 
     it("clears _slideTimer on disconnectedCallback and it does not fire afterward", () => {
       const card = makeCard();
       card._hass = twoSectionHass();
-      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      card.setConfig({
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig);
       card._render();
       const renderSpy = vi.spyOn(card, "_render");
 
@@ -603,6 +633,7 @@ describe("SportScoreboardCard", () => {
           { ...nbaSection, limit: 10 },
           { ...nhlSection, limit: 4 },
         ],
+        mode: "slide",
         slide_sec: 30,
       } as SlideConfig;
       // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = ceil(6.16) = 7
@@ -622,7 +653,11 @@ describe("SportScoreboardCard", () => {
 
     it("adds a tallest-slide min-height to ha-card when height is unset", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
@@ -634,6 +669,7 @@ describe("SportScoreboardCard", () => {
       const card = makeCard();
       card._config = {
         sections: [nbaSection, nhlSection],
+        mode: "slide",
         slide_sec: 30,
         height: "400px",
       } as SlideConfig;
@@ -682,7 +718,11 @@ describe("SportScoreboardCard", () => {
 
     const carouselCard = () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
       return card;
@@ -720,7 +760,7 @@ describe("SportScoreboardCard", () => {
 
     it("renders no header buttons with a single section even when slide_sec is set", () => {
       const card = makeCard();
-      card._config = { sections: [nbaSection], slide_sec: 30 } as SlideConfig;
+      card._config = { sections: [nbaSection], mode: "slide", slide_sec: 30 } as SlideConfig;
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
       expect(slideButtons(card)).toHaveLength(0);
@@ -797,7 +837,11 @@ describe("SportScoreboardCard", () => {
     it("resets _slidePaused to false on setConfig", () => {
       const card = makeCard();
       asSlide(card)._slidePaused = true;
-      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      card.setConfig({
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+      } as SlideConfig);
       expect(asSlide(card)._slidePaused).toBe(false);
     });
   });
@@ -852,7 +896,7 @@ describe("SportScoreboardCard", () => {
       }));
 
     const carouselConfig = () =>
-      ({ sections: [nbaSection, nhlSection], slide_sec: 30 }) as SlideConfig;
+      ({ sections: [nbaSection, nhlSection], mode: "slide", slide_sec: 30 }) as SlideConfig;
 
     it("starts paused when the environment prefers reduced motion", () => {
       stubMatchMedia((q) => q.includes("reduce"));
@@ -954,7 +998,7 @@ describe("SportScoreboardCard", () => {
 
     it("renders header + empty message + controls for an empty active carousel slide", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       // no matching entities at all → active section is empty
       card._hass = makeHass({ "sensor.other_x": makeState("PRE", baseAttrs) });
       card._render();
@@ -968,6 +1012,7 @@ describe("SportScoreboardCard", () => {
       const card = makeCard();
       card._config = {
         sections: [{ ...two[0], limit: 0 }, nhl],
+        mode: "slide",
         slide_sec: 30,
       } as SlideCfg;
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
@@ -978,7 +1023,12 @@ describe("SportScoreboardCard", () => {
 
     it("applies colors.header to the carousel (has-controls) header", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30, colors: { header: "tomato" } } as SlideCfg;
+      card._config = {
+        sections: two,
+        mode: "slide",
+        slide_sec: 30,
+        colors: { header: "tomato" },
+      } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -991,7 +1041,7 @@ describe("SportScoreboardCard", () => {
 
     it("_slideStep is a no-op with fewer than two sections", () => {
       const card = makeCard();
-      card._config = { sections: [two[0]], slide_sec: 30 } as SlideCfg;
+      card._config = { sections: [two[0]], mode: "slide", slide_sec: 30 } as SlideCfg;
       asC(card)._slideIndex = 0;
       expect(() => asC(card)._slideStep(1)).not.toThrow();
       expect(asC(card)._slideIndex).toBe(0);
@@ -1006,7 +1056,12 @@ describe("SportScoreboardCard", () => {
     it("computes the min-height from a numeric row_height and the default limit", () => {
       const card = makeCard();
       // sections carry no `limit` → maxRows = 1 + 10; row_height 40 → min-height 440px
-      card._config = { sections: two, slide_sec: 30, row_height: "40px" } as SlideCfg;
+      card._config = {
+        sections: two,
+        mode: "slide",
+        slide_sec: 30,
+        row_height: "40px",
+      } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -1018,14 +1073,14 @@ describe("SportScoreboardCard", () => {
 
     it("getCardSize uses the default limit for carousel sections without one", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = 7
       expect(card.getCardSize()).toBe(7);
     });
 
     it("_syncSlideTimer is a no-op when the timer is already running", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -1039,7 +1094,7 @@ describe("SportScoreboardCard", () => {
 
     it("the rotation interval tolerates the config being torn out from under it", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -1051,7 +1106,7 @@ describe("SportScoreboardCard", () => {
 
     it("the rotation interval skips rendering when hass is gone", () => {
       const card = makeCard();
-      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._config = { sections: two, mode: "slide", slide_sec: 30 } as SlideCfg;
       card._hass = makeHass({
         "sensor.nba_lal": makeState("PRE", baseAttrs),
         "sensor.nhl_bos": makeState("PRE", baseAttrs),
@@ -1069,6 +1124,32 @@ describe("SportScoreboardCard", () => {
       const card = makeCard();
       expect(() => asC(card)._syncSlideTimer()).not.toThrow();
       expect(asC(card)._slideTimer).toBeNull();
+    });
+
+    it("defaults to a 45s interval when slide_sec is omitted", () => {
+      const card = makeCard();
+      card._config = { sections: two, mode: "slide" } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      vi.advanceTimersByTime(44_000);
+      expect(asC(card)._slideIndex).toBe(0);
+      vi.advanceTimersByTime(1_000);
+      expect(asC(card)._slideIndex).toBe(1);
+    });
+
+    it("falls back to 45s when slide_sec is zero or negative", () => {
+      const card = makeCard();
+      card._config = { sections: two, mode: "slide", slide_sec: -5 } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      vi.advanceTimersByTime(45_000);
+      expect(asC(card)._slideIndex).toBe(1);
     });
   });
 
