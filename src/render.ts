@@ -126,7 +126,7 @@ export function sectionHtml(
     .slice(0, limit)
     .map(({ entityId, special = false, opponentSpecial = false, position }) => {
       const isFresh = blinkMs > 0 && now - (scoreChangedAt.get(entityId) ?? -Infinity) < blinkMs;
-      // no cell unless the section opts in; then the rank in a ranking view, or a
+      // no cell unless the section opts in; then the rank in a standings view, or a
       // blank cell in the schedule (keeps rows aligned in a mixed card)
       const pos = !show_position ? undefined : sortMode === "by-date" ? null : position;
       return rowHtml(

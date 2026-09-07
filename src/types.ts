@@ -2,7 +2,7 @@ export type GameState = "PRE" | "IN" | "POST" | "BYE";
 
 export type SortMode = "win-loss" | "win-draw-loss" | "win-loss-otl" | "by-date";
 
-export type ViewMode = "auto" | "ranking" | "schedule";
+export type ViewMode = "auto" | "standings" | "schedule";
 
 export interface GameAttr {
   state?: string;
@@ -54,10 +54,10 @@ export interface SectionConfig {
   limit?: number;
   special_teams?: string[];
   rank_type?: SortMode;
-  /** default `schedule`; `ranking` for a standings table, `auto` for the record heuristic */
+  /** default `schedule`; `standings` for the standings table, `auto` for the record heuristic */
   view?: ViewMode;
   score_blink?: number;
-  /** default `false`; `true` draws the position gutter (the rank in a ranking view) */
+  /** default `false`; `true` draws the position gutter (the rank in a standings view) */
   show_position?: boolean;
 }
 

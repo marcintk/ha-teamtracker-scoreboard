@@ -260,9 +260,9 @@ describe("resolveSortMode", () => {
   });
 
   describe("view override (4th parameter)", () => {
-    it("view='ranking' forces rank_type even when records are missing", () => {
+    it("view='standings' forces rank_type even when records are missing", () => {
       const states: HassStates = { "sensor.a": s({}) };
-      expect(resolveSortMode(["sensor.a"], states, "win-draw-loss", "ranking")).toBe(
+      expect(resolveSortMode(["sensor.a"], states, "win-draw-loss", "standings")).toBe(
         "win-draw-loss"
       );
     });

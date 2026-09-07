@@ -32,7 +32,7 @@ const nbaSection = {
   limit: 10,
   special_teams: [] as string[],
   rank_type: "win-loss" as const,
-  view: "ranking" as const,
+  view: "standings" as const,
 };
 
 function makeCard(): SportScoreboardCard {
@@ -530,7 +530,7 @@ describe("SportScoreboardCard", () => {
       limit: 5,
       special_teams: [] as string[],
       rank_type: "win-loss-otl" as const,
-      view: "ranking" as const,
+      view: "standings" as const,
     };
 
     // In carousel mode the header wraps the name in `.section-title` alongside the
@@ -745,7 +745,7 @@ describe("SportScoreboardCard", () => {
       limit: 5,
       special_teams: [] as string[],
       rank_type: "win-loss-otl" as const,
-      view: "ranking" as const,
+      view: "standings" as const,
     };
 
     const twoSectionHass = () =>
@@ -905,7 +905,7 @@ describe("SportScoreboardCard", () => {
       limit: 5,
       special_teams: [] as string[],
       rank_type: "win-loss-otl" as const,
-      view: "ranking" as const,
+      view: "standings" as const,
     };
 
     const twoSectionHass = () =>
