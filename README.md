@@ -127,12 +127,12 @@ sections:
   - name: Premier League
     prefix: sensor.epl_
     limit: 12
-    rank_type: win-draw-loss
     view: auto
+    rank_type: win-draw-loss
+    score_blink: 5
+    show_position: true
     special_teams:
       - liv
-    show_position: true
-    score_blink: 5
   - ...
 ```
 
