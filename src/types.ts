@@ -70,6 +70,20 @@ export interface ColorsConfig {
   live?: string;
 }
 
+/** Card-level size / spacing / text-scale knobs, grouped like `colors`. */
+export interface LayoutConfig {
+  /** outer card height (any CSS length); omit to fit content */
+  height?: string;
+  /** team-name column width; one CSS length applied to both sides */
+  team_width?: string;
+  logo_width?: string;
+  score_width?: string;
+  colon_width?: string;
+  row_height?: string;
+  /** uniform multiplier over every font-size; 1 = baseline */
+  font_scale?: number;
+}
+
 export interface SortItem {
   entityId: string;
   teamName?: string;
@@ -81,15 +95,23 @@ export interface SortItem {
 
 export interface CardConfig {
   sections?: SectionConfig[];
+  /** size / spacing / text-scale knobs; the flat keys below are deprecated aliases */
+  layout?: LayoutConfig;
+  /** @deprecated use `layout.height` */
   height?: string;
+  /** @deprecated use `layout.team_width` */
   team_width?: string;
-  /** @deprecated use `team_width` */
+  /** @deprecated use `layout.team_width` */
   team_col_width?: string;
+  /** @deprecated use `layout.logo_width` */
   logo_width?: string;
+  /** @deprecated use `layout.score_width` */
   score_width?: string;
+  /** @deprecated use `layout.colon_width` */
   colon_width?: string;
+  /** @deprecated use `layout.row_height` */
   row_height?: string;
-  /** card-level: uniform multiplier over every font-size; 1 = baseline */
+  /** @deprecated use `layout.font_scale` */
   font_scale?: number;
   colors?: ColorsConfig;
   debug?: boolean;

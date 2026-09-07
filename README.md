@@ -58,7 +58,8 @@ Add a **Manual card** to your dashboard and paste:
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
 slide_sec: 45
-team_width: 80px
+layout:
+  team_width: 80px
 sections:
   - name: Serie A
     prefix: sensor.sera_
@@ -97,19 +98,18 @@ sections:
       - gb
 ```
 
-Card-level keys (`height`, `slide_sec`, `team_width`, …) are optional — see [Options](#options)
-below. Per section: `prefix` matches the entity IDs from the league file you imported (see
-[docs/sensors/](docs/sensors/)); `rank_type` is `win-loss` for NBA/NFL, `win-loss-otl` for NHL,
-`win-draw-loss` for the soccer leagues; and the soccer sections use `season_mode: regular` so the
-card always shows the standings table (ha-teamtracker's `season` attribute isn't a clean token — see
-[Season mode](#season-mode)). `special_teams` takes the suffix after the prefix (`juv` for
-`sensor.sera_juv`).
+Card-level keys are optional: `slide_sec` (see [Options](#options)) and the `layout:` map (see
+[Layout & sizing](#layout--sizing)). Per section: `prefix` matches the entity IDs from the league
+file you imported (see [docs/sensors/](docs/sensors/)); `rank_type` is `win-loss` for NBA/NFL,
+`win-loss-otl` for NHL, `win-draw-loss` for the soccer leagues; and the soccer sections use
+`season_mode: regular` so the card always shows the standings table (ha-teamtracker's `season`
+attribute isn't a clean token — see [Season mode](#season-mode)). `special_teams` takes the suffix
+after the prefix (`juv` for `sensor.sera_juv`).
 
 ### Options
 
-Behavioural card-level options. Everything that controls **size, spacing, and text scale** —
-`height`, `row_height`, `team_width`, `logo_width`, `score_width`, `colon_width`, `font_scale` —
-lives in [Layout & sizing](#layout--sizing). `slide_sec` is in
+Behavioural card-level options. Everything that controls **size, spacing, and text scale** lives
+under the `layout:` map — see [Layout & sizing](#layout--sizing). `slide_sec` is in
 [Rotating sections](#rotating-sections).
 
 | Option          | Type    | Default  | Description                                                                                                            |
@@ -226,23 +226,25 @@ sections:
 
 ### Layout & sizing
 
-Every card-level knob for size, spacing, and text scale. `height` sets the outer card box; the rest
-override the built-in pixel constants for the row layout — each maps to a `--scoreboard-*` CSS
-variable that falls back to its default, so a card that sets none of them renders exactly as before.
+Every card-level knob for size, spacing, and text scale lives under one `layout:` map (like
+`colors:`). `height` sets the outer card box; the rest override the built-in pixel constants for the
+row layout — each maps to a `--scoreboard-*` CSS variable that falls back to its default, so a card
+with no `layout:` renders exactly as before.
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
-height: 600px # fixed card box (else fits content)
-row_height: 34px # roomier rows; the logo scales with it
-logo_width: 40px
-score_width: 42px # room for 3-digit basketball totals
-team_width: 130px # widen both team-name columns
-font_scale: 1.15 # ~15% larger text throughout
+layout:
+  height: 600px # fixed card box (else fits content)
+  row_height: 34px # roomier rows; the logo scales with it
+  logo_width: 40px
+  score_width: 42px # room for 3-digit basketball totals
+  team_width: 130px # widen both team-name columns
+  font_scale: 1.15 # ~15% larger text throughout
 sections:
   - ...
 ```
 
-| Option        | Type   | Default | Controls                                                                                  |
+| `layout:` key | Type   | Default | Controls                                                                                  |
 | ------------- | ------ | ------- | ----------------------------------------------------------------------------------------- |
 | `height`      | string | auto    | Outer card height (any CSS length); omit to fit content                                   |
 | `row_height`  | string | `28px`  | `.game-row` height, the logo / score / colon cell heights, the logo image                 |
@@ -252,21 +254,23 @@ sections:
 | `team_width`  | string | `99px`  | Team-name column width; one CSS length applied to both sides                              |
 | `font_scale`  | number | `1`     | Uniform multiplier over every text size — see [Typography scale](#typography-scale) below |
 
-`team_col_width` from earlier versions is still accepted as an alias for `team_width`.
+The same keys set flat at the card root (plus `team_col_width` for `team_width`) are still accepted
+as **deprecated** aliases; a value under `layout:` wins over its flat counterpart.
 
-`getCardSize()` — the height hint Home Assistant uses for masonry layout — tracks `row_height` when
-it is a plain pixel value.
+`getCardSize()` — the height hint Home Assistant uses for masonry layout — tracks
+`layout.row_height` when it is a plain pixel value.
 
 #### Typography scale
 
-`font_scale` is a single multiplier applied to **every** font size in the card — score, team name,
-section header, rank, message, TV badge. The built-in sizes were tuned as a set, so scaling them
-together keeps their proportions (the score stays ≈1.5× the team name at any value).
+`layout.font_scale` is a single multiplier applied to **every** font size in the card — score, team
+name, section header, rank, message, TV badge. The built-in sizes were tuned as a set, so scaling
+them together keeps their proportions (the score stays ≈1.5× the team name at any value).
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
-font_scale: 1.15 # ~15% larger text throughout
-row_height: 34px # give the taller text room — see below
+layout:
+  font_scale: 1.15 # ~15% larger text throughout
+  row_height: 34px # give the taller text room — see below
 sections:
   - ...
 ```
@@ -309,6 +313,6 @@ with the arrows, and one tap starts the rotation.
 Unset `slide_sec`, `slide_sec: 0`, or a single section → the sections stack as before, with no
 controls.
 
-When `height` is not set, a rotating card locks its height to the tallest section so it doesn't jump
-between advances; an explicit `height` still wins. `getCardSize()` reports one section rather than
-the sum.
+When `layout.height` is not set, a rotating card locks its height to the tallest section so it
+doesn't jump between advances; an explicit `layout.height` still wins. `getCardSize()` reports one
+section rather than the sum.

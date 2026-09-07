@@ -5,7 +5,7 @@ import { html, nothing, render, type TemplateResult } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { sectionHtml } from "./render.js";
 import { CARD_STYLES } from "./styles.js";
-import type { CardConfig, HassStates, HomeAssistant } from "./types.js";
+import type { CardConfig, HassStates, HomeAssistant, LayoutConfig } from "./types.js";
 
 const STYLE_BLOCK = unsafeHTML(`<style>${CARD_STYLES}</style>`);
 
@@ -290,24 +290,36 @@ export class SportScoreboardCard extends HTMLElement {
     return false;
   }
 
+  /**
+   * Resolve the layout knobs: values under `layout:` win, falling back to the
+   * deprecated flat card-level keys (`team_col_width` still feeds `team_width`).
+   */
+  _layout(): LayoutConfig {
+    const c = this._config;
+    const l = c?.layout ?? {};
+    return {
+      height: l.height ?? c?.height,
+      team_width: l.team_width ?? c?.team_width ?? c?.team_col_width,
+      logo_width: l.logo_width ?? c?.logo_width,
+      score_width: l.score_width ?? c?.score_width,
+      colon_width: l.colon_width ?? c?.colon_width,
+      row_height: l.row_height ?? c?.row_height,
+      font_scale: l.font_scale ?? c?.font_scale,
+    };
+  }
+
   _render(): void {
     try {
       const {
         sections,
-        height,
-        team_col_width,
-        team_width,
-        logo_width,
-        score_width,
-        colon_width,
-        row_height,
-        font_scale,
         colors = {},
         debug,
         show_version,
         show_position,
         slide_sec,
       } = this._config as CardConfig;
+      const { height, team_width, logo_width, score_width, colon_width, row_height, font_scale } =
+        this._layout();
       const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
       this._buildTrackedIds(stateKeys);
@@ -341,7 +353,7 @@ export class SportScoreboardCard extends HTMLElement {
         slideMinH = `min-height:${maxRows * slideH}px;`;
       }
 
-      const tw = team_width ?? team_col_width;
+      const tw = team_width;
 
       const cssVars: Record<string, string | undefined> = {
         "--scoreboard-team-col-a-width": tw,
@@ -417,8 +429,9 @@ export class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize(): number {
-    if (this._config?.height) {
-      const px = parseInt(this._config.height, 10);
+    const { height, row_height } = this._layout();
+    if (height) {
+      const px = parseInt(height, 10);
       if (Number.isFinite(px)) return Math.ceil(px / 50);
     }
     const sections = this._config?.sections ?? [];
@@ -426,7 +439,7 @@ export class SportScoreboardCard extends HTMLElement {
     const rows = carousel
       ? Math.max(0, ...sections.map((s) => 1 + (s.limit ?? 10)))
       : sections.reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
-    const rowPx = parseInt(this._config?.row_height ?? "", 10);
+    const rowPx = parseInt(row_height ?? "", 10);
     const h = Number.isFinite(rowPx) ? rowPx : 28;
     return Math.max(1, Math.ceil((rows * h) / 50));
   }

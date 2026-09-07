@@ -1685,6 +1685,84 @@ describe("SportScoreboardCard", () => {
     });
   });
 
+  describe("layout: map", () => {
+    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
+      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+
+    const cases = [
+      { key: "team_width", prop: "--scoreboard-team-col-a-width", value: "120px" },
+      { key: "logo_width", prop: "--scoreboard-logo-width", value: "44px" },
+      { key: "score_width", prop: "--scoreboard-score-width", value: "50px" },
+      { key: "colon_width", prop: "--scoreboard-colon-width", value: "12px" },
+      { key: "row_height", prop: "--scoreboard-row-height", value: "40px" },
+    ] as const;
+
+    for (const { key, prop, value } of cases) {
+      it(`emits ${prop} from layout.${key}`, () => {
+        const card = makeCard();
+        card._config = { sections: [nbaSection], layout: { [key]: value } };
+        card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+        card._render();
+        expect(haCardStyle(card)).toContain(`${prop}:${value}`);
+      });
+    }
+
+    it("layout.team_width sets both team columns", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], layout: { team_width: "120px" } };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-a-width:120px");
+      expect(haCardStyle(card)).toContain("--scoreboard-team-col-b-width:120px");
+    });
+
+    it("layout.font_scale emits --scoreboard-font-scale", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], layout: { font_scale: 1.15 } };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-font-scale:1.15");
+    });
+
+    it("layout.height sets the ha-card height and drives getCardSize", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], layout: { height: "600px" } };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("height:600px;");
+      expect(card.getCardSize()).toBe(12);
+    });
+
+    it("layout.* wins over the deprecated flat key when both are set", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection],
+        row_height: "40px",
+        team_col_width: "200px",
+        layout: { row_height: "60px", team_width: "120px" },
+      };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      const style = haCardStyle(card);
+      expect(style).toContain("--scoreboard-row-height:60px");
+      expect(style).toContain("--scoreboard-team-col-a-width:120px");
+      expect(style).not.toContain("40px");
+      expect(style).not.toContain("200px");
+    });
+
+    it("falls back to a flat key the layout map omits", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection],
+        row_height: "40px",
+        layout: { team_width: "120px" },
+      };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-row-height:40px");
+    });
+  });
+
   describe("_refreshDebugOverlay", () => {
     it("patches #sc-debug innerHTML without invoking _render", () => {
       const card = makeCard();
