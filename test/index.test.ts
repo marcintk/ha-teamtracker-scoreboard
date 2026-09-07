@@ -129,6 +129,19 @@ describe("SportScoreboardCard", () => {
       expect(card.getCardSize()).toBe(7);
     });
 
+    it("ignores non-pixel row_height / row_gap (uses the defaults)", () => {
+      const card = makeCard();
+      card._config = { sections: [{ limit: 10 }], layout: { row_height: "2rem", row_gap: "1em" } };
+      // "2rem"/"1em" aren't px → 28 + 2*5 = 38; 11 * 38 = 418 / 50 = ceil(8.36) = 9
+      expect(card.getCardSize()).toBe(9);
+    });
+
+    it("ignores a percentage height (falls back to the section estimate)", () => {
+      const card = makeCard();
+      card._config = { height: "50%", sections: [{ limit: 10 }] };
+      expect(card.getCardSize()).toBe(9);
+    });
+
     it("falls back to section-based size when height is non-numeric", () => {
       const card = makeCard();
       card._config = { height: "auto", sections: [{ limit: 10 }] };
@@ -1590,12 +1603,12 @@ describe("SportScoreboardCard", () => {
       expect(card.shadowRoot?.innerHTML).not.toContain("pointer-events:none");
     });
 
-    it("ha-card gets position:relative when debug is true", () => {
+    it("renders the debug pane inside ha-card", () => {
       const card = makeCard();
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).toContain("position:relative");
+      expect(card.shadowRoot?.querySelector("#sc-debug")?.closest("ha-card")).not.toBeNull();
     });
 
     it("debug mode does not show version badge", () => {
@@ -1623,7 +1636,7 @@ describe("SportScoreboardCard", () => {
       expect(card.shadowRoot?.querySelector("#sc-debug")).toBeNull();
     });
 
-    it("renders the version badge inside the first section header, once", () => {
+    it("renders the version badge once, as a direct child of ha-card", () => {
       const card = makeCard();
       card._config = {
         sections: [nbaSection, { name: "NHL", prefix: "sensor.nhl_", special_teams: [] }],
@@ -1636,12 +1649,11 @@ describe("SportScoreboardCard", () => {
       card._render();
       const badges = card.shadowRoot?.querySelectorAll("#sc-version") ?? [];
       expect(badges).toHaveLength(1);
-      expect(badges[0]?.closest(".section-header")).not.toBeNull();
-      const headers = card.shadowRoot?.querySelectorAll(".section-header") ?? [];
-      expect(headers[0]?.contains(badges[0] as Node)).toBe(true);
+      expect(badges[0]?.parentElement?.tagName.toLowerCase()).toBe("ha-card");
+      expect(badges[0]?.closest(".section-header")).toBeNull();
     });
 
-    it("moves the version badge to the first section that has games", () => {
+    it("shows the version badge even when the leading section is empty", () => {
       const card = makeCard();
       card._config = {
         sections: [
@@ -1652,13 +1664,10 @@ describe("SportScoreboardCard", () => {
       };
       card._hass = makeHass({ "sensor.nhl_bos": makeState("PRE", baseAttrs) });
       card._render();
-      const badges = card.shadowRoot?.querySelectorAll("#sc-version") ?? [];
-      expect(badges).toHaveLength(1);
-      // the only header rendered is NHL's — the badge is in it, not lost with the empty section
-      expect(badges[0]?.closest(".section-header")?.textContent).toContain("NHL");
+      expect(card.shadowRoot?.querySelectorAll("#sc-version")).toHaveLength(1);
     });
 
-    it("drops the version badge when no section has games", () => {
+    it("keeps the version badge when no section has games", () => {
       const card = makeCard();
       card._config = {
         sections: [{ name: "Empty", prefix: "sensor.mlb_", special_teams: [] }],
@@ -1666,7 +1675,7 @@ describe("SportScoreboardCard", () => {
       };
       card._hass = makeHass({ "sensor.nhl_bos": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.querySelector("#sc-version")).toBeNull();
+      expect(card.shadowRoot?.querySelector("#sc-version")).not.toBeNull();
       expect(card.shadowRoot?.querySelector(".empty")).not.toBeNull();
     });
   });
