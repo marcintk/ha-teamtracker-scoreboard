@@ -69,22 +69,23 @@ sections:
 
 ### Options
 
-| Option          | Type          | Default  | Description                                                                                                                                      |
-| --------------- | ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `height`        | string        | auto     | Card height (CSS value); omit to fit content                                                                                                     |
-| `lazy_refresh`  | number        | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                                                 |
-| `fixed_refresh` | number        | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                                                   |
-| `sections`      | list          | required | One entry per sport/league                                                                                                                       |
-| `colors`        | map           | —        | Override team colours (see [Colors](#colors))                                                                                                    |
-| `debug`         | boolean       | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s           |
-| `show_version`  | boolean       | `false`  | Show card version badge (top-right corner)                                                                                                       |
-| `show_position` | boolean       | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)                             |
-| `team_width`    | string / list | `99px`   | Team-name column width. A single CSS length sets both sides; a `[left, right]` list sets them apart. See [Layout dimensions](#layout-dimensions) |
-| `logo_width`    | string        | `30px`   | CSS width of each team-logo cell (and the logo image). See [Layout dimensions](#layout-dimensions)                                               |
-| `score_width`   | string        | `34px`   | CSS width of each score cell. Widen for 3-digit totals                                                                                           |
-| `colon_width`   | string        | `9px`    | CSS width of the centre colon cell                                                                                                               |
-| `row_height`    | string        | `28px`   | CSS height of every game row (row, cells, and logo scale together)                                                                               |
-| `font_scale`    | number        | `1`      | Uniform multiplier over every text size in the card. See [Typography scale](#typography-scale)                                                   |
+| Option          | Type          | Default  | Description                                                                                                                                         |
+| --------------- | ------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `height`        | string        | auto     | Card height (CSS value); omit to fit content                                                                                                        |
+| `lazy_refresh`  | number        | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                                                    |
+| `fixed_refresh` | number        | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                                                      |
+| `sections`      | list          | required | One entry per sport/league                                                                                                                          |
+| `colors`        | map           | —        | Override team colours (see [Colors](#colors))                                                                                                       |
+| `debug`         | boolean       | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s              |
+| `show_version`  | boolean       | `false`  | Show card version badge (top-right corner)                                                                                                          |
+| `show_position` | boolean       | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)                                |
+| `team_width`    | string / list | `99px`   | Team-name column width. A single CSS length sets both sides; a `[left, right]` list sets them apart. See [Layout dimensions](#layout-dimensions)    |
+| `logo_width`    | string        | `30px`   | CSS width of each team-logo cell (and the logo image). See [Layout dimensions](#layout-dimensions)                                                  |
+| `score_width`   | string        | `34px`   | CSS width of each score cell. Widen for 3-digit totals                                                                                              |
+| `colon_width`   | string        | `9px`    | CSS width of the centre colon cell                                                                                                                  |
+| `row_height`    | string        | `28px`   | CSS height of every game row (row, cells, and logo scale together)                                                                                  |
+| `font_scale`    | number        | `1`      | Uniform multiplier over every text size in the card. See [Typography scale](#typography-scale)                                                      |
+| `slide_sec`     | number        | —        | Show one section at a time, auto-advancing every N seconds, with playback controls. Needs ≥ 2 sections. See [Rotating sections](#rotating-sections) |
 
 ### Section options
 
@@ -237,3 +238,40 @@ It is a positive multiplier; `1` is the baseline and is a no-op (nothing is emit
 readability knob only — it does **not** touch `row_height` or the column widths. A `font_scale` much
 above `1` puts larger text in an unchanged row, which clips top and bottom; raise `row_height`
 alongside it. Values ≤ 0 collapse the text to nothing and are not validated — don't set them.
+
+### Rotating sections
+
+With `slide_sec` set and **two or more** sections, the card stops stacking them and instead shows
+one section at a time, advancing to the next every `slide_sec` seconds and wrapping after the last.
+Empty sections take their turn too (header + "no games"), so the rotation order is stable.
+
+```yaml
+type: custom:ha-teamtracker-scoreboard-card
+slide_sec: 60 # a minute per league
+sections:
+  - name: NBA
+    prefix: sensor.nba_
+  - name: NHL
+    prefix: sensor.nhl_
+  - name: EPL
+    prefix: sensor.epl_
+```
+
+Three buttons sit at the right of the section header:
+
+| Button    | Action                                                           |
+| --------- | ---------------------------------------------------------------- |
+| `‹`       | Previous section — steps immediately and **pauses** the rotation |
+| `⏸` / `▶` | Stop / resume the rotation. Turns **orange** while paused        |
+| `›`       | Next section — steps immediately and **pauses** the rotation     |
+
+Only the stop/resume button resumes auto-advancing; the arrows just pause. If the viewer's system is
+set to **reduce motion**, the card starts paused (orange `▶`) — every section is still reachable
+with the arrows, and one tap starts the rotation.
+
+Unset `slide_sec`, `slide_sec: 0`, or a single section → the sections stack as before, with no
+controls.
+
+When `height` is not set, a rotating card locks its height to the tallest section so it doesn't jump
+between advances; an explicit `height` still wins. `getCardSize()` reports one section rather than
+the sum.

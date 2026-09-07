@@ -476,7 +476,51 @@
     </p>
   </div>
   <div class="slice">
-    <h3>Slice 3 &mdash; honour <code>prefers-reduced-motion</code> &nbsp;&middot;&nbsp; <em>pending</em></h3>
+    <h3>Slice 3 &mdash; honour <code>prefers-reduced-motion</code> &nbsp;&middot;&nbsp; accepted</h3>
+    <ul class="plain">
+      <li><code>src/index.ts</code> &mdash; <code>_prefersReducedMotion()</code>
+        (<code>window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true</code> &mdash;
+        optional-chained so a missing <code>matchMedia</code> reads as &ldquo;not reduced&rdquo;).
+        <code>setConfig</code> sets <code>this._slidePaused = this._prefersReducedMotion()</code>
+        instead of <code>false</code> &mdash; the only behavioural line. <code>_syncSlideTimer()</code>
+        already refuses to arm while paused, and <code>_render</code> already draws the toggle in
+        its orange <code>&#x25B6;</code> / &ldquo;Resume rotation&rdquo; form from
+        <code>_slidePaused</code>, so nothing else changed.</li>
+      <li><code>test/index.test.ts</code> &mdash; <code>describe("slide_sec reduced motion")</code>,
+        6 cases: reduced &rarr; starts paused, no timer, no auto-advance, toggle in resume form,
+        Resume click starts rotation; plus two regression guards &mdash; <code>matchMedia</code>
+        present-but-<code>false</code> and <code>matchMedia</code> absent both rotate normally
+        (the jsdom default the other blocks rely on). <code>vi.stubGlobal("matchMedia", &hellip;)</code>
+        per test.</li>
+      <li><code>README.md</code> &mdash; <code>slide_sec</code> options row + a
+        &ldquo;Rotating sections&rdquo; section (controls table, pause colour, reduced-motion, the
+        <code>height</code> / <code>getCardSize</code> behaviour).</li>
+      <li><code>test/index.test.ts</code> &mdash; <code>describe("slide_sec branch coverage")</code>,
+        11 targeted cases restoring 100% coverage across all three slices: the carousel empty-slide
+        <code>emptyHtml()</code> paths (no entities / <code>limit: 0</code>), <code>colors.header</code>
+        on the <code>has-controls</code> header, <code>_slideStep</code>'s <code>n &lt; 2</code> guard
+        (direct call), numeric <code>row_height</code> + default-<code>limit</code> in the
+        <code>min-height</code> math and <code>getCardSize</code>, and the
+        <code>_syncSlideTimer</code> / interval-callback fall-throughs (already-running no-op,
+        missing config, <code>hass</code> gone mid-interval).</li>
+    </ul>
+    <p>
+      Suite 342 green; <code>typecheck</code> / <code>check:ci</code> clean;
+      <strong>coverage back to 100%</strong> on statements, branches, functions and lines.
+      Reviewer: no correctness findings &mdash; the optional chain is safe against a missing or
+      <code>{ matches: undefined }</code> <code>matchMedia</code>; <code>setConfig</code> sets
+      <code>_slidePaused</code> before <code>_syncSlideTimer()</code> so no arm-then-stop window;
+      the &ldquo;consulted only in <code>setConfig</code>&rdquo; scope is deliberate (no
+      <code>connectedCallback</code>, a live OS-setting change waits for the next
+      <code>setConfig</code>). <code>/simplify</code> no changes.
+    </p>
+    <div class="callout">
+      <b>Coverage note</b>
+      Slices 1&ndash;2 landed a hair under 100% branch coverage (the review gate ran
+      <code>npm test</code>, not <code>test:coverage</code>). Restored here with the
+      &ldquo;branch coverage&rdquo; block before shipping. The <code>/code-it</code> per-slice gate
+      should run <code>test:coverage</code>, not just <code>test</code>.
+    </div>
   </div>
 
   <footer>

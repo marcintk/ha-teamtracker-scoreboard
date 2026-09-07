@@ -2,6 +2,7 @@
 .serena/
 node_modules/
 coverage/
+.vitest/
 dist/
 docs/design-notes/.work/
 

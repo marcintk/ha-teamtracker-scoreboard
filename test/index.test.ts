@@ -800,6 +800,276 @@ describe("SportScoreboardCard", () => {
     });
   });
 
+  describe("slide_sec reduced motion", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    });
+
+    type SlideConfig = NonNullable<SportScoreboardCard["_config"]> & { slide_sec?: number };
+    type SlideCard = SportScoreboardCard & {
+      _slideIndex: number;
+      _slideTimer: ReturnType<typeof setInterval> | null;
+      _slidePaused: boolean;
+    };
+    const asSlide = (c: SportScoreboardCard) => c as unknown as SlideCard;
+
+    const nhlSection = {
+      name: "NHL",
+      prefix: "sensor.nhl_",
+      limit: 5,
+      special_teams: [] as string[],
+      rank_type: "win-loss-otl" as const,
+    };
+
+    const twoSectionHass = () =>
+      makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+
+    const ctrl = (c: SportScoreboardCard, title: string) =>
+      c.shadowRoot?.querySelector<HTMLButtonElement>(`.section-header button[title="${title}"]`);
+
+    const headerText = (c: SportScoreboardCard) =>
+      c.shadowRoot?.querySelector(".section-header")?.textContent ?? "";
+
+    const stubMatchMedia = (matches: (q: string) => boolean) =>
+      vi.stubGlobal("matchMedia", (q: string) => ({
+        matches: matches(q),
+        media: q,
+        onchange: null,
+        addListener() {},
+        removeListener() {},
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent() {
+          return false;
+        },
+      }));
+
+    const carouselConfig = () =>
+      ({ sections: [nbaSection, nhlSection], slide_sec: 30 }) as SlideConfig;
+
+    it("starts paused when the environment prefers reduced motion", () => {
+      stubMatchMedia((q) => q.includes("reduce"));
+      const card = makeCard();
+      card._hass = twoSectionHass();
+      card.setConfig(carouselConfig());
+      expect(asSlide(card)._slidePaused).toBe(true);
+      expect(asSlide(card)._slideTimer).toBeNull();
+    });
+
+    it("does not auto-advance when reduced motion is preferred", () => {
+      stubMatchMedia((q) => q.includes("reduce"));
+      const card = makeCard();
+      card._hass = twoSectionHass();
+      card.setConfig(carouselConfig());
+      card._render();
+      // A rotating carousel would land on the second section after slide_sec.
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NBA");
+      expect(headerText(card)).not.toContain("NHL");
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NBA");
+    });
+
+    it("renders the toggle in its resume/paused form on first render under reduced motion", () => {
+      stubMatchMedia((q) => q.includes("reduce"));
+      const card = makeCard();
+      card._hass = twoSectionHass();
+      card.setConfig(carouselConfig());
+      card._render();
+
+      const toggle = ctrl(card, "Resume rotation");
+      expect(toggle).not.toBeNull();
+      expect(toggle?.classList.contains("paused")).toBe(true);
+      expect(toggle?.textContent).toContain("▶");
+      expect(ctrl(card, "Pause rotation")).toBeFalsy();
+    });
+
+    it("starts rotating when Resume is clicked after a reduced-motion paused start", () => {
+      stubMatchMedia((q) => q.includes("reduce"));
+      const card = makeCard();
+      card._hass = twoSectionHass();
+      card.setConfig(carouselConfig());
+      card._render();
+
+      // The reduced-motion paused start must surface a Resume control.
+      expect(ctrl(card, "Resume rotation")).toBeTruthy();
+      ctrl(card, "Resume rotation")?.click();
+      expect(asSlide(card)._slidePaused).toBe(false);
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NHL");
+    });
+
+    it("rotates normally when matchMedia is present but does not match reduce", () => {
+      stubMatchMedia(() => false);
+      const card = makeCard();
+      card._hass = twoSectionHass();
+      card.setConfig(carouselConfig());
+      card._render();
+
+      expect(asSlide(card)._slidePaused).toBe(false);
+      expect(asSlide(card)._slideTimer).not.toBeNull();
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NHL");
+    });
+
+    it("rotates normally when matchMedia is absent (jsdom default)", () => {
+      vi.stubGlobal("matchMedia", undefined);
+      const card = makeCard();
+      card._hass = twoSectionHass();
+      card.setConfig(carouselConfig());
+      card._render();
+
+      expect(asSlide(card)._slidePaused).toBe(false);
+      expect(asSlide(card)._slideTimer).not.toBeNull();
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerText(card)).toContain("NHL");
+    });
+  });
+
+  describe("slide_sec branch coverage", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    type SlideCfg = NonNullable<SportScoreboardCard["_config"]> & { slide_sec?: number };
+    type SlideC = SportScoreboardCard & {
+      _slideIndex: number;
+      _slideTimer: ReturnType<typeof setInterval> | null;
+      _slidePaused: boolean;
+      _slideStep(dir: number): void;
+      _syncSlideTimer(): void;
+    };
+    const asC = (c: SportScoreboardCard) => c as unknown as SlideC;
+    const nhl = { name: "NHL", prefix: "sensor.nhl_", special_teams: [] as string[] };
+    const two = [{ name: "NBA", prefix: "sensor.nba_", special_teams: [] as string[] }, nhl];
+
+    it("renders header + empty message + controls for an empty active carousel slide", () => {
+      const card = makeCard();
+      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      // no matching entities at all → active section is empty
+      card._hass = makeHass({ "sensor.other_x": makeState("PRE", baseAttrs) });
+      card._render();
+      const header = card.shadowRoot?.querySelector(".section-header");
+      expect(header).not.toBeNull();
+      expect(card.shadowRoot?.querySelector(".empty")?.textContent).toContain("No games found");
+      expect(card.shadowRoot?.querySelectorAll(".section-header button")).toHaveLength(3);
+    });
+
+    it("renders the empty carousel slide when the active section has entities but limit 0", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [{ ...two[0], limit: 0 }, nhl],
+        slide_sec: 30,
+      } as SlideCfg;
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(card.shadowRoot?.querySelector(".empty")).not.toBeNull();
+      expect(card.shadowRoot?.querySelectorAll(".game-row")).toHaveLength(0);
+    });
+
+    it("applies colors.header to the carousel (has-controls) header", () => {
+      const card = makeCard();
+      card._config = { sections: two, slide_sec: 30, colors: { header: "tomato" } } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      const header = card.shadowRoot?.querySelector(".section-header") as HTMLElement | null;
+      expect(header?.getAttribute("style")).toContain("color:tomato");
+      expect(header?.classList.contains("has-controls")).toBe(true);
+    });
+
+    it("_slideStep is a no-op with fewer than two sections", () => {
+      const card = makeCard();
+      card._config = { sections: [two[0]], slide_sec: 30 } as SlideCfg;
+      asC(card)._slideIndex = 0;
+      expect(() => asC(card)._slideStep(1)).not.toThrow();
+      expect(asC(card)._slideIndex).toBe(0);
+    });
+
+    it("_slideStep is a no-op with no config", () => {
+      const card = makeCard();
+      expect(() => asC(card)._slideStep(1)).not.toThrow();
+      expect(asC(card)._slideIndex).toBe(0);
+    });
+
+    it("computes the min-height from a numeric row_height and the default limit", () => {
+      const card = makeCard();
+      // sections carry no `limit` → maxRows = 1 + 10; row_height 40 → min-height 440px
+      card._config = { sections: two, slide_sec: 30, row_height: "40px" } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+      expect(style).toContain("min-height:440px");
+    });
+
+    it("getCardSize uses the default limit for carousel sections without one", () => {
+      const card = makeCard();
+      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = 7
+      expect(card.getCardSize()).toBe(7);
+    });
+
+    it("_syncSlideTimer is a no-op when the timer is already running", () => {
+      const card = makeCard();
+      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      const timer = asC(card)._slideTimer;
+      expect(timer).not.toBeNull();
+      asC(card)._syncSlideTimer();
+      expect(asC(card)._slideTimer).toBe(timer);
+    });
+
+    it("the rotation interval tolerates the config being torn out from under it", () => {
+      const card = makeCard();
+      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      card._config = null;
+      expect(() => vi.advanceTimersByTime(30_000)).not.toThrow();
+    });
+
+    it("the rotation interval skips rendering when hass is gone", () => {
+      const card = makeCard();
+      card._config = { sections: two, slide_sec: 30 } as SlideCfg;
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      const renderSpy = vi.spyOn(card, "_render");
+      card._hass = null;
+      vi.advanceTimersByTime(30_000);
+      // index still advanced, but no re-render fired
+      expect(asC(card)._slideIndex).toBe(1);
+      expect(renderSpy).not.toHaveBeenCalled();
+    });
+
+    it("_syncSlideTimer tolerates a missing config", () => {
+      const card = makeCard();
+      expect(() => asC(card)._syncSlideTimer()).not.toThrow();
+      expect(asC(card)._slideTimer).toBeNull();
+    });
+  });
+
   describe("subscription", () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());

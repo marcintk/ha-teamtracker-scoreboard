@@ -32,6 +32,18 @@ index.
   nested `<button>`s inside `.section-header`, so the text became `"NHL‹⏸›"`. Fix: scope such
   helpers to a stable inner element (`.section-title`) — and prefer that from the start when a
   region is likely to gain controls.
+- **Also — `window.matchMedia` is not implemented by jsdom and there is no test setup file.** A bare
+  `window.matchMedia("…").matches` in `src/` throws under test. Read it optional-chained —
+  `window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true` — so an absent
+  `matchMedia` degrades to the feature being off; the existing carousel tests never stub it and rely
+  on exactly that. Tests that exercise the branch do
+  `vi.stubGlobal("matchMedia", q => ({ matches: …, media: q, addEventListener(){}, removeEventListener(){}, … }))`.
+- **Also — the per-slice review gate runs `npm test`, which does not enforce the 100% coverage
+  threshold; `npm run test:coverage` does.** Slices 1–2 of #140 landed a few branches short
+  (`_syncSlideTimer` fall-throughs, `_slideStep`'s `n < 2` guard, `?? 10` / numeric-`row_height` in
+  the min-height + `getCardSize` math, `sectionHtml`'s carousel `emptyHtml()` paths) and it was only
+  caught at the end. Run `test:coverage` at each slice gate, or expect a coverage-catch-up test
+  block before shipping.
 - **Ref:** [#140](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/140) ·
   2026-09-06
 
