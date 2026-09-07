@@ -29,7 +29,13 @@ export const CARD_STYLES = `
     color: #888;
     font-size: calc(15px * var(--scoreboard-font-scale, 1));
     line-height: 1;
-    padding: 1px 4px;
+    padding: 0;
+    /* fixed square box so the ▶/⏸ glyph swap never shifts the ‹ › buttons */
+    width: calc(20px * var(--scoreboard-font-scale, 1));
+    height: calc(20px * var(--scoreboard-font-scale, 1));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 3px;
   }
   .slide-btn:hover { color: #ccc; }
@@ -49,7 +55,7 @@ export const CARD_STYLES = `
     display: var(--scoreboard-position-display, block);
     width: 18px;
     min-width: 18px;
-    font-size: calc(11px * var(--scoreboard-font-scale, 1));
+    font-size: calc(15px * var(--scoreboard-font-scale, 1));
     font-variant-numeric: tabular-nums;
     text-align: center;
     color: var(--scoreboard-opponent-color, #777);
