@@ -74,6 +74,7 @@ describe("sectionHtml", () => {
     limit: 10,
     special_teams: [],
     rank_type: "win-loss",
+    view: "ranking",
   };
 
   it("returns empty when no matching entities", () => {
@@ -194,6 +195,40 @@ describe("sectionHtml", () => {
     };
     const text = doc(sectionHtml(wcSection, states)).textContent ?? "";
     expect(text.indexOf("France")).toBeLessThan(text.indexOf("Brazil"));
+  });
+
+  it("defaults a section with no `view` to the schedule (no position numbers)", () => {
+    // baseAttrs carries a record, so the old `auto` default would have ranked it
+    const states = {
+      "sensor.nba_lal": makeState("PRE", { ...baseAttrs, date: "2024-04-20T00:00:00Z" }),
+    };
+    const s: SectionConfig = { name: "NBA", prefix: "sensor.nba_", limit: 10, special_teams: [] };
+    const el = doc(sectionHtml(s, states));
+    expect((el.querySelector(".team-pos")?.textContent ?? "").trim()).toBe("");
+  });
+
+  it("schedule floats live games above upcoming, and finished games last", () => {
+    const states = {
+      "sensor.nba_fin": makeState("POST", {
+        ...baseAttrs,
+        team_name: "Finished",
+        date: "2024-04-20T18:00:00Z", // earliest kickoff
+      }),
+      "sensor.nba_soon": makeState("PRE", {
+        ...baseAttrs,
+        team_name: "Upcoming",
+        date: "2024-04-20T23:00:00Z", // latest kickoff
+      }),
+      "sensor.nba_live": makeState("IN", {
+        ...baseAttrs,
+        team_name: "Live",
+        date: "2024-04-20T20:00:00Z", // middle kickoff
+      }),
+    };
+    const s: SectionConfig = { name: "NBA", prefix: "sensor.nba_", limit: 10, special_teams: [] };
+    const text = doc(sectionHtml(s, states)).textContent ?? "";
+    expect(text.indexOf("Live")).toBeLessThan(text.indexOf("Upcoming"));
+    expect(text.indexOf("Upcoming")).toBeLessThan(text.indexOf("Finished"));
   });
 
   it("produces stable order when two teams have the same win ratio", () => {
@@ -333,6 +368,7 @@ describe("standings position column", () => {
     limit: 10,
     special_teams: [],
     rank_type: "win-loss",
+    view: "ranking",
   };
 
   const threeTeams = () => ({
@@ -427,6 +463,7 @@ describe("sectionHtml scoreChangedAt", () => {
     limit: 10,
     special_teams: [] as string[],
     rank_type: "win-loss" as const,
+    view: "ranking" as const,
   };
 
   it("marks entity as fresh when scoreChangedAt is recent", () => {

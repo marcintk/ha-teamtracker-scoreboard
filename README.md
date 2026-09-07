@@ -54,16 +54,19 @@ sections:
   - name: Serie A
     prefix: sensor.sera_
     limit: 20
+    view: ranking # omit for the date-sorted schedule (the default)
     rank_type: win-draw-loss
     special_teams:
       - juv
   - name: Primera Division
     prefix: sensor.liga_
     limit: 20
+    view: ranking
     rank_type: win-draw-loss
   - name: NBA Scoreboard
     prefix: sensor.nba_
     limit: 20
+    view: ranking
     rank_type: win-loss
     special_teams:
       - sa
@@ -73,12 +76,12 @@ sections:
 
 A section renders as one of two things:
 
+- **schedule** _(default)_ — one row per game: live games first, then upcoming (soonest first), then
+  finished; the two sensors for a game are merged into one row
 - **standings table** — one row per team, ranked by record (see [Rank type](#rank-type))
-- **schedule** — one row per game, sorted by date; the two sensors for a game are merged into one
-  row
 
-`view: auto` (default) picks the standings table when every team has a win-loss record, else the
-schedule.
+Set `view: ranking` on a section for the standings table, or `view: auto` to pick automatically
+(standings when every team has a win-loss record, else schedule).
 
 ## Rank type
 
@@ -121,7 +124,7 @@ sections:
   - name: Premier League
     prefix: sensor.epl_
     limit: 12
-    view: auto
+    view: ranking
     rank_type: win-draw-loss
     score_blink: 5
     show_position: true
@@ -130,16 +133,16 @@ sections:
   - ...
 ```
 
-| Field                   | Type    | Default         | Description                                                                                                                                                                                                                  |
-| ----------------------- | ------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `section.name`          | string  | required        | Header label shown above the section                                                                                                                                                                                         |
-| `section.prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                                                                                                                                         |
-| `section.limit`         | number  | `10`            | Max rows to show                                                                                                                                                                                                             |
-| `section.view`          | string  | `auto`          | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `auto` = standings when every team has a numeric record, else schedule; `ranking` = always standings; `schedule` = always the date-sorted list |
-| `section.rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table — see [Rank type](#rank-type)                                                                                                                                                        |
-| `section.score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                 |
-| `section.show_position` | boolean | `true`          | Show the position number (`ranking` view only). It's the rank among tracked teams, so it matches the real league table only if every team is tracked. `false` hides it but keeps the gutter for row alignment                |
-| `section.special_teams` | list    | `[]`            | Team suffixes to highlight — the part after the prefix, e.g. `bos` for `sensor.nba_bos`                                                                                                                                      |
+| Field                   | Type    | Default         | Description                                                                                                                                                                                                                        |
+| ----------------------- | ------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `section.name`          | string  | required        | Header label shown above the section                                                                                                                                                                                               |
+| `section.prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                                                                                                                                               |
+| `section.limit`         | number  | `10`            | Max rows to show                                                                                                                                                                                                                   |
+| `section.view`          | string  | `schedule`      | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `schedule` = date-sorted list, live games first; `ranking` = standings table; `auto` = standings when every team has a numeric record, else schedule |
+| `section.rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table — see [Rank type](#rank-type)                                                                                                                                                              |
+| `section.score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                       |
+| `section.show_position` | boolean | `true`          | Show the position number (`ranking` view only). It's the rank among tracked teams, so it matches the real league table only if every team is tracked. `false` hides it but keeps the gutter for row alignment                      |
+| `section.special_teams` | list    | `[]`            | Team suffixes to highlight — the part after the prefix, e.g. `bos` for `sensor.nba_bos`                                                                                                                                            |
 
 ### Layout
 

@@ -20,10 +20,11 @@
       "lazy_refresh": 0,
       "layout": { "height": "186px" },
       "sections": [
-        "NBA — 4 rows (sensor.nba_, rank_type win-loss, special bos)",
-        "NHL — 4 rows (sensor.nhl_, rank_type win-loss-otl, special col)",
-        "Premier League — 4 rows (sensor.epl_, rank_type win-draw-loss, special liv)"
-      ]
+        "NBA — 4 rows (sensor.nba_, view ranking, rank_type win-loss, special bos)",
+        "NHL — 4 rows (sensor.nhl_, view ranking, rank_type win-loss-otl, special col)",
+        "Premier League — 4 rows (sensor.epl_, view ranking, rank_type win-draw-loss, special liv)"
+      ],
+      "note": "each section sets `view: ranking` — the card default is `schedule`, but the demo shows the standings table"
     },
     "fake_data": "One game per tracked sensor (home side only, so each fixture is one row), a mix of IN / POST / PRE states with team names, records, scores, TV networks and real ESPN CDN logo URLs (https — non-https logos are dropped by the card). NBA/NHL logos are keyed by team abbreviation; ESPN soccer logos are keyed by NUMERIC team id (see the EPL block). No real Home Assistant, no WebSocket: the harness gives the card a connection object with no subscribeEvents, so the card re-renders on every `card.hass = …` assignment (SubscriptionManager bails out early). The same connection object is reused across assignments so the card never treats it as a reconnect.",
     "mount_order": "createElement → setConfig → appendChild → set .hass. setConfig before connecting matters for the same reason it does elsewhere in this card family.",

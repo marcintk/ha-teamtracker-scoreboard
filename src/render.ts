@@ -14,6 +14,11 @@ import type { ColorsConfig, GameState, HassEntity, HassStates, SectionConfig } f
 import { VALID_STATES } from "./utils.js";
 import { logoHtml, messageHtml, tvHtml } from "./widgets.js";
 
+// schedule view: group order before the date sort — IN (live) first, POST
+// (finished) last, everything else (PRE / BYE) in the middle "upcoming" band.
+const scheduleGroup = (state: string | undefined): number =>
+  state === "IN" ? 0 : state === "POST" ? 2 : 1;
+
 export function rowHtml(
   stateObj: HassEntity | null,
   special: boolean,
@@ -68,7 +73,7 @@ export function sectionHtml(
     limit = 10,
     special_teams = [],
     rank_type = "win-draw-loss",
-    view = "auto",
+    view = "schedule",
     score_blink = 5,
     show_position = true,
   } = section;
@@ -98,6 +103,12 @@ export function sectionHtml(
   });
 
   items.sort((a, b) => {
+    if (sortMode === "by-date") {
+      // live games first, then upcoming, then finished — date-sorted within each group
+      const ga = scheduleGroup(states[a.entityId]?.state);
+      const gb = scheduleGroup(states[b.entityId]?.state);
+      if (ga !== gb) return ga - gb;
+    }
     const diff = sortMode === "by-date" ? a.key - b.key : b.key - a.key;
     if (diff !== 0) return diff;
     const nameDiff = a.teamName.localeCompare(b.teamName);

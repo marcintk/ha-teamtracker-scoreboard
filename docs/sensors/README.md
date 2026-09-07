@@ -54,10 +54,9 @@ under `sensor:` in `configuration.yaml`.
 
 ## Card config notes
 
+- A section defaults to the **schedule** (date-sorted, live games first). Add `view: ranking` for
+  the standings table. See "Standings vs schedule" in the main README.
 - Use `rank_type: win-loss` for NBA/NFL, `win-loss-otl` for NHL, and `win-draw-loss` for the soccer
-  leagues.
+  leagues (only matters in a `ranking` view).
 - `special_teams` takes the suffix **after** the prefix — e.g. `juv` for `sensor.sera_juv`, not the
   ESPN id.
-- Sections show the standings table automatically once every tracked team has a numeric record; set
-  `view: schedule` on a section to force the date-sorted list. See "Standings vs schedule" in the
-  main README.

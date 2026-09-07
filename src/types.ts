@@ -54,6 +54,7 @@ export interface SectionConfig {
   limit?: number;
   special_teams?: string[];
   rank_type?: SortMode;
+  /** default `schedule`; `ranking` for a standings table, `auto` for the record heuristic */
   view?: ViewMode;
   score_blink?: number;
   show_position?: boolean;
