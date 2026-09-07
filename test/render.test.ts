@@ -74,7 +74,7 @@ describe("sectionHtml", () => {
     limit: 10,
     special_teams: [],
     rank_type: "win-loss",
-    view: "ranking",
+    view: "standings",
   };
 
   it("returns empty when no matching entities", () => {
@@ -367,7 +367,7 @@ describe("standings position column", () => {
     limit: 10,
     special_teams: [],
     rank_type: "win-loss",
-    view: "ranking",
+    view: "standings",
     show_position: true,
   };
 
@@ -464,7 +464,7 @@ describe("sectionHtml scoreChangedAt", () => {
     limit: 10,
     special_teams: [] as string[],
     rank_type: "win-loss" as const,
-    view: "ranking" as const,
+    view: "standings" as const,
   };
 
   it("marks entity as fresh when scoreChangedAt is recent", () => {

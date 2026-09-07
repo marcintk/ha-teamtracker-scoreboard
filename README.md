@@ -53,36 +53,25 @@ type: custom:ha-teamtracker-scoreboard-card
 sections:
   - name: Serie A
     prefix: sensor.sera_
-    limit: 20
-    view: ranking # omit for the date-sorted schedule (the default)
-    rank_type: win-draw-loss
     special_teams:
       - juv
   - name: Primera Division
     prefix: sensor.liga_
-    limit: 20
-    view: ranking
-    rank_type: win-draw-loss
+    limit: 5
+    view: standings
   - name: NBA Scoreboard
     prefix: sensor.nba_
-    limit: 20
-    view: ranking
-    rank_type: win-loss
-    special_teams:
-      - sa
+    limit: 5
 ```
 
 ## Standings vs schedule
 
-A section renders as one of two things:
+A section renders as one of ways:
 
 - **schedule** _(default)_ — one row per game: live games first, then every other game by nearness
   to now, so the next kick-off and the just-finished game sit near the top; the two sensors for a
   game are merged into one row
 - **standings table** — one row per team, ranked by record (see [Rank type](#rank-type))
-
-Set `view: ranking` on a section for the standings table, or `view: auto` to pick automatically
-(standings when every team has a win-loss record, else schedule).
 
 ## Rank type
 
@@ -125,7 +114,7 @@ sections:
   - name: Premier League
     prefix: sensor.epl_
     limit: 12
-    view: ranking
+    view: standings
     rank_type: win-draw-loss
     score_blink: 5
     show_position: true
@@ -134,16 +123,16 @@ sections:
   - ...
 ```
 
-| Field                   | Type    | Default         | Description                                                                                                                                                                                                                                                            |
-| ----------------------- | ------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `section.name`          | string  | required        | Header label shown above the section                                                                                                                                                                                                                                   |
-| `section.prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                                                                                                                                                                                   |
-| `section.limit`         | number  | `10`            | Max rows to show                                                                                                                                                                                                                                                       |
-| `section.view`          | string  | `schedule`      | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `schedule` = list, live games first then every other game by nearness to now; `ranking` = standings table; `auto` = standings when every team has a numeric record, else schedule        |
-| `section.rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table — see [Rank type](#rank-type)                                                                                                                                                                                                  |
-| `section.score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                                                           |
-| `section.show_position` | boolean | `false`         | Draw the position gutter — the rank in a `ranking` view (a blank cell in `schedule`, for aligning a mixed card). It's the rank among **tracked** teams, so it matches the real league table only if every team is tracked. Left `false`, the gutter isn't drawn at all |
-| `section.special_teams` | list    | `[]`            | Team suffixes to highlight — the part after the prefix, e.g. `bos` for `sensor.nba_bos`                                                                                                                                                                                |
+| Field                   | Type    | Default         | Description                                                                                                                                                                                                                                                              |
+| ----------------------- | ------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `section.name`          | string  | required        | Header label shown above the section                                                                                                                                                                                                                                     |
+| `section.prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                                                                                                                                                                                     |
+| `section.limit`         | number  | `10`            | Max rows to show                                                                                                                                                                                                                                                         |
+| `section.view`          | string  | `schedule`      | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `schedule` = list, live games first then every other game by nearness to now; `standings` = standings table; `auto` = standings when every team has a numeric record, else schedule        |
+| `section.rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table — see [Rank type](#rank-type)                                                                                                                                                                                                    |
+| `section.score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                                                             |
+| `section.show_position` | boolean | `false`         | Draw the position gutter — the rank in a `standings` view (a blank cell in `schedule`, for aligning a mixed card). It's the rank among **tracked** teams, so it matches the real league table only if every team is tracked. Left `false`, the gutter isn't drawn at all |
+| `section.special_teams` | list    | `[]`            | Team suffixes to highlight — the part after the prefix, e.g. `bos` for `sensor.nba_bos`                                                                                                                                                                                  |
 
 ### Layout
 

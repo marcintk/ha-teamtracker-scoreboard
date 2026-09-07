@@ -85,7 +85,7 @@ index.
   `"regular"` as non-regular, so leagues that emit a descriptive `season` label (TeamTracker Serie
   A: `2026-27-italian-serie-a`) tripped a false positive.
 - **Guardrail (current):** the `season` attribute is **no longer consulted**. A section's `view`
-  (`auto` | `ranking` | `schedule`, default `schedule` since #143) decides directly; `auto` shows
+  (`auto` | `standings` | `schedule`, default `schedule` since #143) decides directly; `auto` shows
   the standings table only when every tracked entity has a numeric `team_record`. `src/sorting.ts` ›
   `resolveSortMode`; `test/sorting.test.ts` › "view override (4th parameter)" pins the forced
   directions and the unrecognised-value fall-through. Schedule ordering (live → `|date − now|`) is

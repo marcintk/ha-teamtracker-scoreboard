@@ -32,7 +32,7 @@ export function sortKeyFor(attr: GameAttr | null | undefined, sortMode: SortMode
 // A win-loss record: two or more dash-separated integers ("12-4", "0-1-2", "5-2-1").
 const NUMERIC_RECORD = /^\d+(-\d+)+$/;
 
-// "schedule" / "ranking" force the result. "auto" (default, and any unrecognised value)
+// "schedule" / "standings" force the result. "auto" (default, and any unrecognised value)
 // shows the standings table only when *every* tracked entity carries a numeric win-loss
 // record — otherwise there is nothing to rank, so fall back to the date-sorted list.
 export function resolveSortMode(
@@ -42,7 +42,7 @@ export function resolveSortMode(
   view: ViewMode = "auto"
 ): SortMode {
   if (view === "schedule") return "by-date";
-  if (view === "ranking") return rankType;
+  if (view === "standings") return rankType;
   return entities.every((id) =>
     NUMERIC_RECORD.test(String(states[id]?.attributes?.team_record ?? "").trim())
   )

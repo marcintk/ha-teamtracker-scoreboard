@@ -6,7 +6,7 @@
 
 Durable behavioral/UX constraints. Preserve unless the user explicitly changes them.
 
-- A section's `view` defaults to `schedule` — the date-sorted list. `ranking` forces the standings
+- A section's `view` defaults to `schedule` — the date-sorted list. `standings` forces the standings
   table (ranked by `rank_type`); `auto` shows standings only when **every** tracked entity has a
   numeric win-loss `team_record` (`12-4`, `0-1-2`) and otherwise the list. The internal `SortMode`
   value for the list is still `by-date`. The sensor `season` attribute is not consulted.
