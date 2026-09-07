@@ -136,9 +136,6 @@ Each entry in the `sections:` list is one league:
 
 ### Layout
 
-`layout` (map) — size, spacing and text scale. Each key maps to a `--scoreboard-*` CSS variable that
-falls back to its default.
-
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
 layout:
