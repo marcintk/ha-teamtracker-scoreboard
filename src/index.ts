@@ -358,12 +358,16 @@ export class SportScoreboardCard extends HTMLElement {
         .map(([k, v]) => `${k}:${String(v)};`)
         .join("");
 
-      const haCardStyle = `${slideMinH}${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}${varStr}`;
+      const haCardStyle = `${slideMinH}${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug ? "position:relative;" : ""}${varStr}`;
 
       const idx = ((this._slideIndex % sections.length) + sections.length) % sections.length;
       const visibleSections = carousel ? sections.slice(idx, idx + 1) : sections;
 
-      const sectionTemplates = visibleSections.map((s) =>
+      const versionBadge = show_version
+        ? html`<span id="sc-version" class="sc-version">v${__CARD_VERSION__}</span>`
+        : nothing;
+
+      const sectionTemplates = visibleSections.map((s, i) =>
         sectionHtml(
           s,
           states,
@@ -371,7 +375,8 @@ export class SportScoreboardCard extends HTMLElement {
           colors,
           this._scoreChangedAt,
           carousel,
-          slideControls
+          slideControls,
+          i === 0 ? versionBadge : nothing
         )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
@@ -381,11 +386,6 @@ export class SportScoreboardCard extends HTMLElement {
           ${STYLE_BLOCK}
           <ha-card style=${haCardStyle || nothing}>
             ${debug ? unsafeHTML(`<div id="sc-debug" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:rgba(0,0,0,0.5);color:#00e676;font-family:monospace;font-size:11px;line-height:1;padding:2px 6px;pointer-events:none;">${this._debug.tableHtml()}</div>`) : nothing}
-            ${
-              show_version
-                ? html`<div id="sc-version" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:monospace;font-size:9px;color:#888;pointer-events:none;">v${__CARD_VERSION__}</div>`
-                : nothing
-            }
             ${
               hasContent
                 ? sectionTemplates

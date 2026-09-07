@@ -1494,7 +1494,7 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], debug: true };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).not.toContain("sc-version");
+      expect(card.shadowRoot?.querySelector("#sc-version")).toBeNull();
     });
 
     it("version badge is absent when debug is false", () => {
@@ -1502,7 +1502,7 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection] };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).not.toContain("sc-version");
+      expect(card.shadowRoot?.querySelector("#sc-version")).toBeNull();
     });
 
     it("show_version shows version badge without debug", () => {
@@ -1510,8 +1510,26 @@ describe("SportScoreboardCard", () => {
       card._config = { sections: [nbaSection], show_version: true };
       card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
       card._render();
-      expect(card.shadowRoot?.innerHTML).toContain("sc-version");
-      expect(card.shadowRoot?.innerHTML).not.toContain("sc-debug");
+      expect(card.shadowRoot?.querySelector("#sc-version")).not.toBeNull();
+      expect(card.shadowRoot?.querySelector("#sc-debug")).toBeNull();
+    });
+
+    it("renders the version badge inside the first section header, once", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection, { name: "NHL", prefix: "sensor.nhl_", special_teams: [] }],
+        show_version: true,
+      };
+      card._hass = makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+      card._render();
+      const badges = card.shadowRoot?.querySelectorAll("#sc-version") ?? [];
+      expect(badges).toHaveLength(1);
+      expect(badges[0]?.closest(".section-header")).not.toBeNull();
+      const headers = card.shadowRoot?.querySelectorAll(".section-header") ?? [];
+      expect(headers[0]?.contains(badges[0] as Node)).toBe(true);
     });
   });
 

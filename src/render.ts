@@ -59,7 +59,8 @@ export function sectionHtml(
   colors: ColorsConfig = {},
   scoreChangedAt: Map<string, number> = new Map(),
   carousel = false,
-  controls: TemplateResult | typeof nothing = nothing
+  controls: TemplateResult | typeof nothing = nothing,
+  version: TemplateResult | typeof nothing = nothing
 ): TemplateResult | typeof nothing {
   const {
     name,
@@ -77,9 +78,9 @@ export function sectionHtml(
     VALID_STATES.has((states[id]?.state ?? "") as GameState)
   );
   const header =
-    controls === nothing
+    controls === nothing && version === nothing
       ? html`<div class="section-header" style=${colors.header ? `color:${colors.header}` : nothing}>${name}</div>`
-      : html`<div class="section-header has-controls" style=${colors.header ? `color:${colors.header}` : nothing}><span class="section-title">${name}</span>${controls}</div>`;
+      : html`<div class="section-header has-controls" style=${colors.header ? `color:${colors.header}` : nothing}><span class="section-title">${name}</span>${version}${controls}</div>`;
   const emptyHtml = () =>
     html`${header}<div class="empty">No games found — check your section prefixes.</div>`;
   if (!entities.length) return carousel ? emptyHtml() : nothing;

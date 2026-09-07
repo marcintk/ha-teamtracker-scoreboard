@@ -20,6 +20,19 @@ export const CARD_STYLES = `
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 6px;
+  }
+  .section-title { flex: none; }
+  /* version sits between the title and the controls, centred and vertically aligned */
+  .sc-version {
+    flex: 1;
+    text-align: center;
+    font-family: monospace;
+    font-size: calc(9px * var(--scoreboard-font-scale, 1));
+    font-weight: normal;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
   }
   .slide-ctrls { display: inline-flex; gap: 2px; flex: none; }
   .slide-btn {
