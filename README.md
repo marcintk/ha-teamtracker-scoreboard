@@ -162,49 +162,20 @@ sections:
   - ...
 ```
 
-| Key                  | Type   | Default | Description                                                               |
-| -------------------- | ------ | ------- | ------------------------------------------------------------------------- |
-| `layout.height`      | string | auto    | Outer card height (any CSS length); omit to fit content                   |
-| `layout.row_height`  | string | `28px`  | `.game-row` height, the logo / score / colon cell heights, the logo image |
-| `layout.logo_width`  | string | `30px`  | Logo cell width and the logo image width (aspect ratio preserved)         |
-| `layout.score_width` | string | `34px`  | Score cell width — widen for 3-digit totals                               |
-| `layout.colon_width` | string | `9px`   | Centre colon cell width                                                   |
-| `layout.team_width`  | string | `99px`  | Team-name column width; one CSS length applied to both sides              |
-| `layout.font_scale`  | number | `1`     | Uniform multiplier over every text size; raise `layout.row_height` too    |
+Each key also exposes a `--ttsc-*` CSS custom property (unique to this card) with a built-in
+fallback. Setting the `layout:` key writes it inline; to restyle from a theme or `card_mod`, set the
+property on `ha-card` instead — it inherits into the card's shadow DOM, and a key you leave out of
+`layout:` takes the CSS value (one you set there wins unless your rule uses `!important`).
 
-### Styling with CSS
-
-Every dimension and colour above is also a CSS custom property, each prefixed **`--ttsc-`** (unique
-to this card) and each with a built-in fallback. Setting a `layout:` / `colors:` key just writes the
-matching property inline on the card. To restyle from a theme or `card_mod` instead, set the
-property on `ha-card` (or any ancestor — custom properties inherit into the card's shadow DOM); a
-key you left out of `layout:` / `colors:` takes the CSS value, one you set there wins unless your
-rule uses `!important`.
-
-| Property                                              | Default                            | Set by                           |
-| ----------------------------------------------------- | ---------------------------------- | -------------------------------- |
-| `--ttsc-row-height`                                   | `28px`                             | `layout.row_height`              |
-| `--ttsc-logo-width`                                   | `30px`                             | `layout.logo_width`              |
-| `--ttsc-score-width`                                  | `34px`                             | `layout.score_width`             |
-| `--ttsc-colon-width`                                  | `9px`                              | `layout.colon_width`             |
-| `--ttsc-team-col-a-width` / `--ttsc-team-col-b-width` | `99px`                             | `layout.team_width` (both sides) |
-| `--ttsc-font-scale`                                   | `1`                                | `layout.font_scale`              |
-| `--ttsc-team-color`                                   | `var(--primary-text-color, white)` | `colors.team`                    |
-| `--ttsc-opponent-color`                               | `#777`                             | `colors.opponent`                |
-| `--ttsc-special-color`                                | `#2196F3`                          | `colors.special`                 |
-
-The remaining `colors:` keys (`header`, `winner`, `loser`, `live`, `leading`) have no CSS property —
-set them through the `colors:` map.
-
-```css
-/* e.g. via card_mod */
-ha-card {
-  --ttsc-row-height: 40px;
-  --ttsc-special-color: #e91e63;
-}
-```
-
-`layout.height` is applied as a plain `height` on `ha-card`, not a custom property.
+| Key                  | Type   | Default | CSS property                                          | Controls                                                                  |
+| -------------------- | ------ | ------- | ----------------------------------------------------- | ------------------------------------------------------------------------- |
+| `layout.height`      | string | auto    | — (plain `height` on `ha-card`)                       | Outer card height (any CSS length); omit to fit content                   |
+| `layout.row_height`  | string | `28px`  | `--ttsc-row-height`                                   | `.game-row` height, the logo / score / colon cell heights, the logo image |
+| `layout.logo_width`  | string | `30px`  | `--ttsc-logo-width`                                   | Logo cell width and the logo image width (aspect ratio preserved)         |
+| `layout.score_width` | string | `34px`  | `--ttsc-score-width`                                  | Score cell width — widen for 3-digit totals                               |
+| `layout.colon_width` | string | `9px`   | `--ttsc-colon-width`                                  | Centre colon cell width                                                   |
+| `layout.team_width`  | string | `99px`  | `--ttsc-team-col-a-width` / `--ttsc-team-col-b-width` | Team-name column width; one CSS length applied to both sides              |
+| `layout.font_scale`  | number | `1`     | `--ttsc-font-scale`                                   | Uniform multiplier over every text size; raise `layout.row_height` too    |
 
 ### Colors
 
@@ -223,16 +194,16 @@ sections:
   - ...
 ```
 
-| Key               | Default                   | Description                                |
-| ----------------- | ------------------------- | ------------------------------------------ |
-| `colors.team`     | `white`                   | Your tracked team name                     |
-| `colors.opponent` | `#777` (gray)             | Opponent name                              |
-| `colors.special`  | `#2196F3` (Material Blue) | `special_teams` highlight                  |
-| `colors.header`   | `#2196F3` (Material Blue) | Section header label                       |
-| `colors.winner`   | `orange`                  | POST winner score and final clock          |
-| `colors.loser`    | `darkgray`                | POST loser score                           |
-| `colors.live`     | `indianred`               | IN game clock text and TV badge background |
-| `colors.leading`  | `brown`                   | IN score for the currently leading team    |
+| Key               | Default                            | CSS property            | Applies to                                 |
+| ----------------- | ---------------------------------- | ----------------------- | ------------------------------------------ |
+| `colors.team`     | `var(--primary-text-color, white)` | `--ttsc-team-color`     | Your tracked team name                     |
+| `colors.opponent` | `#777` (gray)                      | `--ttsc-opponent-color` | Opponent name                              |
+| `colors.special`  | `#2196F3` (Material Blue)          | `--ttsc-special-color`  | `special_teams` highlight                  |
+| `colors.header`   | `#2196F3` (Material Blue)          | —                       | Section header label                       |
+| `colors.winner`   | `orange`                           | —                       | POST winner score and final clock          |
+| `colors.loser`    | `darkgray`                         | —                       | POST loser score                           |
+| `colors.live`     | `indianred`                        | —                       | IN game clock text and TV badge background |
+| `colors.leading`  | `brown`                            | —                       | IN score for the currently leading team    |
 
 <!-- Reference links -->
 
