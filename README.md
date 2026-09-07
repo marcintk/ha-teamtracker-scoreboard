@@ -159,6 +159,8 @@ sections:
 | `layout.team_width`  | string | `99px`  | Team-name column width; one CSS length applied to both sides              |
 | `layout.font_scale`  | number | `1`     | Uniform multiplier over every text size; raise `layout.row_height` too    |
 
+Each key maps to a `--scoreboard-*` CSS variable that falls back to its default.
+
 ### Colors
 
 ```yaml
