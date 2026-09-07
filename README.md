@@ -166,9 +166,6 @@ sections:
 | `layout.team_width`  | string | `99px`  | `--ttsc-team-col-a-width` / `--ttsc-team-col-b-width` | Team-name column width; one CSS length applied to both sides              |
 | `layout.font_scale`  | number | `1`     | `--ttsc-font-scale`                                   | Uniform multiplier over every text size; raise `layout.row_height` too    |
 
-The `--ttsc-*` properties (unique to this card) can also be set on `ha-card` from a theme or
-`card_mod` — a `layout:` / `colors:` key wins over the CSS unless your rule uses `!important`.
-
 ### Colors
 
 ```yaml
