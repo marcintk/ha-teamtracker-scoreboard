@@ -326,7 +326,7 @@ export class SportScoreboardCard extends HTMLElement {
         ? html`<span class="slide-ctrls"
             >${this._slideBtn("Previous section", "❮", () => this._slideStep(-1))}${this._slideBtn(
               this._slidePaused ? "Resume rotation" : "Stop rotation",
-              this._slidePaused ? "▶" : "⏹",
+              this._slidePaused ? "▶" : "■",
               () => this._slideToggle(),
               this._slidePaused ? "paused" : ""
             )}${this._slideBtn("Next section", "❯", () => this._slideStep(1))}</span

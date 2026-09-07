@@ -788,7 +788,7 @@ describe("SportScoreboardCard", () => {
       expect(headerText(card)).toContain("NHL");
 
       const toggle = ctrl(card, "Stop rotation");
-      expect(toggle?.textContent).toContain("⏹");
+      expect(toggle?.textContent).toContain("■");
       expect(toggle?.classList.contains("paused")).toBe(false);
     });
 
