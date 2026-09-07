@@ -55,7 +55,7 @@ export class SportScoreboardCard extends HTMLElement {
     this._scoreChangedAt.clear();
     this._prevScores.clear();
     this._slideIndex = 0;
-    this._slidePaused = false;
+    this._slidePaused = this._prefersReducedMotion();
     this._startFixedTimer();
     this._stopSlideTimer();
     this._syncSlideTimer();
@@ -173,6 +173,10 @@ export class SportScoreboardCard extends HTMLElement {
     this._slidePaused = !this._slidePaused;
     this._syncSlideTimer();
     this._render();
+  }
+
+  _prefersReducedMotion(): boolean {
+    return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
   }
 
   _slideBtn(label: string, glyph: string, onClick: () => void, extra = ""): TemplateResult {
