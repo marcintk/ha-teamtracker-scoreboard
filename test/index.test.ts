@@ -1747,6 +1747,7 @@ describe("SportScoreboardCard", () => {
       { key: "score_width", prop: "--ttsc-score-width", value: "50px" },
       { key: "colon_width", prop: "--ttsc-colon-width", value: "12px" },
       { key: "row_height", prop: "--ttsc-row-height", value: "40px" },
+      { key: "row_gap", prop: "--ttsc-row-gap", value: "6px" },
     ] as const;
 
     for (const { key, prop, value } of cases) {

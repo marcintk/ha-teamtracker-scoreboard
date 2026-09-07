@@ -114,11 +114,16 @@ export const CARD_STYLES = `
     gap: 0;
     position: relative;
   }
+  .game-row + .game-row { margin-top: var(--ttsc-row-gap, 0); }
 
   .team-pos {
+    box-sizing: border-box;
     display: block;
-    width: 18px;
-    min-width: 18px;
+    width: 24px;
+    min-width: 24px;
+    /* balance the card's 6px left padding so the number sits an equal gap from
+       the card edge and from the next cell */
+    padding-right: 6px;
     font-size: calc(14px * var(--ttsc-font-scale, 1));
     font-variant-numeric: tabular-nums;
     text-align: center;

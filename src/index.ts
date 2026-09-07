@@ -313,6 +313,7 @@ export class SportScoreboardCard extends HTMLElement {
       score_width: l.score_width ?? c?.score_width,
       colon_width: l.colon_width ?? c?.colon_width,
       row_height: l.row_height ?? c?.row_height,
+      row_gap: l.row_gap,
       font_scale: l.font_scale ?? c?.font_scale,
     };
   }
@@ -320,8 +321,16 @@ export class SportScoreboardCard extends HTMLElement {
   _render(): void {
     try {
       const { sections, colors = {}, debug, show_version } = this._config as CardConfig;
-      const { height, team_width, logo_width, score_width, colon_width, row_height, font_scale } =
-        this._layout();
+      const {
+        height,
+        team_width,
+        logo_width,
+        score_width,
+        colon_width,
+        row_height,
+        row_gap,
+        font_scale,
+      } = this._layout();
       const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
       this._buildTrackedIds(stateKeys);
@@ -364,6 +373,7 @@ export class SportScoreboardCard extends HTMLElement {
         "--ttsc-score-width": score_width,
         "--ttsc-colon-width": colon_width,
         "--ttsc-row-height": row_height,
+        "--ttsc-row-gap": row_gap,
         "--ttsc-font-scale":
           font_scale != null && font_scale !== 1 ? String(font_scale) : undefined,
       };

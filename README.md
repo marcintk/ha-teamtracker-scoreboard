@@ -3,8 +3,7 @@
 [![TeamTracker Scoreboard Card][preview-img]][repo]
 
 Home Assistant custom Lovelace card displaying live scores, pre-game odds, win probability, TV
-network, and series info — one row per game, grouped by sport. Built on top of the
-[ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) integration.
+network, and series info — one row per game.
 
 [![hacs_badge][hacs-shield]][hacs] [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]][license] ![Maintenance][maintenance-shield]
@@ -152,6 +151,7 @@ layout:
   logo_width: 40px
   score_width: 42px # room for 3-digit basketball totals
   team_width: 130px # widen both team-name columns
+  row_gap: 4px # space between game rows (default 0)
   font_scale: 1.15 # ~15% larger text throughout
 sections:
   - ...
@@ -165,6 +165,7 @@ sections:
 | `layout.score_width` | string | `34px`  | `--ttsc-score-width`                                  | Score cell width — widen for 3-digit totals                               |
 | `layout.colon_width` | string | `9px`   | `--ttsc-colon-width`                                  | Centre colon cell width                                                   |
 | `layout.team_width`  | string | `99px`  | `--ttsc-team-col-a-width` / `--ttsc-team-col-b-width` | Team-name column width; one CSS length applied to both sides              |
+| `layout.row_gap`     | string | `0`     | `--ttsc-row-gap`                                      | Vertical gap between consecutive game rows in a section                   |
 | `layout.font_scale`  | number | `1`     | `--ttsc-font-scale`                                   | Uniform multiplier over every text size; raise `layout.row_height` too    |
 
 ### Colors

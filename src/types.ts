@@ -80,6 +80,8 @@ export interface LayoutConfig {
   score_width?: string;
   colon_width?: string;
   row_height?: string;
+  /** vertical gap between consecutive game rows in a section (CSS length; default 0) */
+  row_gap?: string;
   /** uniform multiplier over every font-size; 1 = baseline */
   font_scale?: number;
 }
