@@ -93,14 +93,14 @@ sections:
 
 ### Options
 
-Behavioural card-level options. Everything that controls **size, spacing, and text scale** lives
-under the `layout:` map — see [Layout & sizing](#layout--sizing). `slide_sec` is in
-[Rotating sections](#rotating-sections).
+Card-level options.
 
 | Option          | Type    | Default  | Description                                                                                                            |
 | --------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `sections`      | list    | required | One entry per sport/league                                                                                             |
+| `layout`        | map     | —        | Size, spacing and text-scale knobs (see [Layout & sizing](#layout--sizing))                                            |
 | `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                          |
+| `slide_sec`     | number  | —        | Rotate sections one at a time, N seconds each; needs ≥ 2 sections (see [Rotating sections](#rotating-sections))        |
 | `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s |
 | `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                             |
 | `show_position` | boolean | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)   |
