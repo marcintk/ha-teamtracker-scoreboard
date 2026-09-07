@@ -14,8 +14,9 @@ import type { ColorsConfig, GameState, HassEntity, HassStates, SectionConfig } f
 import { VALID_STATES } from "./utils.js";
 import { logoHtml, messageHtml, tvHtml } from "./widgets.js";
 
-// schedule view: group order before the date sort — IN (live) first, POST
-// (finished) last, everything else (PRE / BYE) in the middle "upcoming" band.
+// schedule view: primary group order — IN (live) first, POST (finished) last,
+// everything else (PRE / BYE) in the middle "upcoming" band. Within a group,
+// rows are ordered by distance from now (see the sort).
 const scheduleGroup = (state: string | undefined): number =>
   state === "IN" ? 0 : state === "POST" ? 2 : 1;
 
@@ -102,22 +103,26 @@ export function sectionHtml(
     };
   });
 
+  const now = Date.now();
   items.sort((a, b) => {
     if (sortMode === "by-date") {
-      // live games first, then upcoming, then finished — date-sorted within each group
+      // live games first, then upcoming, then finished
       const ga = scheduleGroup(states[a.entityId]?.state);
       const gb = scheduleGroup(states[b.entityId]?.state);
       if (ga !== gb) return ga - gb;
+      // within a group, whichever is nearer to *now* — the soonest kickoff, the
+      // most-recent final — sits higher
+      const near = Math.abs(a.key - now) - Math.abs(b.key - now);
+      if (near !== 0) return near;
+    } else {
+      const diff = b.key - a.key; // best record first
+      if (diff !== 0) return diff;
     }
-    const diff = sortMode === "by-date" ? a.key - b.key : b.key - a.key;
-    if (diff !== 0) return diff;
     const nameDiff = a.teamName.localeCompare(b.teamName);
     return nameDiff !== 0 ? nameDiff : a.entityId.localeCompare(b.entityId);
   });
 
   const ranked = items.map((it, i) => ({ ...it, position: i + 1 }));
-
-  const now = Date.now();
   const rows = deduplicate(ranked, sortMode, states)
     .slice(0, limit)
     .map(({ entityId, special = false, opponentSpecial = false, position }) => {

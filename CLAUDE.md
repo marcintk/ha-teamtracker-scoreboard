@@ -11,7 +11,8 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
   numeric win-loss `team_record` (`12-4`, `0-1-2`) and otherwise the list. The internal `SortMode`
   value for the list is still `by-date`. The sensor `season` attribute is not consulted.
 - `schedule` / `by-date` shows one entry per game (home sensor wins over away when both exist),
-  grouped IN → PRE/BYE → POST before the date sort, so live games sit at the top
+  grouped IN → PRE/BYE → POST; within a group, ordered by `|date − now|` (soonest upcoming,
+  most-recent final) so live and imminent/just-finished games sit at the top
 - Team logos render only for HTTPS URLs; non-HTTPS is silently dropped
 - Every row opens with a fixed-width position cell (`.team-pos`). In a ranking sort it holds the
   row's 1-based rank in the full sorted list (pre-`limit`), coloured like the tracked team; under

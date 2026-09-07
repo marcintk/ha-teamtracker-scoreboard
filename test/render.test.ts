@@ -171,20 +171,12 @@ describe("sectionHtml", () => {
     expect(el.innerHTML).toContain("dimgray");
   });
 
-  it("sorts by-date with multiple entities in ascending date order", () => {
+  it("sorts upcoming games by soonest kick-off first", () => {
+    const soon = new Date(Date.now() + 2 * 3600_000).toISOString();
+    const later = new Date(Date.now() + 5 * 3600_000).toISOString();
     const states = {
-      "sensor.wc_bra": makeState("PRE", {
-        ...baseAttrs,
-        date: "2024-04-20T00:00:00Z",
-        team_name: "Brazil",
-        season: "regular",
-      }),
-      "sensor.wc_fra": makeState("PRE", {
-        ...baseAttrs,
-        date: "2024-04-18T00:00:00Z",
-        team_name: "France",
-        season: "regular",
-      }),
+      "sensor.wc_bra": makeState("PRE", { ...baseAttrs, date: later, team_name: "Brazil" }),
+      "sensor.wc_fra": makeState("PRE", { ...baseAttrs, date: soon, team_name: "France" }),
     };
     const wcSection: SectionConfig = {
       name: "WC",
@@ -229,6 +221,26 @@ describe("sectionHtml", () => {
     const text = doc(sectionHtml(s, states)).textContent ?? "";
     expect(text.indexOf("Live")).toBeLessThan(text.indexOf("Upcoming"));
     expect(text.indexOf("Upcoming")).toBeLessThan(text.indexOf("Finished"));
+  });
+
+  it("orders each schedule group by distance from now (soonest / most recent first)", () => {
+    const h = 3600_000;
+    const iso = (ms: number) => new Date(Date.now() + ms).toISOString();
+    const states = {
+      "sensor.nba_soon": makeState("PRE", { ...baseAttrs, team_name: "Soon", date: iso(2 * h) }),
+      "sensor.nba_far": makeState("PRE", { ...baseAttrs, team_name: "Far", date: iso(30 * h) }),
+      "sensor.nba_recent": makeState("POST", {
+        ...baseAttrs,
+        team_name: "Recent",
+        date: iso(-2 * h),
+      }),
+      "sensor.nba_old": makeState("POST", { ...baseAttrs, team_name: "Old", date: iso(-30 * h) }),
+    };
+    const s: SectionConfig = { name: "NBA", prefix: "sensor.nba_", limit: 10, special_teams: [] };
+    const text = doc(sectionHtml(s, states)).textContent ?? "";
+    expect(text.indexOf("Soon")).toBeLessThan(text.indexOf("Far")); // upcoming: soonest first
+    expect(text.indexOf("Recent")).toBeLessThan(text.indexOf("Old")); // finished: most recent first
+    expect(text.indexOf("Far")).toBeLessThan(text.indexOf("Recent")); // all upcoming before finished
   });
 
   it("produces stable order when two teams have the same win ratio", () => {
