@@ -20,12 +20,21 @@ index.
   `CARD_STYLES`-contains assertion for the stylesheet side. `test/index.test.ts` › "team_col_width"
   / "layout dimension options" and `test/snapshot.test.ts` › CARD_STYLES wiring show the split.
 - **Also:** the `cssVars` table in `_render` is serialised through `.filter(([, v]) => v)`, so a
-  boolean "off" flag routed through it (`show_position` → `--scoreboard-position-display: none`)
-  must compare `option === false`, never `!option` — the truthy filter already drops `undefined`,
-  and `!option` would also fire on `0` / `""`.
+  value routed through it whose "off"/"default" state is falsy needs an _explicit_ comparison, not a
+  truthy check. A boolean "off" flag (`show_position` → `--scoreboard-position-display: none`)
+  compares `option === false`, never `!option` (`!option` also fires on `0` / `""`). A numeric
+  option with a non-zero baseline (`font_scale`, default `1`) emits on
+  `font_scale != null && font_scale !== 1` — so `0` still reaches CSS as `--scoreboard-font-scale:0`
+  (a valid `calc()` operand; intentional GIGO, no validation) and the `1` no-op is not emitted.
+- **Also:** wrapping a `styles.ts` literal in `calc(Npx * var(--x, 1))` changes `CARD_STYLES`, so
+  the `toMatchSnapshot()` test in `test/snapshot.test.ts` must be refreshed (`vitest -u`). The
+  `code-writer` role can't write `test/`, so the driver (or `test-writer`) regenerates it; a
+  `// @ts-expect-error` the failing test left on a not-yet-typed config field also has to be removed
+  once the field lands, or `tsc` fails on the unused directive.
 - **Ref:** [#132](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/132),
   [#133](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/133),
-  [#134](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/134) · 2026-09-06
+  [#134](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/134),
+  [#136](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/136) · 2026-09-06
 
 ## Card shows the fixture table during the regular season / wrong standings-vs-fixtures sort
 

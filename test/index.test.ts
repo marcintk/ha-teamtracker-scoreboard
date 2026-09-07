@@ -1060,6 +1060,35 @@ describe("SportScoreboardCard", () => {
     });
   });
 
+  describe("font_scale", () => {
+    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
+      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+
+    it("emits --scoreboard-font-scale:1.15 when font_scale is 1.15", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], font_scale: 1.15 };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-font-scale:1.15");
+    });
+
+    it("does not emit --scoreboard-font-scale when font_scale is omitted", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).not.toContain("--scoreboard-font-scale");
+    });
+
+    it("does not emit --scoreboard-font-scale when font_scale is 1", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], font_scale: 1 };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).not.toContain("--scoreboard-font-scale");
+    });
+  });
+
   describe("_refreshDebugOverlay", () => {
     it("patches #sc-debug innerHTML without invoking _render", () => {
       const card = makeCard();

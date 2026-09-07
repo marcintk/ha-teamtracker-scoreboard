@@ -6,12 +6,12 @@ export const CARD_STYLES = `
     box-sizing: border-box;
     font-family: var(--paper-font-body1_-_font-family, sans-serif);
     color: #888; /* gray */
-    font-size: 14px;
+    font-size: calc(14px * var(--scoreboard-font-scale, 1));
   }
 
   .section-header {
     color: #2196F3; /* Material Blue */
-    font-size: 15px;
+    font-size: calc(15px * var(--scoreboard-font-scale, 1));
     padding: 2px 0 2px 0;
     margin-top: 1px;
   }
@@ -29,7 +29,7 @@ export const CARD_STYLES = `
     display: var(--scoreboard-position-display, block);
     width: 18px;
     min-width: 18px;
-    font-size: 11px;
+    font-size: calc(11px * var(--scoreboard-font-scale, 1));
     font-variant-numeric: tabular-nums;
     text-align: center;
     color: var(--scoreboard-opponent-color, #777);
@@ -54,14 +54,14 @@ export const CARD_STYLES = `
   }
 
   .team-name {
-    font-size: 13px;
+    font-size: calc(13px * var(--scoreboard-font-scale, 1));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
   }
   .team-rank {
-    font-size: 9px;
+    font-size: calc(9px * var(--scoreboard-font-scale, 1));
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
@@ -88,7 +88,7 @@ export const CARD_STYLES = `
   .score {
     width: var(--scoreboard-score-width, 34px);
     min-width: var(--scoreboard-score-width, 34px);
-    font-size: 20px;
+    font-size: calc(20px * var(--scoreboard-font-scale, 1));
     font-weight: bold;
     height: var(--scoreboard-row-height, 28px);
     display: flex;
@@ -102,7 +102,7 @@ export const CARD_STYLES = `
   .colon {
     width: var(--scoreboard-colon-width, 9px);
     min-width: var(--scoreboard-colon-width, 9px);
-    font-size: 17px;
+    font-size: calc(17px * var(--scoreboard-font-scale, 1));
     font-weight: bold;
     text-align: center;
     height: var(--scoreboard-row-height, 28px);
@@ -118,7 +118,7 @@ export const CARD_STYLES = `
     font-size: 0;
   }
   .tv-badge {
-    font-size: 8px;
+    font-size: calc(8px * var(--scoreboard-font-scale, 1));
     font-weight: bold;
     color: white;
     border-radius: 3px;
@@ -137,7 +137,7 @@ export const CARD_STYLES = `
     transform: translateX(-50%);
     background: #222;
     color: #fff;
-    font-size: 10px;
+    font-size: calc(10px * var(--scoreboard-font-scale, 1));
     font-weight: bold;
     padding: 3px 6px;
     border-radius: 4px;
@@ -160,13 +160,13 @@ export const CARD_STYLES = `
     display: flex;
     flex-direction: column;
     justify-content: center;
-    font-size: 13px;
+    font-size: calc(13px * var(--scoreboard-font-scale, 1));
     font-weight: bold;
     line-height: 1.1;
     padding-left: 4px;
   }
   .msg-sub {
-    font-size: 10px;
+    font-size: calc(10px * var(--scoreboard-font-scale, 1));
     font-weight: normal;
     color: #666; /* dimgray */
     line-height: 1.1;
@@ -174,7 +174,7 @@ export const CARD_STYLES = `
 
   .empty {
     padding: 8px 4px;
-    font-size: 13px;
+    font-size: calc(13px * var(--scoreboard-font-scale, 1));
     color: #555; /* dark gray */
   }
 

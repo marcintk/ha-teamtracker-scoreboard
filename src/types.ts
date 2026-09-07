@@ -89,6 +89,8 @@ export interface CardConfig {
   score_width?: string;
   colon_width?: string;
   row_height?: string;
+  /** card-level: uniform multiplier over every font-size; 1 = baseline */
+  font_scale?: number;
   colors?: ColorsConfig;
   debug?: boolean;
   show_version?: boolean;

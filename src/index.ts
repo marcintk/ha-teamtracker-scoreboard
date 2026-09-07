@@ -236,6 +236,7 @@ export class SportScoreboardCard extends HTMLElement {
         score_width,
         colon_width,
         row_height,
+        font_scale,
         colors = {},
         debug,
         show_version,
@@ -265,6 +266,8 @@ export class SportScoreboardCard extends HTMLElement {
         "--scoreboard-colon-width": colon_width,
         "--scoreboard-row-height": row_height,
         "--scoreboard-position-display": show_position === false ? "none" : undefined,
+        "--scoreboard-font-scale":
+          font_scale != null && font_scale !== 1 ? String(font_scale) : undefined,
       };
       const varStr = Object.entries(cssVars)
         .filter(([, v]) => v)

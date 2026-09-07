@@ -84,6 +84,7 @@ sections:
 | `score_width`   | string        | `34px`   | CSS width of each score cell. Widen for 3-digit totals                                                                                           |
 | `colon_width`   | string        | `9px`    | CSS width of the centre colon cell                                                                                                               |
 | `row_height`    | string        | `28px`   | CSS height of every game row (row, cells, and logo scale together)                                                                               |
+| `font_scale`    | number        | `1`      | Uniform multiplier over every text size in the card. See [Typography scale](#typography-scale)                                                   |
 
 ### Section options
 
@@ -217,3 +218,22 @@ alias for `team_width`.
 
 `getCardSize()` — the height hint Home Assistant uses for masonry layout — tracks `row_height` when
 it is a plain pixel value.
+
+### Typography scale
+
+`font_scale` is a single multiplier applied to **every** font size in the card — score, team name,
+section header, rank, message, TV badge. The built-in sizes were tuned as a set, so scaling them
+together keeps their proportions (the score stays ≈1.5× the team name at any value).
+
+```yaml
+type: custom:ha-teamtracker-scoreboard-card
+font_scale: 1.15 # ~15% larger text throughout
+row_height: 34px # give the taller text room — see below
+sections:
+  - ...
+```
+
+It is a positive multiplier; `1` is the baseline and is a no-op (nothing is emitted). It is a
+readability knob only — it does **not** touch `row_height` or the column widths. A `font_scale` much
+above `1` puts larger text in an unchanged row, which clips top and bottom; raise `row_height`
+alongside it. Values ≤ 0 collapse the text to nothing and are not validated — don't set them.
