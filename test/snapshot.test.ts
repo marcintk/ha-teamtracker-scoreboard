@@ -102,6 +102,10 @@ describe("CARD_STYLES", () => {
   it("wires row height to the --scoreboard-row-height custom property", () => {
     expect(CARD_STYLES).toContain("height: var(--scoreboard-row-height, 28px)");
   });
+
+  it("wires team position display to the --scoreboard-position-display custom property", () => {
+    expect(CARD_STYLES).toContain("display: var(--scoreboard-position-display, block)");
+  });
 });
 
 // ─── rowHtml structural snapshots ────────────────────────────────────────────

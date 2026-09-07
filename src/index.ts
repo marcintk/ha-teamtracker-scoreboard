@@ -239,6 +239,7 @@ export class SportScoreboardCard extends HTMLElement {
         colors = {},
         debug,
         show_version,
+        show_position,
       } = this._config as CardConfig;
       const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
@@ -263,6 +264,7 @@ export class SportScoreboardCard extends HTMLElement {
         "--scoreboard-score-width": score_width,
         "--scoreboard-colon-width": colon_width,
         "--scoreboard-row-height": row_height,
+        "--scoreboard-position-display": show_position === false ? "none" : undefined,
       };
       const varStr = Object.entries(cssVars)
         .filter(([, v]) => v)

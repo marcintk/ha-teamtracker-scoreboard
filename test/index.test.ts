@@ -1031,6 +1031,35 @@ describe("SportScoreboardCard", () => {
     }
   });
 
+  describe("card-level show_position", () => {
+    const haCardStyle = (card: ReturnType<typeof makeCard>) =>
+      card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+
+    it("emits --scoreboard-position-display:none when show_position is false", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], show_position: false };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).toContain("--scoreboard-position-display:none");
+    });
+
+    it("does not emit --scoreboard-position-display when show_position is omitted", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection] };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).not.toContain("--scoreboard-position-display");
+    });
+
+    it("does not emit --scoreboard-position-display when show_position is true", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], show_position: true };
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(haCardStyle(card)).not.toContain("--scoreboard-position-display");
+    });
+  });
+
   describe("_refreshDebugOverlay", () => {
     it("patches #sc-debug innerHTML without invoking _render", () => {
       const card = makeCard();

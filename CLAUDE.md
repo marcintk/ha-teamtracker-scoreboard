@@ -15,7 +15,9 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
 - Every row opens with a fixed-width position cell (`.team-pos`). In a ranking sort it holds the
   row's 1-based rank in the full sorted list (pre-`limit`), coloured like the tracked team; under
   `by-date` or `show_position: false` (section option, default `true`) the cell is drawn but empty,
-  so mixed standings/fixture cards stay row-aligned without a card-wide pre-pass
+  so mixed standings/fixture cards stay row-aligned without a card-wide pre-pass. A **card-level**
+  `show_position: false` removes the cell entirely (`--scoreboard-position-display: none`),
+  restoring the pre-position-column layout
 
 ## Architecture Notes
 
