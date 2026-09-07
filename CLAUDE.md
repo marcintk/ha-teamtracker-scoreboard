@@ -10,9 +10,9 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
   table (ranked by `rank_type`); `auto` shows standings only when **every** tracked entity has a
   numeric win-loss `team_record` (`12-4`, `0-1-2`) and otherwise the list. The internal `SortMode`
   value for the list is still `by-date`. The sensor `season` attribute is not consulted.
-- `schedule` / `by-date` shows one entry per game (home sensor wins over away when both exist),
-  grouped IN → PRE/BYE → POST; within a group, ordered by `|date − now|` (soonest upcoming,
-  most-recent final) so live and imminent/just-finished games sit at the top
+- `schedule` / `by-date` shows one entry per game (home sensor wins over away when both exist). `IN`
+  (live) games sort first; every other state (`PRE`/`BYE`/`POST`) shares one band ordered by
+  `|date − now|`, so the next kick-off and the just-finished game sit near the top
 - Team logos render only for HTTPS URLs; non-HTTPS is silently dropped
 - Every row opens with a fixed-width position cell (`.team-pos`). In a ranking sort it holds the
   row's 1-based rank in the full sorted list (pre-`limit`), coloured like the tracked team; under

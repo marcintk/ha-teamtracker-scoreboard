@@ -199,48 +199,35 @@ describe("sectionHtml", () => {
     expect((el.querySelector(".team-pos")?.textContent ?? "").trim()).toBe("");
   });
 
-  it("schedule floats live games above upcoming, and finished games last", () => {
+  const H = 3600_000;
+  const iso = (ms: number) => new Date(Date.now() + ms).toISOString();
+
+  it("schedule puts live games above everything else", () => {
     const states = {
-      "sensor.nba_fin": makeState("POST", {
-        ...baseAttrs,
-        team_name: "Finished",
-        date: "2024-04-20T18:00:00Z", // earliest kickoff
-      }),
-      "sensor.nba_soon": makeState("PRE", {
-        ...baseAttrs,
-        team_name: "Upcoming",
-        date: "2024-04-20T23:00:00Z", // latest kickoff
-      }),
-      "sensor.nba_live": makeState("IN", {
-        ...baseAttrs,
-        team_name: "Live",
-        date: "2024-04-20T20:00:00Z", // middle kickoff
-      }),
+      "sensor.nba_fin": makeState("POST", { ...baseAttrs, team_name: "Finished", date: iso(-H) }),
+      "sensor.nba_soon": makeState("PRE", { ...baseAttrs, team_name: "Upcoming", date: iso(H) }),
+      // Live is the furthest from now by date, yet still first — it's its own group
+      "sensor.nba_live": makeState("IN", { ...baseAttrs, team_name: "Live", date: iso(-5 * H) }),
     };
     const s: SectionConfig = { name: "NBA", prefix: "sensor.nba_", limit: 10, special_teams: [] };
     const text = doc(sectionHtml(s, states)).textContent ?? "";
+    expect(text.indexOf("Live")).toBeLessThan(text.indexOf("Finished"));
     expect(text.indexOf("Live")).toBeLessThan(text.indexOf("Upcoming"));
-    expect(text.indexOf("Upcoming")).toBeLessThan(text.indexOf("Finished"));
   });
 
-  it("orders each schedule group by distance from now (soonest / most recent first)", () => {
-    const h = 3600_000;
-    const iso = (ms: number) => new Date(Date.now() + ms).toISOString();
+  it("interleaves PRE and POST by distance from now", () => {
     const states = {
-      "sensor.nba_soon": makeState("PRE", { ...baseAttrs, team_name: "Soon", date: iso(2 * h) }),
-      "sensor.nba_far": makeState("PRE", { ...baseAttrs, team_name: "Far", date: iso(30 * h) }),
-      "sensor.nba_recent": makeState("POST", {
-        ...baseAttrs,
-        team_name: "Recent",
-        date: iso(-2 * h),
-      }),
-      "sensor.nba_old": makeState("POST", { ...baseAttrs, team_name: "Old", date: iso(-30 * h) }),
+      "sensor.nba_recent": makeState("POST", { ...baseAttrs, team_name: "Recent", date: iso(-H) }),
+      "sensor.nba_soon": makeState("PRE", { ...baseAttrs, team_name: "Soon", date: iso(3 * H) }),
+      "sensor.nba_far": makeState("PRE", { ...baseAttrs, team_name: "Far", date: iso(20 * H) }),
+      "sensor.nba_old": makeState("POST", { ...baseAttrs, team_name: "Old", date: iso(-40 * H) }),
     };
     const s: SectionConfig = { name: "NBA", prefix: "sensor.nba_", limit: 10, special_teams: [] };
     const text = doc(sectionHtml(s, states)).textContent ?? "";
-    expect(text.indexOf("Soon")).toBeLessThan(text.indexOf("Far")); // upcoming: soonest first
-    expect(text.indexOf("Recent")).toBeLessThan(text.indexOf("Old")); // finished: most recent first
-    expect(text.indexOf("Far")).toBeLessThan(text.indexOf("Recent")); // all upcoming before finished
+    // |Δ from now|: Recent 1h, Soon 3h, Far 20h, Old 40h — a POST outranks a PRE here
+    expect(text.indexOf("Recent")).toBeLessThan(text.indexOf("Soon"));
+    expect(text.indexOf("Soon")).toBeLessThan(text.indexOf("Far"));
+    expect(text.indexOf("Far")).toBeLessThan(text.indexOf("Old"));
   });
 
   it("produces stable order when two teams have the same win ratio", () => {

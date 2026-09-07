@@ -14,11 +14,10 @@ import type { ColorsConfig, GameState, HassEntity, HassStates, SectionConfig } f
 import { VALID_STATES } from "./utils.js";
 import { logoHtml, messageHtml, tvHtml } from "./widgets.js";
 
-// schedule view: primary group order — IN (live) first, POST (finished) last,
-// everything else (PRE / BYE) in the middle "upcoming" band. Within a group,
-// rows are ordered by distance from now (see the sort).
-const scheduleGroup = (state: string | undefined): number =>
-  state === "IN" ? 0 : state === "POST" ? 2 : 1;
+// schedule view: live (IN) games always sit above everything else. Every other
+// state — PRE / BYE / POST — shares one band, ordered by distance from now
+// (see the sort), so an imminent fixture and a just-finished game interleave.
+const scheduleGroup = (state: string | undefined): number => (state === "IN" ? 0 : 1);
 
 export function rowHtml(
   stateObj: HassEntity | null,
@@ -106,12 +105,12 @@ export function sectionHtml(
   const now = Date.now();
   items.sort((a, b) => {
     if (sortMode === "by-date") {
-      // live games first, then upcoming, then finished
+      // live games first
       const ga = scheduleGroup(states[a.entityId]?.state);
       const gb = scheduleGroup(states[b.entityId]?.state);
       if (ga !== gb) return ga - gb;
-      // within a group, whichever is nearer to *now* — the soonest kickoff, the
-      // most-recent final — sits higher
+      // then everything else by distance from now — the soonest kickoff and the
+      // most-recent final float to the top, regardless of PRE vs POST
       const near = Math.abs(a.key - now) - Math.abs(b.key - now);
       if (near !== 0) return near;
     } else {
