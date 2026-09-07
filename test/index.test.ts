@@ -485,6 +485,173 @@ describe("SportScoreboardCard", () => {
     });
   });
 
+  describe("slide_sec carousel", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    // slide_sec / _slideIndex / _slideTimer do not exist on the type yet.
+    type SlideConfig = NonNullable<SportScoreboardCard["_config"]> & { slide_sec?: number };
+    type SlideCard = SportScoreboardCard & {
+      _slideIndex: number;
+      _slideTimer: ReturnType<typeof setInterval> | null;
+    };
+    const asSlide = (c: SportScoreboardCard) => c as unknown as SlideCard;
+
+    const nhlSection = {
+      name: "NHL",
+      prefix: "sensor.nhl_",
+      limit: 5,
+      special_teams: [] as string[],
+      rank_type: "win-loss-otl" as const,
+    };
+
+    const headerTexts = (c: SportScoreboardCard) =>
+      Array.from(c.shadowRoot?.querySelectorAll(".section-header") ?? []).map(
+        (el) => el.textContent
+      );
+
+    const twoSectionHass = () =>
+      makeHass({
+        "sensor.nba_lal": makeState("PRE", baseAttrs),
+        "sensor.nhl_bos": makeState("PRE", baseAttrs),
+      });
+
+    it("renders every section header stacked when slide_sec is unset", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection] };
+      card._hass = twoSectionHass();
+      card._render();
+      expect(headerTexts(card)).toEqual(["NBA", "NHL"]);
+    });
+
+    it("with a single section renders one header and arms no slide timer", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection], slide_sec: 30 } as SlideConfig;
+      card._hass = makeHass({ "sensor.nba_lal": makeState("PRE", baseAttrs) });
+      card._render();
+      expect(headerTexts(card)).toEqual(["NBA"]);
+      expect(asSlide(card)._slideTimer).toBeNull();
+    });
+
+    it("with two sections renders only the first section", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+      expect(headerTexts(card)).toEqual(["NBA"]);
+    });
+
+    it("auto-advances to the next section after slide_sec seconds", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerTexts(card)).toEqual(["NHL"]);
+    });
+
+    it("wraps back to the first section after the last", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+
+      vi.advanceTimersByTime(30_000);
+      expect(headerTexts(card)).toEqual(["NHL"]);
+      vi.advanceTimersByTime(30_000);
+      expect(headerTexts(card)).toEqual(["NBA"]);
+    });
+
+    it("keeps _slideIndex across a manual _render() call", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._hass = twoSectionHass();
+      asSlide(card)._slideIndex = 1;
+      card._render();
+      expect(headerTexts(card)).toEqual(["NHL"]);
+      expect(asSlide(card)._slideIndex).toBe(1);
+    });
+
+    it("resets _slideIndex to 0 on setConfig", () => {
+      const card = makeCard();
+      asSlide(card)._slideIndex = 1;
+      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      expect(asSlide(card)._slideIndex).toBe(0);
+    });
+
+    it("clears _slideTimer on disconnectedCallback and it does not fire afterward", () => {
+      const card = makeCard();
+      card._hass = twoSectionHass();
+      card.setConfig({ sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig);
+      card._render();
+      const renderSpy = vi.spyOn(card, "_render");
+
+      card.disconnectedCallback();
+      expect(asSlide(card)._slideTimer).toBeNull();
+
+      vi.advanceTimersByTime(60_000);
+      expect(renderSpy).not.toHaveBeenCalled();
+    });
+
+    it("getCardSize returns the largest single section (not the sum) in carousel mode", () => {
+      const carousel = makeCard();
+      carousel._config = {
+        sections: [
+          { ...nbaSection, limit: 10 },
+          { ...nhlSection, limit: 4 },
+        ],
+        slide_sec: 30,
+      } as SlideConfig;
+      // maxRows = 1 + 10 = 11; h = 28 => ceil(11 * 28 / 50) = ceil(6.16) = 7
+      expect(carousel.getCardSize()).toBe(7);
+
+      const stacked = makeCard();
+      stacked._config = {
+        sections: [
+          { ...nbaSection, limit: 10 },
+          { ...nhlSection, limit: 4 },
+        ],
+      };
+      // sum: (1 + 10) + (1 + 4) = 16 => ceil(16 * 28 / 50) = ceil(8.96) = 9
+      expect(stacked.getCardSize()).toBe(9);
+      expect(carousel.getCardSize()).toBeLessThan(stacked.getCardSize());
+    });
+
+    it("adds a tallest-slide min-height to ha-card when height is unset", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection], slide_sec: 30 } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+      const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+      // maxRows = 1 + 10 = 11; h = 28 => 11 * 28 = 308
+      expect(style).toContain("min-height:308px");
+    });
+
+    it("lets an explicit height win over the carousel min-height", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        slide_sec: 30,
+        height: "400px",
+      } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+      const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+      expect(style).toContain("min-height:400px");
+      expect(style).not.toContain("308px");
+    });
+
+    it("adds no carousel min-height when slide_sec is unset", () => {
+      const card = makeCard();
+      card._config = { sections: [nbaSection, nhlSection] };
+      card._hass = twoSectionHass();
+      card._render();
+      const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+      expect(style).not.toContain("min-height");
+    });
+  });
+
   describe("subscription", () => {
     beforeEach(() => vi.useFakeTimers());
     afterEach(() => vi.useRealTimers());
