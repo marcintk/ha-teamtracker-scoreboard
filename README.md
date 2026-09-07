@@ -17,9 +17,19 @@ network, and series info — one row per game, grouped by sport. Built on top of
 ## Requirements
 
 Requires [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) (HACS Integration) — it
-provides the `sensor.<sport>_<team>` entities this card reads. See
-[docs/setup-ha-teamtracker.md](docs/setup-ha-teamtracker.md) for sensor setup and ready-to-paste
-league files.
+provides the `sensor.<sport>_<team>` entities this card reads.
+
+**Ready-made sensor configs** live in [`docs/sensors/`](docs/sensors/) — one drop-in `sensor:`
+package per league, all rosters verified against ESPN for the 2026/27 season:
+
+- **NBA** — all 30 teams
+- **NHL** — all 32 teams
+- **NFL** — all 32 teams
+- **Premier League** (England) — all 20 clubs
+- **La Liga / Primera División** (Spain) — all 20 clubs
+- **Serie A** (Italy) — all 20 clubs
+
+See [docs/sensors/README.md](docs/sensors/README.md) for how to load them and per-league notes.
 
 ## Installation
 
@@ -47,25 +57,53 @@ Add a **Manual card** to your dashboard and paste:
 
 ```yaml
 type: custom:ha-teamtracker-scoreboard-card
+slide_sec: 45
+team_width: 80px
 sections:
+  - name: Serie A
+    prefix: sensor.sera_
+    limit: 20
+    season_mode: regular
+    rank_type: win-draw-loss
+    special_teams:
+      - juv
+  - name: Primera Division
+    prefix: sensor.liga_
+    limit: 20
+    season_mode: regular
+    rank_type: win-draw-loss
+  - name: Premier League
+    prefix: sensor.epl_
+    limit: 20
+    season_mode: regular
+    rank_type: win-draw-loss
   - name: NBA Scoreboard
     prefix: sensor.nba_
-    limit: 10
-    special_teams:
-      - bos
+    limit: 20
     rank_type: win-loss
+    special_teams:
+      - sa
   - name: NHL Scoreboard
     prefix: sensor.nhl_
-    limit: 5
+    limit: 20
+    rank_type: win-loss-otl
     special_teams:
       - dal
-    rank_type: win-loss-otl
-  - name: World Cup
-    prefix: sensor.wc_
-    limit: 13
+  - name: NFL Scoreboard
+    prefix: sensor.nfl_
+    limit: 20
+    rank_type: win-loss
     special_teams:
-      - fra
+      - gb
 ```
+
+Card-level keys (`height`, `slide_sec`, `team_width`, …) are optional — see [Options](#options)
+below. Per section: `prefix` matches the entity IDs from the league file you imported (see
+[docs/sensors/](docs/sensors/)); `rank_type` is `win-loss` for NBA/NFL, `win-loss-otl` for NHL,
+`win-draw-loss` for the soccer leagues; and the soccer sections use `season_mode: regular` so the
+card always shows the standings table (ha-teamtracker's `season` attribute isn't a clean token — see
+[Season mode](#season-mode)). `special_teams` takes the suffix after the prefix (`juv` for
+`sensor.sera_juv`).
 
 ### Options
 
@@ -109,7 +147,7 @@ at the bottom. Choose the formula that matches the league:
 | Value           | Points system   | Record format | Use for                              |
 | --------------- | --------------- | ------------- | ------------------------------------ |
 | `win-loss`      | W=2, L=0        | `W-L`         | NBA and other W/L-only leagues       |
-| `win-draw-loss` | W=3, D=1, L=0   | `W-D-L`       | Soccer, MLS, World Cup, …            |
+| `win-draw-loss` | W=3, D=1, L=0   | `W-D-L`       | Soccer leagues, MLS, …               |
 | `win-loss-otl`  | W=2, OTL=1, L=0 | `W-L-OTL`     | NHL and leagues with overtime losses |
 
 During **playoffs, cups, and tournaments** the card ignores `rank_type` entirely and sorts rows by

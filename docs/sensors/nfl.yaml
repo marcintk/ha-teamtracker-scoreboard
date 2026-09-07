@@ -1,0 +1,158 @@
+# NFL — ha-teamtracker sensor definitions
+#
+# Roster: 2026 NFL season (verified against ESPN, Sept 2026). All 32 franchises,
+# grouped by division. No relocations or expansion since the 2024 season.
+#
+# This file is a complete `sensor:` block. Load it as a Home Assistant
+# package (`homeassistant: packages: !include_dir_named packages/`), or
+# paste its contents into configuration.yaml (only one `sensor:` key allowed).
+# Delete any teams you don't want to track.
+#
+# After saving, restart Home Assistant (or reload YAML configuration).
+# Each entry creates one entity, e.g. sensor.nfl_buf, sensor.nfl_kc, …
+# Use the shared prefix  sensor.nfl_  in the card's `prefix` field.
+
+sensor:
+  # ── AFC EAST ───────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "BUF"
+    name: "nfl_buf"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "MIA"
+    name: "nfl_mia"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "NE"
+    name: "nfl_ne"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "NYJ"
+    name: "nfl_nyj"
+
+  # ── AFC NORTH ──────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "BAL"
+    name: "nfl_bal"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "CIN"
+    name: "nfl_cin"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "CLE"
+    name: "nfl_cle"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "PIT"
+    name: "nfl_pit"
+
+  # ── AFC SOUTH ──────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "HOU"
+    name: "nfl_hou"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "IND"
+    name: "nfl_ind"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "JAX"
+    name: "nfl_jax"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "TEN"
+    name: "nfl_ten"
+
+  # ── AFC WEST ───────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "DEN"
+    name: "nfl_den"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "KC"
+    name: "nfl_kc"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "LV"
+    name: "nfl_lv"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "LAC"
+    name: "nfl_lac"
+
+  # ── NFC EAST ───────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "DAL"
+    name: "nfl_dal"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "NYG"
+    name: "nfl_nyg"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "PHI"
+    name: "nfl_phi"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "WSH"
+    name: "nfl_wsh"
+
+  # ── NFC NORTH ──────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "CHI"
+    name: "nfl_chi"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "DET"
+    name: "nfl_det"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "GB"
+    name: "nfl_gb"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "MIN"
+    name: "nfl_min"
+
+  # ── NFC SOUTH ──────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "ATL"
+    name: "nfl_atl"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "CAR"
+    name: "nfl_car"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "NO"
+    name: "nfl_no"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "TB"
+    name: "nfl_tb"
+
+  # ── NFC WEST ───────────────────────────────────────────
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "ARI"
+    name: "nfl_ari"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "LAR"
+    name: "nfl_lar"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "SF"
+    name: "nfl_sf"
+  - platform: teamtracker
+    league_id: "NFL"
+    team_id: "SEA"
+    name: "nfl_sea"
