@@ -17,6 +17,8 @@ export class SportScoreboardCard extends HTMLElement {
   _debugTimer: ReturnType<typeof setInterval> | null;
   _renderTimer: ReturnType<typeof setTimeout> | null;
   _blinkTimer: ReturnType<typeof setTimeout> | null;
+  _slideTimer: ReturnType<typeof setInterval> | null;
+  _slideIndex: number;
   _trackedIds: Set<string> | null;
   _trackedByPrefix: Map<string, string[]> | null;
   _subscription: SubscriptionManager;
@@ -33,6 +35,8 @@ export class SportScoreboardCard extends HTMLElement {
     this._debugTimer = null;
     this._renderTimer = null;
     this._blinkTimer = null;
+    this._slideTimer = null;
+    this._slideIndex = 0;
     this._trackedIds = null;
     this._trackedByPrefix = null;
     this._subscription = new SubscriptionManager();
@@ -48,7 +52,9 @@ export class SportScoreboardCard extends HTMLElement {
     this._trackedByPrefix = null;
     this._scoreChangedAt.clear();
     this._prevScores.clear();
+    this._slideIndex = 0;
     this._startFixedTimer();
+    this._startSlideTimer();
     if (this._hass) {
       this._render();
       this._subscribe();
@@ -126,6 +132,28 @@ export class SportScoreboardCard extends HTMLElement {
     }
   }
 
+  _startSlideTimer(): void {
+    this._stopSlideTimer();
+    const sections = this._config?.sections ?? [];
+    const sec = this._config?.slide_sec ?? 0;
+    if (sec > 0 && sections.length >= 2) {
+      this._slideTimer = setInterval(() => {
+        const n = this._config?.sections?.length ?? 0;
+        if (n >= 2) {
+          this._slideIndex = (this._slideIndex + 1) % n;
+          if (this._hass && this._config) this._render();
+        }
+      }, sec * 1000);
+    }
+  }
+
+  _stopSlideTimer(): void {
+    if (this._slideTimer) {
+      clearInterval(this._slideTimer);
+      this._slideTimer = null;
+    }
+  }
+
   _refreshDebugOverlay(): void {
     const el = this._root.querySelector("#sc-debug");
     if (el) el.innerHTML = this._debug.tableHtml();
@@ -144,6 +172,7 @@ export class SportScoreboardCard extends HTMLElement {
 
   disconnectedCallback(): void {
     this._stopFixedTimer();
+    this._stopSlideTimer();
     this._clearSubscription();
     this._trackedIds = null;
     this._scoreChangedAt.clear();
@@ -241,6 +270,7 @@ export class SportScoreboardCard extends HTMLElement {
         debug,
         show_version,
         show_position,
+        slide_sec,
       } = this._config as CardConfig;
       const states = (this._hass as HomeAssistant).states;
       const stateKeys = Object.keys(states);
@@ -254,6 +284,17 @@ export class SportScoreboardCard extends HTMLElement {
       }
 
       if (debug) this._debug.track("rendered");
+
+      if (!this._slideTimer) this._startSlideTimer();
+
+      const carousel = (slide_sec ?? 0) > 0 && sections.length >= 2;
+      let slideMinH = "";
+      if (carousel && !height) {
+        const rowPx = parseInt(row_height ?? "", 10);
+        const slideH = Number.isFinite(rowPx) ? rowPx : 28;
+        const maxRows = Math.max(...sections.map((s) => 1 + (s.limit ?? 10)));
+        slideMinH = `min-height:${maxRows * slideH}px;`;
+      }
 
       const tw = team_width ?? team_col_width;
       const [teamAW, teamBW] = Array.isArray(tw) ? tw : [tw, tw];
@@ -274,15 +315,19 @@ export class SportScoreboardCard extends HTMLElement {
         .map(([k, v]) => `${k}:${String(v)};`)
         .join("");
 
-      const haCardStyle = `${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}${varStr}`;
+      const haCardStyle = `${slideMinH}${height ? `height:${String(height)};min-height:${String(height)};max-height:${String(height)};overflow:hidden;` : ""}${debug || show_version ? "position:relative;" : ""}${varStr}`;
 
-      const sectionTemplates = sections.map((s) =>
+      const idx = ((this._slideIndex % sections.length) + sections.length) % sections.length;
+      const visibleSections = carousel ? sections.slice(idx, idx + 1) : sections;
+
+      const sectionTemplates = visibleSections.map((s) =>
         sectionHtml(
           s,
           states,
           this._trackedByPrefix?.get(s.prefix ?? ""),
           colors,
-          this._scoreChangedAt
+          this._scoreChangedAt,
+          carousel
         )
       );
       const hasContent = sectionTemplates.some((t) => t !== nothing);
@@ -331,7 +376,11 @@ export class SportScoreboardCard extends HTMLElement {
       const px = parseInt(this._config.height, 10);
       if (Number.isFinite(px)) return Math.ceil(px / 50);
     }
-    const rows = (this._config?.sections ?? []).reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
+    const sections = this._config?.sections ?? [];
+    const carousel = (this._config?.slide_sec ?? 0) > 0 && sections.length >= 2;
+    const rows = carousel
+      ? Math.max(0, ...sections.map((s) => 1 + (s.limit ?? 10)))
+      : sections.reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
     const rowPx = parseInt(this._config?.row_height ?? "", 10);
     const h = Number.isFinite(rowPx) ? rowPx : 28;
     return Math.max(1, Math.ceil((rows * h) / 50));

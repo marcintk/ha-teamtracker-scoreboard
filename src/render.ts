@@ -57,7 +57,8 @@ export function sectionHtml(
   states: HassStates,
   entityIds?: string[],
   colors: ColorsConfig = {},
-  scoreChangedAt: Map<string, number> = new Map()
+  scoreChangedAt: Map<string, number> = new Map(),
+  carousel = false
 ): TemplateResult | typeof nothing {
   const {
     name,
@@ -74,7 +75,10 @@ export function sectionHtml(
   const entities = resolvedIds.filter((id) =>
     VALID_STATES.has((states[id]?.state ?? "") as GameState)
   );
-  if (!entities.length) return nothing;
+  const header = html`<div class="section-header" style=${colors.header ? `color:${colors.header}` : nothing}>${name}</div>`;
+  const emptyHtml = () =>
+    html`${header}<div class="empty">No games found — check your section prefixes.</div>`;
+  if (!entities.length) return carousel ? emptyHtml() : nothing;
 
   const sortMode = resolveSortMode(entities, states, rank_type, season_mode);
 
@@ -113,6 +117,6 @@ export function sectionHtml(
       );
     });
 
-  if (!rows.length) return nothing;
-  return html`<div class="section-header" style=${colors.header ? `color:${colors.header}` : nothing}>${name}</div>${rows}`;
+  if (!rows.length) return carousel ? emptyHtml() : nothing;
+  return html`${header}${rows}`;
 }

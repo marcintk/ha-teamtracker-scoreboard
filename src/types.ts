@@ -98,4 +98,6 @@ export interface CardConfig {
   fixed_refresh?: number;
   /** card-level: false removes the .team-pos gutter entirely */
   show_position?: boolean;
+  /** card-level: rotate sections as a slideshow, N seconds each (needs ≥2 sections) */
+  slide_sec?: number;
 }
