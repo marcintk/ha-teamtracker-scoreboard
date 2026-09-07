@@ -324,12 +324,12 @@ export class SportScoreboardCard extends HTMLElement {
       const carousel = (slide_sec ?? 0) > 0 && sections.length >= 2;
       const slideControls = carousel
         ? html`<span class="slide-ctrls"
-            >${this._slideBtn("Previous section", "‹", () => this._slideStep(-1))}${this._slideBtn(
+            >${this._slideBtn("Previous section", "❮", () => this._slideStep(-1))}${this._slideBtn(
               this._slidePaused ? "Resume rotation" : "Pause rotation",
               this._slidePaused ? "▶" : "⏸",
               () => this._slideToggle(),
               this._slidePaused ? "paused" : ""
-            )}${this._slideBtn("Next section", "›", () => this._slideStep(1))}</span
+            )}${this._slideBtn("Next section", "❯", () => this._slideStep(1))}</span
           >`
         : nothing;
       let slideMinH = "";

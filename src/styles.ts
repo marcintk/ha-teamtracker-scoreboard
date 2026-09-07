@@ -43,7 +43,7 @@ export const CARD_STYLES = `
     font-size: calc(15px * var(--scoreboard-font-scale, 1));
     line-height: 1;
     padding: 0;
-    /* fixed square box so the ▶/⏸ glyph swap never shifts the ‹ › buttons */
+    /* fixed square box so the ▶/⏸ glyph swap never shifts the ❮ ❯ buttons */
     width: calc(20px * var(--scoreboard-font-scale, 1));
     height: calc(20px * var(--scoreboard-font-scale, 1));
     display: inline-flex;
