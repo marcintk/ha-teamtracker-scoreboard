@@ -359,7 +359,10 @@ export class SportScoreboardCard extends HTMLElement {
       let slideMinH = "";
       if (carousel && !height) {
         const rowPx = parseInt(row_height ?? "", 10);
-        const slideH = Number.isFinite(rowPx) ? rowPx : 28;
+        const gapPx = parseInt(row_gap ?? "", 10);
+        // each row is row_height + a gap above and below it
+        const slideH =
+          (Number.isFinite(rowPx) ? rowPx : 28) + 2 * (Number.isFinite(gapPx) ? gapPx : 5);
         const maxRows = Math.max(...sections.map((s) => 1 + (s.limit ?? 10)));
         slideMinH = `min-height:${maxRows * slideH}px;`;
       }

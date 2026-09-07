@@ -1,0 +1,181 @@
+<!doctype html>
+<!--
+  Standalone rig for scripts/demo/record-demo.mjs — NOT a user-facing page.
+  Loads the built bundle from /dist/card.js and mounts the card with a fixed set
+  of fake ha-teamtracker sensor states so the recorder can drive it deterministically.
+
+  Committed on purpose: the demo recipe (scripts/demo/record-demo.json) must be
+  reproducible without rebuilding this rig from memory. Never loads real Home
+  Assistant data; never writes anything.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>record-harness</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #111418;
+      }
+      #wrap {
+        width: 440px;
+        margin: 16px;
+        /* mimic HA's card surface so the recorded frame isn't a bare element */
+        --ha-card-background: #1c1f24;
+        --primary-text-color: #e9edf1;
+        --divider-color: rgba(255, 255, 255, 0.18);
+      }
+      ha-card,
+      #wrap > * {
+        background: var(--ha-card-background);
+        border-radius: 10px;
+        display: block;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+    <script type="module" src="/dist/card.js"></script>
+  </head>
+  <body>
+    <div id="wrap"></div>
+    <script type="module">
+      // ---- fake sensor data -------------------------------------------------
+      const L = (sport, code) =>
+        `https://a.espncdn.com/i/teamlogos/${sport}/500/${code}.png`;
+
+      // one game per tracked sensor. `state` is the ha-teamtracker sensor state.
+      const g = (o) => ({ state: o.state, attributes: o });
+
+      const NBA = {
+        "sensor.nba_bos": g({
+          state: "IN", team_name: "Celtics", team_abbr: "BOS", team_record: "41-12",
+          team_homeaway: "home", team_score: 88, team_logo: L("nba", "bos"),
+          opponent_name: "Lakers", opponent_abbr: "LAL", opponent_record: "30-23",
+          opponent_score: 84, opponent_logo: L("nba", "lal"),
+          clock: "Q3 4:12", tv_network: "ESPN", last_play: "Tatum 3PT jumper",
+        }),
+        "sensor.nba_den": g({
+          state: "POST", team_name: "Nuggets", team_abbr: "DEN", team_record: "38-15",
+          team_homeaway: "home", team_score: 120, team_winner: true, team_logo: L("nba", "den"),
+          opponent_name: "Suns", opponent_abbr: "PHX", opponent_record: "29-24",
+          opponent_score: 111, opponent_logo: L("nba", "phx"), clock: "Final",
+        }),
+        "sensor.nba_nyk": g({
+          state: "PRE", team_name: "Knicks", team_abbr: "NY", team_record: "34-19",
+          team_homeaway: "home", team_logo: L("nba", "ny"), kickoff_in: "in 2h",
+          opponent_name: "Bucks", opponent_abbr: "MIL", opponent_record: "35-18",
+          opponent_logo: L("nba", "mil"), tv_network: "TNT",
+          location: "New York, NY", odds: "NY -1.5",
+        }),
+        "sensor.nba_gs": g({
+          state: "PRE", team_name: "Warriors", team_abbr: "GS", team_record: "28-25",
+          team_homeaway: "away", team_logo: L("nba", "gs"), kickoff_in: "in 3h",
+          opponent_name: "Kings", opponent_abbr: "SAC", opponent_record: "30-22",
+          opponent_logo: L("nba", "sac"),
+        }),
+        "sensor.nba_mia": g({
+          state: "PRE", team_name: "Heat", team_abbr: "MIA", team_record: "31-22",
+          team_homeaway: "home", team_logo: L("nba", "mia"), kickoff_in: "in 5h",
+          opponent_name: "Magic", opponent_abbr: "ORL", opponent_record: "29-24",
+          opponent_logo: L("nba", "orl"),
+        }),
+      };
+
+      const NHL = {
+        "sensor.nhl_col": g({
+          state: "IN", team_name: "Avalanche", team_abbr: "COL", team_record: "34-18-4",
+          team_homeaway: "home", team_score: 3, team_logo: L("nhl", "col"),
+          opponent_name: "Stars", opponent_abbr: "DAL", opponent_record: "33-16-6",
+          opponent_score: 2, opponent_logo: L("nhl", "dal"), clock: "2nd 6:40", tv_network: "TNT",
+        }),
+        "sensor.nhl_bos": g({
+          state: "POST", team_name: "Bruins", team_abbr: "BOS", team_record: "35-12-9",
+          team_homeaway: "home", team_score: 4, team_winner: true, team_logo: L("nhl", "bos"),
+          opponent_name: "Maple Leafs", opponent_abbr: "TOR", opponent_record: "32-15-8",
+          opponent_score: 1, opponent_logo: L("nhl", "tor"), clock: "Final",
+        }),
+        "sensor.nhl_nyr": g({
+          state: "PRE", team_name: "Rangers", team_abbr: "NYR", team_record: "36-16-3",
+          team_homeaway: "home", team_logo: L("nhl", "nyr"), kickoff_in: "in 1h",
+          opponent_name: "Devils", opponent_abbr: "NJ", opponent_record: "27-22-6",
+          opponent_logo: L("nhl", "nj"), tv_network: "MSG",
+        }),
+        "sensor.nhl_edm": g({
+          state: "PRE", team_name: "Oilers", team_abbr: "EDM", team_record: "33-19-2",
+          team_homeaway: "away", team_logo: L("nhl", "edm"), kickoff_in: "in 4h",
+          opponent_name: "Golden Knights", opponent_abbr: "VGK", opponent_record: "31-18-6",
+          opponent_logo: L("nhl", "vgk"),
+        }),
+      };
+
+      const EPL = {
+        "sensor.epl_liv": g({
+          state: "IN", team_name: "Liverpool", team_abbr: "LIV", team_record: "16-4-3",
+          team_homeaway: "home", team_score: 2, team_logo: L("soccer", "eng.liverpool"),
+          opponent_name: "Arsenal", opponent_abbr: "ARS", opponent_record: "15-5-3",
+          opponent_score: 1, opponent_logo: L("soccer", "eng.arsenal"), clock: "67'",
+          tv_network: "USA",
+        }),
+        "sensor.epl_mci": g({
+          state: "POST", team_name: "Man City", team_abbr: "MCI", team_record: "17-3-3",
+          team_homeaway: "home", team_score: 3, team_winner: true,
+          team_logo: L("soccer", "eng.manchester_city"),
+          opponent_name: "Chelsea", opponent_abbr: "CHE", opponent_record: "11-6-6",
+          opponent_score: 1, opponent_logo: L("soccer", "eng.chelsea"), clock: "FT",
+        }),
+        "sensor.epl_tot": g({
+          state: "PRE", team_name: "Tottenham", team_abbr: "TOT", team_record: "13-4-6",
+          team_homeaway: "home", team_logo: L("soccer", "eng.tottenham_hotspur"),
+          kickoff_in: "in 2h", opponent_name: "Newcastle", opponent_abbr: "NEW",
+          opponent_record: "12-5-6", opponent_logo: L("soccer", "eng.newcastle_united"),
+          tv_network: "NBC",
+        }),
+        "sensor.epl_avl": g({
+          state: "PRE", team_name: "Aston Villa", team_abbr: "AVL", team_record: "13-5-5",
+          team_homeaway: "away", team_logo: L("soccer", "eng.aston_villa"),
+          kickoff_in: "in 3h", opponent_name: "Brighton", opponent_abbr: "BHA",
+          opponent_record: "10-8-5", opponent_logo: L("soccer", "eng.brighton_and_hove_albion"),
+        }),
+      };
+
+      // one shared connection object — the card treats a changed `connection`
+      // reference as "reconnected". No `subscribeEvents`, so the card falls back
+      // to re-rendering on every `card.hass = …` assignment (see SubscriptionManager).
+      const connection = {};
+      const states = { ...NBA, ...NHL, ...EPL };
+      const makeHass = () => ({ states: { ...states }, connection });
+
+      const card = document.createElement("ha-teamtracker-scoreboard-card");
+      card.id = "demo-card";
+      card.setConfig({
+        mode: "slide",
+        slide_sec: 2,
+        lazy_refresh: 0, // render immediately — no debounce to fight in the recorder
+        // pin the height so every re-shoot records the same box (the tallest
+        // slide is NBA's 5 rows + header; at the default 5px row_gap that's ≈ 214px)
+        layout: { height: "224px" },
+        sections: [
+          { name: "NBA", prefix: "sensor.nba_", rank_type: "win-loss", special_teams: ["bos"] },
+          { name: "NHL", prefix: "sensor.nhl_", rank_type: "win-loss-otl", special_teams: ["col"] },
+          {
+            name: "Premier League",
+            prefix: "sensor.epl_",
+            rank_type: "win-draw-loss",
+            special_teams: ["liv"],
+          },
+        ],
+      });
+      document.getElementById("wrap").appendChild(card);
+      card.hass = makeHass();
+
+      // expose a hook for the recorder to nudge a live score (drives the blink)
+      window.__bumpScore = () => {
+        const a = { ...states["sensor.nba_bos"].attributes, team_score: 91 };
+        states["sensor.nba_bos"] = { state: "IN", attributes: a };
+        card.hass = makeHass();
+      };
+
+      window.__ready = true;
+    </script>
+  </body>
+</html>

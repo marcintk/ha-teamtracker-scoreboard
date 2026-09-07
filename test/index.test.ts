@@ -661,8 +661,23 @@ describe("SportScoreboardCard", () => {
       card._hass = twoSectionHass();
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
-      // maxRows = 1 + 10 = 11; h = 28 => 11 * 28 = 308
-      expect(style).toContain("min-height:308px");
+      // maxRows = 1 + 10 = 11; h = 28 + 2*5 gap => 11 * 38 = 418
+      expect(style).toContain("min-height:418px");
+    });
+
+    it("factors layout.row_gap into the carousel min-height", () => {
+      const card = makeCard();
+      card._config = {
+        sections: [nbaSection, nhlSection],
+        mode: "slide",
+        slide_sec: 30,
+        layout: { row_gap: "10px" },
+      } as SlideConfig;
+      card._hass = twoSectionHass();
+      card._render();
+      const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
+      // h = 28 + 2*10 = 48 => 11 * 48 = 528
+      expect(style).toContain("min-height:528px");
     });
 
     it("lets an explicit height win over the carousel min-height", () => {
@@ -677,7 +692,7 @@ describe("SportScoreboardCard", () => {
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
       expect(style).toContain("min-height:400px");
-      expect(style).not.toContain("308px");
+      expect(style).not.toContain("418px");
     });
 
     it("adds no carousel min-height when slide_sec is unset", () => {
@@ -1055,7 +1070,7 @@ describe("SportScoreboardCard", () => {
 
     it("computes the min-height from a numeric row_height and the default limit", () => {
       const card = makeCard();
-      // sections carry no `limit` → maxRows = 1 + 10; row_height 40 → min-height 440px
+      // no `limit` → maxRows = 1 + 10; row_height 40 + 2*5 gap → 11 * 50 = min-height 550px
       card._config = {
         sections: two,
         mode: "slide",
@@ -1068,7 +1083,7 @@ describe("SportScoreboardCard", () => {
       });
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
-      expect(style).toContain("min-height:440px");
+      expect(style).toContain("min-height:550px");
     });
 
     it("getCardSize uses the default limit for carousel sections without one", () => {

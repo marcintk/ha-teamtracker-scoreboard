@@ -1,0 +1,57 @@
+{
+  "_what_this_is": "The working recipe behind scripts/demo/record-demo.mjs, which regenerates docs/demo.gif (the animated demo in README.md). To reshoot it: `npm run build` then `npm run demo:record`.",
+
+  "prereqs": [
+    "npm run build  — dist/card.js must be current; the recorder loads that exact bundle, not src/",
+    "ffmpeg on PATH — two-pass palette GIF encode",
+    "npx playwright install chromium — once per machine; `playwright` is a devDependency"
+  ],
+
+  "hard_constraints": [
+    "The recorder only navigates and clicks real controls on its own standalone rig, scripts/demo/record-harness.html. It never writes to src/, dist/ (rebuild with `npm run build`), or any docs/ file other than the output gif.",
+    "scripts/demo/record-harness.html is committed so the recipe is reproducible without rebuilding the rig from scratch. It is NOT a user-facing page — there is no docs/index.html demo for this card."
+  ],
+
+  "harness_config": {
+    "file": "scripts/demo/record-harness.html",
+    "card_setConfig": {
+      "mode": "slide",
+      "slide_sec": 2,
+      "lazy_refresh": 0,
+      "layout": { "height": "224px" },
+      "sections": [
+        "NBA (sensor.nba_, rank_type win-loss, special bos)",
+        "NHL (sensor.nhl_, rank_type win-loss-otl, special col)",
+        "Premier League (sensor.epl_, rank_type win-draw-loss, special liv)"
+      ]
+    },
+    "fake_data": "One game per tracked sensor (home side only, so each fixture is one row), a mix of IN / POST / PRE states with team names, records, scores, TV networks and real ESPN CDN logo URLs (https — non-https logos are dropped by the card). No real Home Assistant, no WebSocket: the harness gives the card a connection object with no subscribeEvents, so the card re-renders on every `card.hass = …` assignment (SubscriptionManager bails out early). The same connection object is reused across assignments so the card never treats it as a reconnect.",
+    "mount_order": "createElement → setConfig → appendChild → set .hass. setConfig before connecting matters for the same reason it does elsewhere in this card family.",
+    "recorder_hook": "window.__bumpScore() rewrites sensor.nba_bos with a higher score and re-assigns .hass, so the recorder can trigger the score-blink beat on camera."
+  },
+
+  "recorder": {
+    "tool": "Playwright (headless Chromium), scripts/demo/record-demo.mjs",
+    "capture_method": "Real page.screenshot() with a fixed clip, sampled in a click / sleep / hold loop. Motion in the gif is the card's own CSS/JS (the slide swap, the post-goal score blink) sampled continuously — no synthetic cursor, no locator.click() teleport.",
+    "clip": "measured once from #wrap's bounding box after window.__ready, reused for every frame; width/height rounded to even numbers for the encoder",
+    "encode": "ffmpeg two-pass palette (palettegen max_colors=128 stats_mode=diff, paletteuse dither=bayer) scaled to 440px wide. Bump max_colors down if the gif is over ~1MB; the logos are the main colour cost.",
+    "output_path": "docs/demo.gif",
+    "fps": 10
+  },
+
+  "scenario_beats": [
+    "rest ~1s on the NBA section",
+    "click the ▸ (next section) button → NHL; it also pauses the rotation. hold ~1.2s",
+    "click ▸ → Premier League. hold ~1.2s",
+    "click ▸ → wraps back to NBA. hold ~1s",
+    "click the ▮▮/▶ toggle to resume auto-advance; let it run ~6s — with slide_sec 2 that's ~3 swaps on camera",
+    "call window.__bumpScore() — a live score ticks up on the visible section and the score cell blinks. hold ~1.6s",
+    "hold ~0.8s of resting frames before the gif loops"
+  ],
+
+  "known_risks": [
+    "ESPN logo URLs (a.espncdn.com) can change their path scheme or rate-limit. If logos render blank, refresh the URLs in record-harness.html (the `L()` helper) against a current espn.com scoreboard, or inline a few as data: URIs. The recorder waits 2.5s after load for them; raise that if a re-shoot catches half-loaded logos.",
+    "The demo config pins `layout.height` (224px) so every re-shoot records the same box. If you add rows or bump `layout.row_gap`, raise that height or the last row clips.",
+    "HACS renders a repo's README from its latest release tag, not from main. Merging a demo.gif change to main does not update what HACS users see until a new version is tagged. The README badge points at raw.githubusercontent.com/…/main/…, which is not tag-pinned and updates on every push."
+  ]
+}

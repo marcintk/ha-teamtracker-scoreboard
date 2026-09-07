@@ -103,8 +103,8 @@ describe("CARD_STYLES", () => {
     expect(CARD_STYLES).toContain("font-size: calc(20px * var(--ttsc-font-scale, 1))");
   });
 
-  it("spaces consecutive game rows by the --ttsc-row-gap custom property", () => {
-    expect(CARD_STYLES).toContain(".game-row + .game-row { margin-top: var(--ttsc-row-gap, 0); }");
+  it("pads every game row by the --ttsc-row-gap custom property (above and below)", () => {
+    expect(CARD_STYLES).toContain("padding: var(--ttsc-row-gap, 5px) 0;");
   });
 
   it("paints the whole slide control group orange while paused", () => {

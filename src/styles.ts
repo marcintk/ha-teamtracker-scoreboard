@@ -110,11 +110,13 @@ export const CARD_STYLES = `
     display: flex;
     align-items: center;
     height: var(--ttsc-row-height, 28px);
+    /* equal space above and below every row, so the divider sits centred in the
+       gap: <gap> · row · <gap> · line · <gap> · row · <gap> · … */
+    padding: var(--ttsc-row-gap, 5px) 0;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     gap: 0;
     position: relative;
   }
-  .game-row + .game-row { margin-top: var(--ttsc-row-gap, 0); }
 
   .team-pos {
     box-sizing: border-box;
