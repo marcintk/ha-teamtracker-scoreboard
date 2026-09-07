@@ -64,29 +64,12 @@ sections:
     limit: 20
     season_mode: regular
     rank_type: win-draw-loss
-  - name: Premier League
-    prefix: sensor.epl_
-    limit: 20
-    season_mode: regular
-    rank_type: win-draw-loss
   - name: NBA Scoreboard
     prefix: sensor.nba_
     limit: 20
     rank_type: win-loss
     special_teams:
       - sa
-  - name: NHL Scoreboard
-    prefix: sensor.nhl_
-    limit: 20
-    rank_type: win-loss-otl
-    special_teams:
-      - dal
-  - name: NFL Scoreboard
-    prefix: sensor.nfl_
-    limit: 20
-    rank_type: win-loss
-    special_teams:
-      - gb
 ```
 
 ## Configuration
