@@ -47,7 +47,7 @@ dashboard (see Configuration below).
    - Resource type: **JavaScript module**
 4. Reload your browser
 
-## Configuration
+## Usage
 
 Add a **Manual card** to your dashboard and paste:
 
@@ -101,6 +101,8 @@ file you imported (see [docs/sensors/](docs/sensors/)); `rank_type` is `win-loss
 `season_mode: regular` so the card always shows the standings table (ha-teamtracker's `season`
 attribute isn't a clean token — see [Season mode](#season-mode)). `special_teams` takes the suffix
 after the prefix (`juv` for `sensor.sera_juv`).
+
+## Configuration
 
 ### Options
 
