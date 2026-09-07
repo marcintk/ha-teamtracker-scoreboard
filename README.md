@@ -103,11 +103,11 @@ section) picks the formula:
 | Option         | Type    | Default  | Description                                                                                                                                                                                                                           |
 | -------------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sections`     | list    | required | One entry per league — see [Section](#section)                                                                                                                                                                                        |
+| `layout`       | map     | —        | Size / spacing / text-scale knobs — see [Layout](#layout)                                                                                                                                                                             |
+| `colors`       | map     | —        | Team colour overrides — see [Colors](#colors)                                                                                                                                                                                         |
 | `slide_sec`    | number  | —        | Show one section at a time, auto-advancing every N seconds (needs ≥ 2 sections); header gets `‹` / stop-resume / `›` controls. With no `layout.height`, the card locks to the tallest section. `prefers-reduced-motion` starts paused |
 | `show_version` | boolean | `false`  | Show the card version badge (top-right corner)                                                                                                                                                                                        |
 | `debug`        | boolean | `false`  | Pin a live-refresh overlay — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s                                                                                                                            |
-| `layout`       | map     | —        | Size / spacing / text-scale knobs — see [Layout](#layout)                                                                                                                                                                             |
-| `colors`       | map     | —        | Team colour overrides — see [Colors](#colors)                                                                                                                                                                                         |
 
 ### Refresh
 
