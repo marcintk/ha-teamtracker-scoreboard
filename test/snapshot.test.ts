@@ -83,6 +83,10 @@ describe("CARD_STYLES", () => {
     expect(CARD_STYLES).toContain("var(--ttsc-team-col-b-width, var(--ttsc-team-col-width, 99px))");
   });
 
+  it("keeps a 60px shrink floor on the team columns", () => {
+    expect(CARD_STYLES).toMatch(/\.team-col\s*\{[^}]*min-width:\s*60px/);
+  });
+
   it("wires logo width to the --ttsc-logo-width custom property", () => {
     expect(CARD_STYLES).toContain("width: var(--ttsc-logo-width, 30px)");
   });
