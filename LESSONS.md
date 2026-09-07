@@ -6,6 +6,35 @@ index.
 
 <!-- ponytail: single file; split by area if it outgrows one screen-scroll -->
 
+## Interactive control / view-state / rotation timer in the card — the reference pattern
+
+- **Context:** `slide_sec` (#140) added the card's first `@click` control, first view-state not
+  derived from `hass` (`_slideIndex`, `_slidePaused`), and a rotation timer. Bare `HTMLElement` +
+  standalone lit `render()` — no `LitElement`, no reactive props, so a field change does nothing
+  until something calls `_render()`.
+- **Pattern to copy:** view-state fields are constructor-inited and reset in `setConfig` next to the
+  `_scoreChangedAt` / `_prevScores` clears (new config = fresh view). The timer is a single
+  idempotent `_syncSlideTimer()` — it arms iff `(should run) && !this._slideTimer` and stops iff
+  `!(should run) && this._slideTimer` — called unconditionally from `_render()`, from `setConfig`
+  (after an explicit `_stopSlideTimer()` so a changed interval re-arms), and from each handler.
+  Handlers do `mutate field → _syncSlideTimer() → _render()`. `disconnectedCallback` calls
+  `_stopSlideTimer()` only, **never** `_syncSlideTimer()`, or a post-teardown render would resurrect
+  it. Do not arm a timer from `_render()` with an ad-hoc `if (!this._timer)` guard — that was the
+  slice-1 shape and it made detach→reattach behave inconsistently vs `_fixedTimer` (armed only in
+  `setConfig`); the idempotent sync is the fix.
+- **Test guardrail:** `test/index.test.ts` › "slide_sec carousel" / "slide_sec controls" pin
+  advance/wrap, pause/resume, `_slideIndex`/`_slidePaused` reset on `setConfig`, and timer-inert
+  after `disconnectedCallback` (mirrors the `_fixedTimer` teardown test). Fake timers per
+  `describe`; `makeCard()` is never attached, so lifecycle callbacks are invoked by hand.
+- **Also — a container that grows children in a later slice breaks an earlier slice's `.textContent`
+  assertion.** Slice 1's `headerTexts` helper did
+  `querySelectorAll(".section-header").map(el => el.textContent)` with `toEqual(["NHL"])`; slice 2
+  nested `<button>`s inside `.section-header`, so the text became `"NHL‹⏸›"`. Fix: scope such
+  helpers to a stable inner element (`.section-title`) — and prefer that from the start when a
+  region is likely to gain controls.
+- **Ref:** [#140](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/140) ·
+  2026-09-06
+
 ## Test for a CSS-custom-property-backed option fails/passes misleadingly on `shadowRoot.innerHTML`
 
 - **Root cause:** `CARD_STYLES` is inlined into the shadow DOM as a `<style>` block, so any

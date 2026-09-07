@@ -432,7 +432,48 @@
     </div>
   </div>
   <div class="slice">
-    <h3>Slice 2 &mdash; the three controls &nbsp;&middot;&nbsp; <em>pending</em></h3>
+    <h3>Slice 2 &mdash; the three controls &nbsp;&middot;&nbsp; accepted</h3>
+    <ul class="plain">
+      <li><code>src/index.ts</code> &mdash; <code>_slidePaused</code> field (constructor
+        <code>false</code>; reset in <code>setConfig</code>). <code>_startSlideTimer</code> replaced
+        by an idempotent <code>_syncSlideTimer()</code> &mdash; arms iff
+        <code>slide_sec &gt; 0 &amp;&amp; sections &ge; 2 &amp;&amp; !_slidePaused &amp;&amp; !_slideTimer</code>,
+        stops iff running and shouldn't be. Called unconditionally from <code>_render()</code>, from
+        <code>setConfig</code> (after an explicit <code>_stopSlideTimer()</code> so a changed
+        <code>slide_sec</code> re-arms at the new interval), and from the handlers.
+        <code>_slideStep(dir)</code> (wrap index, set <code>_slidePaused = true</code>, sync,
+        render), <code>_slideToggle()</code> (flip pause, sync, render), <code>_slideBtn()</code>
+        template helper. <code>_render</code> builds a <code>.slide-ctrls</code> span with the three
+        buttons when <code>carousel</code>, passed as the final <code>sectionHtml</code> arg.
+        This also retired the slice-1 lazy <code>if (!this._slideTimer)</code> arm the reviewer
+        flagged.</li>
+      <li><code>src/render.ts</code> &mdash; <code>sectionHtml</code> gains
+        <code>controls = nothing</code>. With controls the header is
+        <code>&lt;div class="section-header has-controls"&gt;&lt;span class="section-title"&gt;${name}&lt;/span&gt;${controls}&lt;/div&gt;</code>;
+        without, byte-identical to before. <code>emptyHtml()</code> reuses the same
+        <code>header</code>, so an empty active slide carries the controls too.</li>
+      <li><code>src/styles.ts</code> &mdash; <code>.section-header.has-controls</code> (flex,
+        space-between), <code>.slide-ctrls</code>, <code>.slide-btn</code> (transparent chrome,
+        <code>#888</code>, <code>:hover</code>/<code>:focus-visible</code>, font-scale
+        <code>calc()</code>), <code>.slide-btn.paused { color: orange }</code>.</li>
+      <li><code>test/index.test.ts</code> &mdash; <code>describe("slide_sec controls")</code>, 9
+        cases: 3-button count + class, title order, absent when not carousel / single section,
+        next/prev step + wrap, next pauses + flips the toggle, pause stops the timer, resume
+        restarts it, <code>_slidePaused</code> resets on <code>setConfig</code>. Slice-1's
+        <code>headerTexts</code> helper widened to read <code>.section-title</code> (buttons now
+        nest in <code>.section-header</code>; the <code>toEqual</code> assertions still return the
+        same string).</li>
+      <li><code>test/snapshot.test.ts</code> &mdash; +2 <code>CARD_STYLES</code> assertions
+        (<code>.slide-btn.paused</code>, <code>.section-header.has-controls</code>); snapshot
+        refreshed.</li>
+    </ul>
+    <p>
+      Suite 325 green; <code>typecheck</code> / <code>check:ci</code> clean; coverage 100%.
+      Reviewer: no correctness findings &mdash; traced <code>_syncSlideTimer()</code> across every
+      caller (including a changed <code>slide_sec</code>), the Euclidean wrap, the
+      <code>_slidePaused</code> lifecycle, and the empty-slide controls path; <code>/simplify</code>
+      no changes. The slice-1 &ldquo;carried forward&rdquo; timer-lifecycle note is now resolved.
+    </p>
   </div>
   <div class="slice">
     <h3>Slice 3 &mdash; honour <code>prefers-reduced-motion</code> &nbsp;&middot;&nbsp; <em>pending</em></h3>

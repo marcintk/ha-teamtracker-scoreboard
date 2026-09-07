@@ -19,6 +19,26 @@ exports[`CARD_STYLES > matches snapshot 1`] = `
     margin-top: 1px;
   }
 
+  .section-header.has-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .slide-ctrls { display: inline-flex; gap: 2px; flex: none; }
+  .slide-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-size: calc(13px * var(--scoreboard-font-scale, 1));
+    line-height: 1;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  .slide-btn:hover { color: #ccc; }
+  .slide-btn:focus-visible { outline: 1px solid #2196F3; outline-offset: 1px; }
+  .slide-btn.paused { color: orange; }
+
   .game-row {
     display: flex;
     align-items: center;
