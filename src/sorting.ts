@@ -2,7 +2,7 @@
 //   win-loss:      W=2 L=0           (NBA, …)    record: W-L
 //   win-draw-loss: W=3 D=1 L=0      (soccer, …) record: W-D-L
 //   win-loss-otl:  W=2 OTL=1 L=0   (NHL, …)    record: W-L-OTL
-//   by-date: internal — auto-applied outside the regular season
+//   by-date: internal — auto-applied when a section has nothing to rank
 
 import type { GameAttr, HassStates, SortItem, SortMode, ViewMode } from "./types.js";
 
@@ -29,9 +29,12 @@ export function sortKeyFor(attr: GameAttr | null | undefined, sortMode: SortMode
   return winRatio(attr?.team_record, sortMode);
 }
 
-// view overrides the season heuristic: "schedule" or "ranking" force the result;
-// "auto" (default) or any unrecognised value falls through to the season-attribute check
-// ("regular" here is ha-teamtracker's own season token, not a card config value).
+// A win-loss record: two or more dash-separated integers ("12-4", "0-1-2", "5-2-1").
+const NUMERIC_RECORD = /^\d+(-\d+)+$/;
+
+// "schedule" / "ranking" force the result. "auto" (default, and any unrecognised value)
+// shows the standings table only when *every* tracked entity carries a numeric win-loss
+// record — otherwise there is nothing to rank, so fall back to the date-sorted list.
 export function resolveSortMode(
   entities: string[],
   states: HassStates,
@@ -40,12 +43,11 @@ export function resolveSortMode(
 ): SortMode {
   if (view === "schedule") return "by-date";
   if (view === "ranking") return rankType;
-  return entities.some((id) => {
-    const s = states[id]?.attributes?.season;
-    return s && s !== "regular";
-  })
-    ? "by-date"
-    : rankType;
+  return entities.every((id) =>
+    NUMERIC_RECORD.test(String(states[id]?.attributes?.team_record ?? "").trim())
+  )
+    ? rankType
+    : "by-date";
 }
 
 // For by-date sort, one row per game — deduplicate by (date, team pair), preferring home sensor.

@@ -292,7 +292,6 @@ describe("sectionHtml", () => {
         team_abbr: "LAL",
         opponent_abbr: "BOS",
         date,
-        season: "playoffs",
       }),
       "sensor.nba_bos": makeState("PRE", {
         ...baseAttrs,
@@ -301,20 +300,19 @@ describe("sectionHtml", () => {
         team_abbr: "BOS",
         opponent_abbr: "LAL",
         date,
-        season: "playoffs",
       }),
     };
-    const el = doc(sectionHtml({ ...section, special_teams: ["lal"] }, states));
+    const el = doc(sectionHtml({ ...section, special_teams: ["lal"], view: "schedule" }, states));
     expect(el.innerHTML).toContain("scoreboard-special-color");
     expect(el.innerHTML).toContain("scoreboard-team-color");
     expect(el.innerHTML).toContain("font-weight:bold");
   });
 
-  it("auto-switches to by-date sort outside regular season", () => {
+  it("auto-switches to the date-sorted list when a tracked team has no record", () => {
     const states = {
       "sensor.nba_lal": makeState("PRE", {
         ...baseAttrs,
-        season: "playoffs",
+        team_record: undefined,
         date: "2024-04-20T00:00:00Z",
       }),
     };

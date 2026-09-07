@@ -58,6 +58,6 @@ under `sensor:` in `configuration.yaml`.
   leagues.
 - `special_teams` takes the suffix **after** the prefix — e.g. `juv` for `sensor.sera_juv`, not the
   ESPN id.
-- The Serie A section needs `view: ranking`: ha-teamtracker's Serie A `season` attribute is a
-  descriptive slug (`2026-27-italian-serie-a`), not a clean season-type token, so `view: auto`
-  misreads it and shows the schedule. See the "View" section of the main README.
+- Sections show the standings table automatically once every tracked team has a numeric record; set
+  `view: schedule` on a section to force the date-sorted list. See "Standings vs schedule" in the
+  main README.

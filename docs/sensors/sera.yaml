@@ -15,8 +15,6 @@
 # After saving, restart Home Assistant (or reload YAML configuration).
 # Each entry creates one entity, e.g. sensor.sera_juv, sensor.sera_mil, …
 # Use the shared prefix  sensor.sera_  in the card's `prefix` field.
-# TeamTracker's Serie A `season` attribute is a slug, not a clean token, so
-# set `view: ranking` on this section in the card config.
 
 sensor:
   - platform: teamtracker
