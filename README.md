@@ -102,13 +102,21 @@ under the `layout:` map — see [Layout & sizing](#layout--sizing). `slide_sec` 
 
 | Option          | Type    | Default  | Description                                                                                                            |
 | --------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `lazy_refresh`  | number  | `1`      | Seconds to hold before rendering after the first event; `0` = render immediately                                       |
-| `fixed_refresh` | number  | `60`     | Re-render every N seconds regardless of events; `0` = disabled                                                         |
 | `sections`      | list    | required | One entry per sport/league                                                                                             |
 | `colors`        | map     | —        | Override team colours (see [Colors](#colors))                                                                          |
 | `debug`         | boolean | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s |
 | `show_version`  | boolean | `false`  | Show card version badge (top-right corner)                                                                             |
 | `show_position` | boolean | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)   |
+
+### Refresh
+
+The card subscribes to Home Assistant state changes and re-renders when a tracked sensor updates.
+These two knobs tune that cadence.
+
+| Option          | Type   | Default | Description                                                                      |
+| --------------- | ------ | ------- | -------------------------------------------------------------------------------- |
+| `lazy_refresh`  | number | `1`     | Seconds to debounce after the first event before rendering; `0` = render at once |
+| `fixed_refresh` | number | `60`    | Re-render every N seconds regardless of events; `0` = disabled                   |
 
 ### Section options
 
