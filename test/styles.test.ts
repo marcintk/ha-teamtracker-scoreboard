@@ -44,15 +44,15 @@ describe("rowHtml inline styles — score text color", () => {
     const html = doc(rowHtml(makeState("PRE", baseAttrs), false)).innerHTML;
     expect(html.match(/color:black/g)?.length).toBeGreaterThanOrEqual(2);
   });
-  it("highlights leading team with brown in IN state", () => {
+  it("highlights the leading team in IN state", () => {
     const html = doc(rowHtml(makeState("IN", baseAttrs), false)).innerHTML;
-    expect(html).toContain("color:brown");
+    expect(html).toContain("color:var(--ttsc-leading-color, brown)");
     expect(html).toContain("color:black");
   });
-  it("marks winner orange and loser darkgray in POST state", () => {
+  it("marks winner and loser colours in POST state", () => {
     const html = doc(rowHtml(makeState("POST", baseAttrs), false)).innerHTML;
-    expect(html).toContain("color:orange");
-    expect(html).toContain("color:darkgray");
+    expect(html).toContain("color:var(--ttsc-winner-color, orange)");
+    expect(html).toContain("color:var(--ttsc-loser-color, darkgray)");
   });
 });
 

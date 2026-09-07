@@ -21,7 +21,7 @@ export function tvHtml(
   /* v8 ignore next */ const first = networks[0] ?? "";
   const truncated = first.substring(0, 3);
   const label = first.length > 3 || hasMultiple ? `${truncated}>` : truncated;
-  const bg = gs === "IN" ? (colors.live ?? "indianred") : "#666";
+  const bg = gs === "IN" ? (colors.live ?? "var(--ttsc-live-color, indianred)") : "#666";
   const badge = html`<span class="tv-badge" style="background:${bg}">${label}</span>`;
   if (hasMultiple) {
     const tooltip = networks.join(" · ");
@@ -57,12 +57,12 @@ export function messageHtml(
           subTemplate = html`<span class="msg-sub">${raw}</span>`;
         }
       }
-      return html`<span style="color:${colors.live ?? "indianred"}">${clock}</span>${subTemplate}`;
+      return html`<span style="color:${colors.live ?? "var(--ttsc-live-color, indianred)"}">${clock}</span>${subTemplate}`;
     }
     default: {
       const clock = attr.clock ?? "";
       const sub = attr.series_summary ?? "";
-      return html`<span style="color:${colors.winner ?? "orange"}">${clock}</span>${sub ? html`<span class="msg-sub">${sub}</span>` : nothing}`;
+      return html`<span style="color:${colors.winner ?? "var(--ttsc-winner-color, orange)"}">${clock}</span>${sub ? html`<span class="msg-sub">${sub}</span>` : nothing}`;
     }
   }
 }

@@ -10,7 +10,7 @@ export const CARD_STYLES = `
   }
 
   .section-header {
-    color: #2196F3; /* Material Blue */
+    color: var(--ttsc-header-color, #2196F3); /* Material Blue */
     font-size: calc(15px * var(--ttsc-font-scale, 1));
     padding: 2px 0 2px 0;
     margin-top: 1px;

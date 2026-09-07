@@ -112,7 +112,6 @@ section) picks the formula:
 ### Refresh
 
 The card subscribes to Home Assistant state changes and re-renders when a tracked sensor updates.
-These two knobs tune that cadence.
 
 | Option          | Type   | Default | Description                                                                      |
 | --------------- | ------ | ------- | -------------------------------------------------------------------------------- |
@@ -173,7 +172,7 @@ sections:
 | `layout.font_scale`  | number | `1`     | `--ttsc-font-scale`                                   | Uniform multiplier over every text size; raise `layout.row_height` too    |
 
 The `--ttsc-*` properties (unique to this card) can also be set on `ha-card` from a theme or
-`card_mod` — a `layout:` key wins over the CSS unless your rule uses `!important`.
+`card_mod` — a `layout:` / `colors:` key wins over the CSS unless your rule uses `!important`.
 
 ### Colors
 
@@ -197,11 +196,11 @@ sections:
 | `colors.team`     | `var(--primary-text-color, white)` | `--ttsc-team-color`     | Your tracked team name                     |
 | `colors.opponent` | `#777` (gray)                      | `--ttsc-opponent-color` | Opponent name                              |
 | `colors.special`  | `#2196F3` (Material Blue)          | `--ttsc-special-color`  | `special_teams` highlight                  |
-| `colors.header`   | `#2196F3` (Material Blue)          | —                       | Section header label                       |
-| `colors.winner`   | `orange`                           | —                       | POST winner score and final clock          |
-| `colors.loser`    | `darkgray`                         | —                       | POST loser score                           |
-| `colors.live`     | `indianred`                        | —                       | IN game clock text and TV badge background |
-| `colors.leading`  | `brown`                            | —                       | IN score for the currently leading team    |
+| `colors.header`   | `#2196F3` (Material Blue)          | `--ttsc-header-color`   | Section header label                       |
+| `colors.winner`   | `orange`                           | `--ttsc-winner-color`   | POST winner score and final clock          |
+| `colors.loser`    | `darkgray`                         | `--ttsc-loser-color`    | POST loser score                           |
+| `colors.live`     | `indianred`                        | `--ttsc-live-color`     | IN game clock text and TV badge background |
+| `colors.leading`  | `brown`                            | `--ttsc-leading-color`  | IN score for the currently leading team    |
 
 <!-- Reference links -->
 

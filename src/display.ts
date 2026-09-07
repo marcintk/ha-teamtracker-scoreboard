@@ -36,12 +36,14 @@ export function scoreColor(
   if (gs === "IN") {
     const ts = parseFloat(String(attr.team_score ?? 0));
     const os = parseFloat(String(attr.opponent_score ?? 0));
-    return (isSide ? ts >= os : os >= ts) ? (colors.leading ?? "brown") : "black";
+    return (isSide ? ts >= os : os >= ts)
+      ? (colors.leading ?? "var(--ttsc-leading-color, brown)")
+      : "black";
   }
   if (gs === "POST") {
     return (isSide ? attr.team_winner : attr.opponent_winner)
-      ? (colors.winner ?? "orange")
-      : (colors.loser ?? "darkgray");
+      ? (colors.winner ?? "var(--ttsc-winner-color, orange)")
+      : (colors.loser ?? "var(--ttsc-loser-color, darkgray)");
   }
   return "black";
 }

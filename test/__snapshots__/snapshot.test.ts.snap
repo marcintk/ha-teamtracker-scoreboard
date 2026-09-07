@@ -13,7 +13,7 @@ exports[`CARD_STYLES > matches snapshot 1`] = `
   }
 
   .section-header {
-    color: #2196F3; /* Material Blue */
+    color: var(--ttsc-header-color, #2196F3); /* Material Blue */
     font-size: calc(15px * var(--ttsc-font-scale, 1));
     padding: 2px 0 2px 0;
     margin-top: 1px;
@@ -314,7 +314,7 @@ exports[`rowHtml structural snapshots > renders IN markup 1`] = `
     <div class="team-rank" style="color:var(--ttsc-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
   <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:lightgray;color:brown"><!--?-->95</div>
+  <div class="score score-a" style="background:lightgray;color:var(--ttsc-leading-color, brown)"><!--?-->95</div>
   <div class="colon" style="background:lightgray;color:black"><!--?-->:</div>
   <div class="score score-b" style="background:lightgray;color:black"><!--?-->90</div>
   <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
@@ -322,7 +322,7 @@ exports[`rowHtml structural snapshots > renders IN markup 1`] = `
     <div class="team-name" style="color:var(--ttsc-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
     <div class="team-rank" style="color:var(--ttsc-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?--><span style="color:indianred"><!--?--></span><!--?--><!--?--></div>
+  <div class="message"><!--?--><span style="color:var(--ttsc-live-color, indianred)"><!--?--></span><!--?--><!--?--></div>
   <div class="tv"><!--?--></div>
 </div>"
 `;
@@ -336,7 +336,7 @@ exports[`rowHtml structural snapshots > renders IN with fresh score 1`] = `
     <div class="team-rank" style="color:var(--ttsc-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
   <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a score-fresh" style="background:lightgray;color:brown"><!--?-->95</div>
+  <div class="score score-a score-fresh" style="background:lightgray;color:var(--ttsc-leading-color, brown)"><!--?-->95</div>
   <div class="colon score-fresh" style="background:lightgray;color:black"><!--?-->:</div>
   <div class="score score-b score-fresh" style="background:lightgray;color:black"><!--?-->90</div>
   <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
@@ -344,7 +344,7 @@ exports[`rowHtml structural snapshots > renders IN with fresh score 1`] = `
     <div class="team-name" style="color:var(--ttsc-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
     <div class="team-rank" style="color:var(--ttsc-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?--><span style="color:indianred"><!--?--></span><!--?--><!--?--></div>
+  <div class="message"><!--?--><span style="color:var(--ttsc-live-color, indianred)"><!--?--></span><!--?--><!--?--></div>
   <div class="tv"><!--?--></div>
 </div>"
 `;
@@ -358,15 +358,15 @@ exports[`rowHtml structural snapshots > renders POST markup 1`] = `
     <div class="team-rank" style="color:var(--ttsc-team-color, var(--primary-text-color, white))"><!--?-->20-10</div>
   </div>
   <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:transparent;color:orange"><!--?-->95</div>
+  <div class="score score-a" style="background:transparent;color:var(--ttsc-winner-color, orange)"><!--?-->95</div>
   <div class="colon" style="background:transparent;color:#777"><!--?-->:</div>
-  <div class="score score-b" style="background:transparent;color:darkgray"><!--?-->90</div>
+  <div class="score score-b" style="background:transparent;color:var(--ttsc-loser-color, darkgray)"><!--?-->90</div>
   <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
   <div class="team-col team-col-b">
     <div class="team-name" style="color:var(--ttsc-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
     <div class="team-rank" style="color:var(--ttsc-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?--><span style="color:orange"><!--?--></span><!--?--><!--?--></div>
+  <div class="message"><!--?--><span style="color:var(--ttsc-winner-color, orange)"><!--?--></span><!--?--><!--?--></div>
   <div class="tv"><!--?--></div>
 </div>"
 `;
@@ -402,7 +402,7 @@ exports[`rowHtml structural snapshots > renders with showLogos enabled 1`] = `
     <div class="team-rank" style="color:var(--ttsc-special-color, #2196F3)"><!--?-->20-10</div>
   </div>
   <div class="logo logo-a"><!--?--><img alt="" src="https://cdn.example.com/lal.png"></div>
-  <div class="score score-a" style="background:lightgray;color:brown"><!--?-->95</div>
+  <div class="score score-a" style="background:lightgray;color:var(--ttsc-leading-color, brown)"><!--?-->95</div>
   <div class="colon" style="background:lightgray;color:black"><!--?-->:</div>
   <div class="score score-b" style="background:lightgray;color:black"><!--?-->90</div>
   <div class="logo logo-b"><!--?--><img alt="" src="https://cdn.example.com/bos.png"></div>
@@ -410,7 +410,7 @@ exports[`rowHtml structural snapshots > renders with showLogos enabled 1`] = `
     <div class="team-name" style="color:var(--ttsc-opponent-color, #777);font-weight:normal"><!--?-->Celtics</div>
     <div class="team-rank" style="color:var(--ttsc-opponent-color, #777)"><!--?-->18-12</div>
   </div>
-  <div class="message"><!--?--><span style="color:indianred"><!--?--></span><!--?--><!--?--></div>
+  <div class="message"><!--?--><span style="color:var(--ttsc-live-color, indianred)"><!--?--></span><!--?--><!--?--></div>
   <div class="tv"><!--?--></div>
 </div>"
 `;
@@ -419,15 +419,15 @@ exports[`widget structural snapshots > logoHtml 1`] = `"<!----><img alt="" src="
 
 exports[`widget structural snapshots > messageHtml BYE 1`] = `"<!----><span style="color:darkgray">Bye</span>"`;
 
-exports[`widget structural snapshots > messageHtml IN short 1`] = `"<!----><span style="color:indianred"><!--?-->Q3 5:00</span><!--?--><span class="msg-sub"><!--?-->Touchdown - LAL</span><!--?-->"`;
+exports[`widget structural snapshots > messageHtml IN short 1`] = `"<!----><span style="color:var(--ttsc-live-color, indianred)"><!--?-->Q3 5:00</span><!--?--><span class="msg-sub"><!--?-->Touchdown - LAL</span><!--?-->"`;
 
-exports[`widget structural snapshots > messageHtml IN truncated 1`] = `"<!----><span style="color:indianred"><!--?-->Q3 5:00</span><!--?--><span class="msg-sub tv-tooltip" data-tooltip="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"><!--?-->AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&gt;</span><!--?-->"`;
+exports[`widget structural snapshots > messageHtml IN truncated 1`] = `"<!----><span style="color:var(--ttsc-live-color, indianred)"><!--?-->Q3 5:00</span><!--?--><span class="msg-sub tv-tooltip" data-tooltip="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"><!--?-->AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&gt;</span><!--?-->"`;
 
-exports[`widget structural snapshots > messageHtml POST 1`] = `"<!----><span style="color:orange"><!--?-->Final</span><!--?--><span class="msg-sub"><!--?-->LAL leads 2-1</span><!--?-->"`;
+exports[`widget structural snapshots > messageHtml POST 1`] = `"<!----><span style="color:var(--ttsc-winner-color, orange)"><!--?-->Final</span><!--?--><span class="msg-sub"><!--?-->LAL leads 2-1</span><!--?-->"`;
 
 exports[`widget structural snapshots > messageHtml PRE with sub 1`] = `"<!----><span style="color:darkgray"><!--?-->2h</span><!--?--><span class="msg-sub"><!--?-->Houston, LAL -3.5</span><!--?-->"`;
 
-exports[`widget structural snapshots > tvHtml IN 1`] = `"<!----><span class="tv-badge" style="background:indianred"><!--?-->ESP&gt;</span>"`;
+exports[`widget structural snapshots > tvHtml IN 1`] = `"<!----><span class="tv-badge" style="background:var(--ttsc-live-color, indianred)"><!--?-->ESP&gt;</span>"`;
 
 exports[`widget structural snapshots > tvHtml PRE single 1`] = `"<!----><span class="tv-badge" style="background:#666"><!--?-->ESP&gt;</span>"`;
 
