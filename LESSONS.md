@@ -19,8 +19,13 @@ index.
   `card.shadowRoot.querySelector("ha-card").getAttribute("style")`, not `innerHTML`; pair it with a
   `CARD_STYLES`-contains assertion for the stylesheet side. `test/index.test.ts` › "team_col_width"
   / "layout dimension options" and `test/snapshot.test.ts` › CARD_STYLES wiring show the split.
+- **Also:** the `cssVars` table in `_render` is serialised through `.filter(([, v]) => v)`, so a
+  boolean "off" flag routed through it (`show_position` → `--scoreboard-position-display: none`)
+  must compare `option === false`, never `!option` — the truthy filter already drops `undefined`,
+  and `!option` would also fire on `0` / `""`.
 - **Ref:** [#132](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/132),
-  [#133](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/133) · 2026-09-06
+  [#133](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/133),
+  [#134](https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/134) · 2026-09-06
 
 ## Card shows the fixture table during the regular season / wrong standings-vs-fixtures sort
 

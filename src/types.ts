@@ -94,4 +94,6 @@ export interface CardConfig {
   show_version?: boolean;
   lazy_refresh?: number;
   fixed_refresh?: number;
+  /** card-level: false removes the .team-pos gutter entirely */
+  show_position?: boolean;
 }

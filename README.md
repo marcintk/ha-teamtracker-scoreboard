@@ -78,6 +78,7 @@ sections:
 | `colors`        | map           | —        | Override team colours (see [Colors](#colors))                                                                                                    |
 | `debug`         | boolean       | `false`  | Pin a live-refresh overlay to the card — **events** / **accepted** / **renders** counters over 1m–3h rolling windows, updated every 5s           |
 | `show_version`  | boolean       | `false`  | Show card version badge (top-right corner)                                                                                                       |
+| `show_position` | boolean       | `true`   | Set `false` to drop the standings-position column from the whole card. See [Standings position](#standings-position)                             |
 | `team_width`    | string / list | `99px`   | Team-name column width. A single CSS length sets both sides; a `[left, right]` list sets them apart. See [Layout dimensions](#layout-dimensions) |
 | `logo_width`    | string        | `30px`   | CSS width of each team-logo cell (and the logo image). See [Layout dimensions](#layout-dimensions)                                               |
 | `score_width`   | string        | `34px`   | CSS width of each score cell. Widen for 3-digit totals                                                                                           |
@@ -118,10 +119,13 @@ In the regular season each row opens with a narrow column holding that team's **
 standings** — its rank in the full sorted list, so `1` is the section leader even when `limit` hides
 the rows below it. The number is coloured like its team, so `special_teams` positions stand out too.
 
-Set `show_position: false` on a section to hide the numbers. The narrow column is still drawn
+Set `show_position: false` on a **section** to hide the numbers. The narrow column is still drawn
 (empty), so a card that mixes a standings section with a date-sorted one keeps every row aligned. In
 date-sorted mode (playoffs, cups, or `season_mode: by-date`) the column is always empty — there is
 no league position to show.
+
+Set `show_position: false` at the **card** level to remove the column entirely — no gutter on any
+row, restoring the pre-position-column layout. Use this when no section ever shows standings.
 
 ```yaml
 sections:
