@@ -80,7 +80,8 @@ function makeDriver(page, framesDir, clip) {
 async function runScenario(page, d) {
   await d.hold(8); // rest on the first section
 
-  // step through the sections with the ▸ button (each click pauses the rotation)
+  // rotation starts paused (prefers-reduced-motion); step through the sections
+  // with the ▸ button
   await d.click(".slide-btn.nav.next");
   await sleep(150);
   await d.hold(10);
@@ -95,7 +96,7 @@ async function runScenario(page, d) {
   await page.evaluate(() => window.__bumpScore());
   await d.hold(16);
 
-  // hand control back to the clock and let it auto-advance once or twice
+  // start the clock with the ▮▮/▶ toggle and let it auto-advance once or twice
   await d.click(".slide-btn.toggle");
   await d.hold(24);
 
@@ -117,6 +118,10 @@ async function main() {
   const context = await browser.newContext({
     viewport: { width: VIEW_WIDTH, height: 1000 },
     deviceScaleFactor: 2,
+    // record with prefers-reduced-motion: the card starts the slide rotation
+    // paused, so the shoot deterministically opens on the first section and the
+    // demo shows the manual ‹/› controls before the final toggle resumes auto-advance
+    reducedMotion: "reduce",
   });
   const page = await context.newPage();
 
