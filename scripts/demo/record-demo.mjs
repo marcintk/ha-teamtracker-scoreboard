@@ -139,8 +139,10 @@ async function main() {
     const clip = {
       x: Math.round(box.x),
       y: Math.round(box.y),
-      width: Math.round(box.width / 2) * 2,
-      height: Math.round(box.height / 2) * 2,
+      // floor to an even number: rounding up can capture a 1px sliver of the
+      // page background below the card's bottom edge (reads as a dark line)
+      width: Math.floor(box.width / 2) * 2,
+      height: Math.floor(box.height / 2) * 2,
     };
     console.log("clip", clip);
 
