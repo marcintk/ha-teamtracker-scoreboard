@@ -5,6 +5,9 @@
 Home Assistant custom Lovelace card displaying live scores, pre-game odds, win probability, TV
 network, and series info — one row per game.
 
+Bug or feature request? [Open an issue][new-issue]. Idea, question, or setup to share? [Start a
+discussion][discussions].
+
 [![hacs_badge][hacs-shield]][hacs] [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]][license] ![Maintenance][maintenance-shield]
 [![Coverage][coverage-shield]][ci] [![Downloads][downloads-shield]][releases] [![CI][ci-shield]][ci]
@@ -190,6 +193,8 @@ sections:
 <!-- Reference links -->
 
 [repo]: https://github.com/marcintk/ha-teamtracker-scoreboard-card
+[new-issue]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/new
+[discussions]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/discussions
 [hacs]: https://hacs.xyz
 [hacs-shield]: https://img.shields.io/badge/HACS-Default-41BDF5.svg
 [releases]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases
