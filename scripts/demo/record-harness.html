@@ -96,6 +96,18 @@
           opponent_name: "Raptors", opponent_abbr: "TOR", opponent_record: "24-29",
           opponent_logo: L("nba", "tor"), tv_network: "NBA TV", date: at(260),
         }),
+        "sensor.nba_lac": g({
+          state: "POST", team_name: "Clippers", team_abbr: "LAC", team_record: "34-19",
+          team_homeaway: "home", team_score: 112, team_winner: true, team_logo: L("nba", "lac"),
+          opponent_name: "Pelicans", opponent_abbr: "NO", opponent_record: "27-26",
+          opponent_score: 106, opponent_logo: L("nba", "no"), clock: "Final", date: at(-310),
+        }),
+        "sensor.nba_dal": g({
+          state: "PRE", team_name: "Mavericks", team_abbr: "DAL", team_record: "32-21",
+          team_homeaway: "home", team_logo: L("nba", "dal"), kickoff_in: "in 5h",
+          opponent_name: "Grizzlies", opponent_abbr: "MEM", opponent_record: "33-20",
+          opponent_logo: L("nba", "mem"), tv_network: "ESPN", date: at(330),
+        }),
       };
 
       const NHL = {
@@ -136,6 +148,18 @@
           team_homeaway: "home", team_logo: L("nhl", "car"), kickoff_in: "in 2h",
           opponent_name: "Capitals", opponent_abbr: "WSH", opponent_record: "29-19-7",
           opponent_logo: L("nhl", "wsh"), date: at(140),
+        }),
+        "sensor.nhl_min": g({
+          state: "POST", team_name: "Wild", team_abbr: "MIN", team_record: "30-20-5",
+          team_homeaway: "home", team_score: 5, team_winner: true, team_logo: L("nhl", "min"),
+          opponent_name: "Blues", opponent_abbr: "STL", opponent_record: "26-25-4",
+          opponent_score: 2, opponent_logo: L("nhl", "stl"), clock: "Final", date: at(-285),
+        }),
+        "sensor.nhl_sea": g({
+          state: "PRE", team_name: "Kraken", team_abbr: "SEA", team_record: "26-24-6",
+          team_homeaway: "home", team_logo: L("nhl", "sea"), kickoff_in: "in 3h",
+          opponent_name: "Flames", opponent_abbr: "CGY", opponent_record: "27-22-7",
+          opponent_logo: L("nhl", "cgy"), date: at(205),
         }),
       };
 
@@ -178,6 +202,18 @@
           opponent_name: "Brentford", opponent_abbr: "BRE", opponent_record: "9-7-7",
           opponent_logo: L("soccer", "337"), tv_network: "Peacock", date: at(300),
         }),
+        "sensor.epl_mun": g({
+          state: "POST", team_name: "Man United", team_abbr: "MUN", team_record: "12-6-5",
+          team_homeaway: "home", team_score: 2, team_winner: true, team_logo: L("soccer", "360"),
+          opponent_name: "Wolves", opponent_abbr: "WOL", opponent_record: "8-8-7",
+          opponent_score: 0, opponent_logo: L("soccer", "380"), clock: "FT", date: at(-270),
+        }),
+        "sensor.epl_cry": g({
+          state: "PRE", team_name: "Crystal Palace", team_abbr: "CRY", team_record: "9-8-6",
+          team_homeaway: "home", team_logo: L("soccer", "384"), kickoff_in: "in 6h",
+          opponent_name: "Bournemouth", opponent_abbr: "BOU", opponent_record: "8-7-8",
+          opponent_logo: L("soccer", "349"), tv_network: "USA", date: at(360),
+        }),
       };
 
       // one shared connection object — the card treats a changed `connection`
@@ -194,10 +230,10 @@
         slide_sec: 4,
         lazy_refresh: 0, // render immediately — no debounce to fight in the recorder
         // pin the height so every re-shoot records the same box. 213px shows the
-        // header + 5 rows (row 6 is cropped): `overflow: hidden` lands flush at
-        // row 5's bottom edge, before its 5px trailing gap, so the only
-        // card-coloured space under it is the 5px outer padding — matching the
-        // other edges. ~15% shorter than the old 6-row 250px box.
+        // header + 5 rows (each section has 8 games — rows 6-8 are cropped):
+        // `overflow: hidden` lands flush at row 5's bottom edge, before its 5px
+        // trailing gap, so the only card-coloured space under it is the 5px outer
+        // padding — matching the other edges. ~15% shorter than the old 250px box.
         layout: { height: "213px" },
         // view: schedule (the default) — one row per game, live games first then
         // every other game by nearness to now.
