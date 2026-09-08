@@ -94,7 +94,7 @@ In the standings table teams are ordered by their win-loss record, best at the t
 | `colors`       | map     | —        | Team colour overrides — see [Colors](#colors)                                                                                              |
 | `mode`         | string  | `stack`  | `stack` shows every section; `slide` shows one at a time (needs ≥ 2 sections), auto-advancing with `‹` / stop-resume / `›` header controls |
 | `slide_sec`    | number  | `45`     | Seconds per section while `mode: slide`                                                                                                    |
-| `debug`        | boolean | `false`  | Pin a live-refresh overlay — **events** / **accepted** / **renders** counters over 1m–3h windows, every 5s                                 |
+| `debug`        | boolean | `false`  | Pin a live-refresh overlay — **events** / **accepted** / **renders** counters over 1m–3h windows, every 1s                                 |
 | `show_version` | boolean | `false`  | Show the card version badge, centred at the top                                                                                            |
 
 ### Refresh
@@ -103,7 +103,7 @@ The card subscribes to Home Assistant state changes and re-renders when a tracke
 
 | Option          | Type   | Default | Description                                                                      |
 | --------------- | ------ | ------- | -------------------------------------------------------------------------------- |
-| `lazy_refresh`  | number | `1`     | Seconds to debounce after the first event before rendering; `0` = render at once |
+| `lazy_refresh`  | number | `5`     | Seconds to debounce after the first event before rendering; `0` = render at once |
 | `fixed_refresh` | number | `60`    | Re-render every N seconds regardless of events; `0` = disabled                   |
 
 ### Section
