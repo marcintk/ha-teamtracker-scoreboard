@@ -24,8 +24,6 @@ package per league, all rosters verified against ESPN for the 2026/27 season:
 - **La Liga / Primera División** (Spain) — all 20 clubs
 - **Serie A** (Italy) — all 20 clubs
 
-See [docs/sensors/README.md](docs/sensors/README.md) for how to load them and per-league notes.
-
 ## Installation
 
 ### Via HACS (recommended)
@@ -64,9 +62,9 @@ sections:
     limit: 5
 ```
 
-## Standings vs schedule
+## Schedule vs standings
 
-A section renders as one of ways:
+A section renders as one of two ways:
 
 - **schedule** _(default)_ — one row per game: live games first, then every other game by nearness
   to now, so the next kick-off and the just-finished game sit near the top; the two sensors for a
@@ -75,7 +73,7 @@ A section renders as one of ways:
 
 ## Rank type
 
-In the standings table teams are ordered by their win-loss record, best at the top.
+In the **standings** table teams are ordered by their win-loss record, best at the top.
 
 | Value           | Points system   | Record format | Use for                              |
 | --------------- | --------------- | ------------- | ------------------------------------ |
@@ -128,7 +126,7 @@ sections:
 | `section.name`          | string  | required        | Header label shown above the section                                                                                                                                                                                                                                     |
 | `section.prefix`        | string  | required        | Entity ID prefix, e.g. `sensor.nba_`                                                                                                                                                                                                                                     |
 | `section.limit`         | number  | `10`            | Max rows to show                                                                                                                                                                                                                                                         |
-| `section.view`          | string  | `schedule`      | What the section shows (see [Standings vs schedule](#standings-vs-schedule)). `schedule` = list, live games first then every other game by nearness to now; `standings` = standings table; `auto` = standings when every team has a numeric record, else schedule        |
+| `section.view`          | string  | `schedule`      | What the section shows (see [Schedule vs standings](#schedule-vs-standings)). `schedule` = list, live games first then every other game by nearness to now; `standings` = standings table; `auto` = standings when every team has a numeric record, else schedule        |
 | `section.rank_type`     | string  | `win-draw-loss` | Ranking formula for the standings table — see [Rank type](#rank-type)                                                                                                                                                                                                    |
 | `section.score_blink`   | number  | `5`             | Seconds to blink the score after a goal/basket; `0` disables                                                                                                                                                                                                             |
 | `section.show_position` | boolean | `false`         | Draw the position gutter — the rank in a `standings` view (a blank cell in `schedule`, for aligning a mixed card). It's the rank among **tracked** teams, so it matches the real league table only if every team is tracked. Left `false`, the gutter isn't drawn at all |
