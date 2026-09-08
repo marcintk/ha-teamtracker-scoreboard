@@ -320,7 +320,7 @@ export class SportScoreboardCard extends HTMLElement {
       score_width: l.score_width ?? c?.score_width,
       colon_width: l.colon_width ?? c?.colon_width,
       row_height: l.row_height ?? c?.row_height,
-      row_gap: l.row_gap,
+      row_padding: l.row_padding,
       font_scale: l.font_scale ?? c?.font_scale,
     };
   }
@@ -335,7 +335,7 @@ export class SportScoreboardCard extends HTMLElement {
         score_width,
         colon_width,
         row_height,
-        row_gap,
+        row_padding,
         font_scale,
       } = this._layout();
       const states = (this._hass as HomeAssistant).states;
@@ -365,8 +365,8 @@ export class SportScoreboardCard extends HTMLElement {
         : nothing;
       let slideMinH = "";
       if (carousel && !height) {
-        // each row is row_height + a gap above and below it
-        const slideH = (asPx(row_height) ?? 28) + 2 * (asPx(row_gap) ?? 5);
+        // each row is row_height + padding above and below it
+        const slideH = (asPx(row_height) ?? 28) + 2 * (asPx(row_padding) ?? 5);
         const maxRows = Math.max(...sections.map((s) => 1 + (s.limit ?? 10)));
         slideMinH = `min-height:${maxRows * slideH}px;`;
       }
@@ -380,7 +380,7 @@ export class SportScoreboardCard extends HTMLElement {
         "--ttsc-score-width": score_width,
         "--ttsc-colon-width": colon_width,
         "--ttsc-row-height": row_height,
-        "--ttsc-row-gap": row_gap,
+        "--ttsc-row-padding": row_padding,
         "--ttsc-font-scale":
           font_scale != null && font_scale !== 1 ? String(font_scale) : undefined,
       };
@@ -449,7 +449,7 @@ export class SportScoreboardCard extends HTMLElement {
   }
 
   getCardSize(): number {
-    const { height, row_height, row_gap } = this._layout();
+    const { height, row_height, row_padding } = this._layout();
     const hpx = asPx(height);
     if (hpx !== null) return Math.max(1, Math.ceil(hpx / 50));
     const sections = this._config?.sections ?? [];
@@ -457,8 +457,8 @@ export class SportScoreboardCard extends HTMLElement {
     const rows = carousel
       ? Math.max(0, ...sections.map((s) => 1 + (s.limit ?? 10)))
       : sections.reduce((n, s) => n + 1 + (s.limit ?? 10), 0);
-    // each row is row_height + a gap above and below it — match slideMinH
-    const h = (asPx(row_height) ?? 28) + 2 * (asPx(row_gap) ?? 5);
+    // each row is row_height + padding above and below it — match slideMinH
+    const h = (asPx(row_height) ?? 28) + 2 * (asPx(row_padding) ?? 5);
     return Math.max(1, Math.ceil((rows * h) / 50));
   }
 

@@ -122,16 +122,19 @@ describe("SportScoreboardCard", () => {
       expect(card.getCardSize()).toBe(9);
     });
 
-    it("factors layout.row_gap into the size estimate", () => {
+    it("factors layout.row_padding into the size estimate", () => {
       const card = makeCard();
-      card._config = { sections: [{ limit: 10 }], layout: { row_gap: "0px" } };
-      // 11 rows * (28 + 0 gap) = 308px / 50 = ceil(6.16) = 7
+      card._config = { sections: [{ limit: 10 }], layout: { row_padding: "0px" } };
+      // 11 rows * (28 + 0 padding) = 308px / 50 = ceil(6.16) = 7
       expect(card.getCardSize()).toBe(7);
     });
 
-    it("ignores non-pixel row_height / row_gap (uses the defaults)", () => {
+    it("ignores non-pixel row_height / row_padding (uses the defaults)", () => {
       const card = makeCard();
-      card._config = { sections: [{ limit: 10 }], layout: { row_height: "2rem", row_gap: "1em" } };
+      card._config = {
+        sections: [{ limit: 10 }],
+        layout: { row_height: "2rem", row_padding: "1em" },
+      };
       // "2rem"/"1em" aren't px → 28 + 2*5 = 38; 11 * 38 = 418 / 50 = ceil(8.36) = 9
       expect(card.getCardSize()).toBe(9);
     });
@@ -683,17 +686,17 @@ describe("SportScoreboardCard", () => {
       card._hass = twoSectionHass();
       card._render();
       const style = card.shadowRoot?.querySelector("ha-card")?.getAttribute("style") ?? "";
-      // maxRows = 1 + 10 = 11; h = 28 + 2*5 gap => 11 * 38 = 418
+      // maxRows = 1 + 10 = 11; h = 28 + 2*5 padding => 11 * 38 = 418
       expect(style).toContain("min-height:418px");
     });
 
-    it("factors layout.row_gap into the carousel min-height", () => {
+    it("factors layout.row_padding into the carousel min-height", () => {
       const card = makeCard();
       card._config = {
         sections: [nbaSection, nhlSection],
         mode: "slide",
         slide_sec: 30,
-        layout: { row_gap: "10px" },
+        layout: { row_padding: "10px" },
       } as SlideConfig;
       card._hass = twoSectionHass();
       card._render();
@@ -1811,7 +1814,7 @@ describe("SportScoreboardCard", () => {
       { key: "score_width", prop: "--ttsc-score-width", value: "50px" },
       { key: "colon_width", prop: "--ttsc-colon-width", value: "12px" },
       { key: "row_height", prop: "--ttsc-row-height", value: "40px" },
-      { key: "row_gap", prop: "--ttsc-row-gap", value: "6px" },
+      { key: "row_padding", prop: "--ttsc-row-padding", value: "6px" },
     ] as const;
 
     for (const { key, prop, value } of cases) {
