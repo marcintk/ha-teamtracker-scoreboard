@@ -231,7 +231,7 @@
         lazy_refresh: 0, // render immediately — no debounce to fight in the recorder
         // pin the height so every re-shoot records the same box. 289px shows the
         // header + 7 rows (each section has 8 games — row 8 is cropped):
-        // header ≈ 23px + 7 × (row_height 28 + 2·row_gap 5). `overflow: hidden`
+        // header ≈ 23px + 7 × (row_height 28 + 2·row_padding 5). `overflow: hidden`
         // lands on row 7's bottom edge, so the only card-coloured space under it
         // is the 5px outer padding — matching the other edges.
         layout: { height: "289px" },

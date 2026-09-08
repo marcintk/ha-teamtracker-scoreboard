@@ -112,9 +112,9 @@ export const CARD_STYLES = `
     display: flex;
     align-items: center;
     height: var(--ttsc-row-height, 28px);
-    /* equal space above and below every row, so the divider sits centred in the
-       gap: <gap> · row · <gap> · line · <gap> · row · <gap> · … */
-    padding: var(--ttsc-row-gap, 5px) 0;
+    /* equal padding above and below every row, so the divider sits centred in
+       the space: <pad> · row · <pad> · line · <pad> · row · <pad> · … */
+    padding: var(--ttsc-row-padding, 5px) 0;
     /* follow the active HA theme's divider (visible in light and dark, matches
        other cards); the rgba fallback covers the standalone / no-theme case */
     border-bottom: 1px solid var(--divider-color, rgba(255,255,255,0.04));

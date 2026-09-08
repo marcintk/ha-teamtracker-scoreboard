@@ -82,8 +82,8 @@ export interface LayoutConfig {
   score_width?: string;
   colon_width?: string;
   row_height?: string;
-  /** space above AND below every game row (CSS length; default 5px) */
-  row_gap?: string;
+  /** padding above AND below every game row (CSS length; default 5px) */
+  row_padding?: string;
   /** uniform multiplier over every font-size; 1 = baseline */
   font_scale?: number;
 }

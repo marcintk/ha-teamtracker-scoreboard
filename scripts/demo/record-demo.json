@@ -52,7 +52,7 @@
 
   "known_risks": [
     "ESPN logo URLs (a.espncdn.com) can change their path scheme or rate-limit. If logos render blank, refresh the URLs in record-harness.html (the `L()` helper) against a current espn.com scoreboard, or inline a few as data: URIs. The recorder waits 2.5s after load for them; raise that if a re-shoot catches half-loaded logos. Some EPL numeric team ids in the new rows (Everton 368, Fulham 370, West Ham 371, Brentford 337) are best-effort — a wrong id just drops that one crest.",
-    "The demo config pins `layout.height` (289px) so the frame shows the header + 7 rows and crops the last one. It is meant to crop — each section has 8 games. If you bump `--ttsc-row-height` / `layout.row_gap` or want a different visible-row count, recompute: header ≈ 23px + N × (row_height + 2·row_gap).",
+    "The demo config pins `layout.height` (289px) so the frame shows the header + 7 rows and crops the last one. It is meant to crop — each section has 8 games. If you bump `--ttsc-row-height` / `layout.row_padding` or want a different visible-row count, recompute: header ≈ 23px + N × (row_height + 2·row_padding).",
     "HACS renders a repo's README from its latest release tag, not from main. Merging a demo.gif change to main does not update what HACS users see until a new version is tagged. The README badge points at raw.githubusercontent.com/…/main/…, which is not tag-pinned and updates on every push."
   ]
 }
