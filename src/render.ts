@@ -26,22 +26,27 @@ export function rowHtml(
   opponentSpecial = false,
   isFresh = false,
   // number → the rank; `null` → an empty gutter cell (alignment); `undefined` → no cell
-  position: number | null | undefined = undefined
+  position: number | null | undefined = undefined,
+  // schedule view: drop the tracked-team highlight (bold + team colour) so both
+  // names read the same — see teamColor's `flat`
+  schedule = false
 ): TemplateResult {
   const gs = (stateObj?.state ?? "") as GameState;
   const attr = stateObj?.attributes ?? {};
   const bg = scoreBg(gs);
   const freshClass = isFresh ? " score-fresh" : "";
 
-  const homeColor = teamColor("home", attr, special, colors, opponentSpecial);
-  const awayColor = teamColor("away", attr, special, colors, opponentSpecial);
+  const homeColor = teamColor("home", attr, special, colors, opponentSpecial, schedule);
+  const awayColor = teamColor("away", attr, special, colors, opponentSpecial, schedule);
   const posColor = attr.team_homeaway === "home" ? homeColor : awayColor;
+  const homeWeight = !schedule && isTeamSide("home", attr) ? "bold" : "normal";
+  const awayWeight = !schedule && isTeamSide("away", attr) ? "bold" : "normal";
 
   return html`
 <div class="game-row">
   ${position === undefined ? nothing : html`<div class="team-pos" style=${position === null ? nothing : `color:${posColor}`}>${position ?? ""}</div>`}
   <div class="team-col team-col-a">
-    <div class="team-name" style="color:${homeColor};font-weight:${isTeamSide("home", attr) ? "bold" : "normal"}">${nameText("home", attr)}</div>
+    <div class="team-name" style="color:${homeColor};font-weight:${homeWeight}">${nameText("home", attr)}</div>
     <div class="team-rank" style="color:${homeColor}">${rankText("home", attr)}</div>
   </div>
   <div class="logo logo-a">${logoHtml("home", attr)}</div>
@@ -50,7 +55,7 @@ export function rowHtml(
   <div class="score score-b${freshClass}" style="background:${bg};color:${scoreColor("away", gs, attr, colors)}">${scoreText("away", gs, attr)}</div>
   <div class="logo logo-b">${logoHtml("away", attr)}</div>
   <div class="team-col team-col-b">
-    <div class="team-name" style="color:${awayColor};font-weight:${isTeamSide("away", attr) ? "bold" : "normal"}">${nameText("away", attr)}</div>
+    <div class="team-name" style="color:${awayColor};font-weight:${awayWeight}">${nameText("away", attr)}</div>
     <div class="team-rank" style="color:${awayColor}">${rankText("away", attr)}</div>
   </div>
   <div class="message">${messageHtml(gs, attr, colors)}</div>
@@ -135,7 +140,8 @@ export function sectionHtml(
         colors,
         opponentSpecial,
         isFresh,
-        pos
+        pos,
+        sortMode === "by-date"
       );
     });
 
