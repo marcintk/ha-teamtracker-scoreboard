@@ -229,12 +229,12 @@
         mode: "slide",
         slide_sec: 4,
         lazy_refresh: 0, // render immediately — no debounce to fight in the recorder
-        // pin the height so every re-shoot records the same box. 213px shows the
-        // header + 5 rows (each section has 8 games — rows 6-8 are cropped):
-        // `overflow: hidden` lands flush at row 5's bottom edge, before its 5px
-        // trailing gap, so the only card-coloured space under it is the 5px outer
-        // padding — matching the other edges. ~15% shorter than the old 250px box.
-        layout: { height: "213px" },
+        // pin the height so every re-shoot records the same box. 289px shows the
+        // header + 7 rows (each section has 8 games — row 8 is cropped):
+        // header ≈ 23px + 7 × (row_height 28 + 2·row_gap 5). `overflow: hidden`
+        // lands on row 7's bottom edge, so the only card-coloured space under it
+        // is the 5px outer padding — matching the other edges.
+        layout: { height: "289px" },
         // view: schedule (the default) — one row per game, live games first then
         // every other game by nearness to now.
         sections: [
