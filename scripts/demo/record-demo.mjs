@@ -23,9 +23,9 @@ import { chromium } from "playwright";
 
 const ROOT = new URL("../..", import.meta.url).pathname;
 const HARNESS_PATH = "/scripts/demo/record-harness.html";
-const VIEW_WIDTH = 900;
+const VIEW_WIDTH = 1100;
 const FPS = 10;
-const OUT_WIDTH = 440; // final gif width; height follows the card's own box
+const OUT_WIDTH = 660; // final gif width; height follows the card's own box
 
 const MIME = {
   ".html": "text/html",
