@@ -16,14 +16,14 @@
       html,
       body {
         margin: 0;
-        background: #e9ebee;
+        background: #111418;
       }
       #wrap {
         width: 660px;
-        /* mimic HA's light-theme card surface so the recorded frame isn't a bare element */
-        --ha-card-background: #ffffff;
-        --primary-text-color: #1a1d21;
-        --divider-color: rgba(0, 0, 0, 0.12);
+        /* mimic HA's dark-theme card surface so the recorded frame isn't a bare element */
+        --ha-card-background: #1c1f24;
+        --primary-text-color: #e9edf1;
+        --divider-color: rgba(255, 255, 255, 0.1);
       }
       ha-card,
       #wrap > * {
@@ -31,7 +31,7 @@
         /* square corners; the card fills the whole recorded frame */
         border-radius: 0;
         display: block;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
       }
       /* 5px breathing room between the frame edge and the card's contents —
          on the outer element only. Putting it on <ha-card> too would inflate
