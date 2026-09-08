@@ -65,6 +65,30 @@ describe("rowHtml", () => {
     expect(el.querySelector(".game-row")).not.toBeNull();
     expect(el.querySelector("img")).toBeNull();
   });
+
+  it("bolds the tracked team by default (standings)", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false));
+    const [home, away] = el.querySelectorAll<HTMLElement>(".team-name");
+    expect(home?.style.fontWeight).toBe("bold");
+    expect(away?.style.fontWeight).toBe("normal");
+    expect(home?.style.color).toContain("--ttsc-team-color");
+  });
+
+  it("schedule flag drops the tracked-team highlight — both names normal + opponent color", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), false, {}, false, false, undefined, true));
+    const [home, away] = el.querySelectorAll<HTMLElement>(".team-name");
+    expect(home?.style.fontWeight).toBe("normal");
+    expect(away?.style.fontWeight).toBe("normal");
+    expect(home?.style.color).toContain("--ttsc-opponent-color");
+    expect(away?.style.color).toContain("--ttsc-opponent-color");
+  });
+
+  it("schedule flag keeps the special-team blue", () => {
+    const el = doc(rowHtml(makeState("PRE", baseAttrs), true, {}, false, false, undefined, true));
+    const [home] = el.querySelectorAll<HTMLElement>(".team-name");
+    expect(home?.style.color).toContain("--ttsc-special-color");
+    expect(home?.style.fontWeight).toBe("normal");
+  });
 });
 
 describe("sectionHtml", () => {
@@ -169,6 +193,23 @@ describe("sectionHtml", () => {
     );
     expect(el.innerHTML).toContain("cyan");
     expect(el.innerHTML).toContain("dimgray");
+  });
+
+  it("schedule view renders both team names normal-weight in the opponent color", () => {
+    const states = { "sensor.nba_lal": makeState("PRE", baseAttrs) };
+    const el = doc(
+      sectionHtml({ ...section, view: "schedule" }, states, Object.keys(states), {
+        team: "cyan",
+        opponent: "dimgray",
+      })
+    );
+    const names = [...el.querySelectorAll<HTMLElement>(".team-name")];
+    expect(names).toHaveLength(2);
+    for (const n of names) {
+      expect(n.style.fontWeight).toBe("normal");
+      expect(n.style.color).toBe("dimgray");
+    }
+    expect(el.innerHTML).not.toContain("cyan");
   });
 
   it("sorts upcoming games by soonest kick-off first", () => {
@@ -338,7 +379,16 @@ describe("sectionHtml", () => {
     };
     const el = doc(sectionHtml({ ...section, special_teams: ["lal"], view: "schedule" }, states));
     expect(el.innerHTML).toContain("ttsc-special-color");
-    expect(el.innerHTML).toContain("ttsc-team-color");
+    // schedule view drops the tracked-team bold/colour, but the special team stays blue
+    expect(el.innerHTML).not.toContain("font-weight:bold");
+  });
+
+  it("preserves the special-team highlight in standings view (bold tracked team)", () => {
+    const states = {
+      "sensor.nba_lal": makeState("PRE", { ...baseAttrs, team_abbr: "LAL" }),
+    };
+    const el = doc(sectionHtml({ ...section, special_teams: ["lal"] }, states));
+    expect(el.innerHTML).toContain("ttsc-special-color");
     expect(el.innerHTML).toContain("font-weight:bold");
   });
 

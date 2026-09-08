@@ -13,6 +13,10 @@ Durable behavioral/UX constraints. Preserve unless the user explicitly changes t
 - `schedule` / `by-date` shows one entry per game (home sensor wins over away when both exist). `IN`
   (live) games sort first; every other state (`PRE`/`BYE`/`POST`) shares one band ordered by
   `|date − now|`, so the next kick-off and the just-finished game sit near the top
+- Team-name rendering: in a **standings** sort the tracked team is highlighted — bold + `team`
+  colour, opponent in `opponent` grey. In **`by-date`** that highlight is dropped: both names render
+  normal-weight in the `opponent` colour (`rowHtml`'s `schedule` arg / `teamColor`'s `flat`). A
+  `special_teams` entry still overrides to `special` (blue) in either view.
 - Team logos render only for HTTPS URLs; non-HTTPS is silently dropped
 - `show_position` (section option, default **`false`**) draws a fixed-width position cell
   (`.team-pos`) as the first child of every row. In a ranking sort it holds the row's 1-based rank

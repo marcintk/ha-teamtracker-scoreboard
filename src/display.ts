@@ -9,13 +9,17 @@ export function teamColor(
   attr: GameAttr,
   special: boolean,
   colors: ColorsConfig = {},
-  opponentSpecial = false
+  opponentSpecial = false,
+  // schedule view: no tracked-team highlight — both names fall back to the
+  // opponent gray, and only an explicit special_teams entry still stands out.
+  flat = false
 ): string {
   if (!isTeamSide(side, attr)) {
     if (opponentSpecial) return colors.special ?? "var(--ttsc-special-color, #2196F3)";
     return colors.opponent ?? "var(--ttsc-opponent-color, #777)"; /* gray */
   }
   if (special) return colors.special ?? "var(--ttsc-special-color, #2196F3)"; /* Material Blue */
+  if (flat) return colors.opponent ?? "var(--ttsc-opponent-color, #777)"; /* gray */
   return colors.team ?? "var(--ttsc-team-color, var(--primary-text-color, white))";
 }
 

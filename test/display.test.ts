@@ -76,6 +76,24 @@ describe("teamColor", () => {
     expect(teamColor("home", homeAttr, true, colors)).toBe("gold");
     expect(teamColor("away", homeAttr, false, colors)).toBe("gray");
   });
+
+  it("flat: tracked team falls back to opponent color (no highlight)", () => {
+    expect(teamColor("home", homeAttr, false, {}, false, true)).toBe(
+      "var(--ttsc-opponent-color, #777)"
+    );
+    expect(
+      teamColor("home", homeAttr, false, { team: "cyan", opponent: "gray" }, false, true)
+    ).toBe("gray");
+  });
+
+  it("flat: special team keeps blue", () => {
+    expect(teamColor("home", homeAttr, true, {}, false, true)).toBe(
+      "var(--ttsc-special-color, #2196F3)"
+    );
+    expect(teamColor("away", homeAttr, false, {}, true, true)).toBe(
+      "var(--ttsc-special-color, #2196F3)"
+    );
+  });
 });
 
 describe("scoreBg", () => {
