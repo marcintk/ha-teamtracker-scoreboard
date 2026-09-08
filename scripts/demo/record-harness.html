@@ -28,13 +28,16 @@
       ha-card,
       #wrap > * {
         background: var(--ha-card-background);
-        /* square corners, and the card fills the whole recorded frame — the 5px
-           padding is the only breathing room between the card edge and its
-           contents */
+        /* square corners; the card fills the whole recorded frame */
         border-radius: 0;
-        padding: 5px;
         display: block;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      }
+      /* 5px breathing room between the frame edge and the card's contents —
+         on the outer element only. Putting it on <ha-card> too would inflate
+         its pinned `height` box and leave a dead strip at the bottom. */
+      #wrap > * {
+        padding: 5px;
       }
     </style>
     <script type="module" src="/dist/card.js"></script>
@@ -190,9 +193,11 @@
         mode: "slide",
         slide_sec: 4,
         lazy_refresh: 0, // render immediately — no debounce to fight in the recorder
-        // pin the height so every re-shoot records the same box: 6 rows + header
-        // at the default 5px row_gap ≈ 262px
-        layout: { height: "268px" },
+        // pin the height so every re-shoot records the same box. The last row's
+        // content ends ~251px down; pinning to 250px makes `overflow: hidden`
+        // trim the row's 5px trailing gap flush, so the only card-coloured space
+        // under the last row is the 5px outer padding — matching the other edges
+        layout: { height: "250px" },
         // view: schedule (the default) — one row per game, live games first then
         // every other game by nearness to now.
         sections: [
@@ -202,6 +207,16 @@
         ],
       });
       document.getElementById("wrap").appendChild(card);
+
+      // Real Home Assistant ships an <ha-card> web component whose own shadow DOM
+      // sets `:host { display: block }`. There's no HA here, so <ha-card> is an
+      // undefined element — `display: inline` — which makes the card's pinned
+      // `layout.height` + `overflow: hidden` no-ops and leaves a strip of bare
+      // background under the last row. Patch the one rule into the card's shadow.
+      const haCardFix = document.createElement("style");
+      haCardFix.textContent = "ha-card { display: block; }";
+      card.shadowRoot.appendChild(haCardFix);
+
       card.hass = makeHass();
 
       // expose a hook for the recorder to nudge a live score (drives the blink)
