@@ -20,7 +20,6 @@
       }
       #wrap {
         width: 440px;
-        margin: 16px;
         /* mimic HA's card surface so the recorded frame isn't a bare element */
         --ha-card-background: #1c1f24;
         --primary-text-color: #e9edf1;
@@ -29,7 +28,11 @@
       ha-card,
       #wrap > * {
         background: var(--ha-card-background);
-        border-radius: 10px;
+        /* square corners, and the card fills the whole recorded frame — the 5px
+           padding is the only breathing room between the card edge and its
+           contents */
+        border-radius: 0;
+        padding: 5px;
         display: block;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
       }
