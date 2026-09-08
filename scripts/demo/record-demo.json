@@ -35,7 +35,7 @@
     "tool": "Playwright (headless Chromium), scripts/demo/record-demo.mjs",
     "capture_method": "Real page.screenshot() with a fixed clip, sampled in a click / sleep / hold loop. Motion in the gif is the card's own CSS/JS (the slide swap, the post-goal score blink) sampled continuously — no synthetic cursor, no locator.click() teleport.",
     "clip": "measured once from #wrap's bounding box after window.__ready, reused for every frame; width/height rounded to even numbers for the encoder",
-    "encode": "ffmpeg two-pass palette (palettegen max_colors=128 stats_mode=diff, paletteuse dither=bayer) scaled to 440px wide. Bump max_colors down if the gif is over ~1MB; the logos are the main colour cost.",
+    "encode": "ffmpeg two-pass palette (palettegen max_colors=128 stats_mode=diff, paletteuse dither=bayer) scaled to 660px wide. Bump max_colors down if the gif is over ~1MB; the logos are the main colour cost.",
     "output_path": "docs/demo.gif",
     "fps": 10
   },
