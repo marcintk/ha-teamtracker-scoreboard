@@ -97,7 +97,7 @@ export class SportScoreboardCard extends HTMLElement {
   _scheduleRender(): void {
     if (this._renderTimer) return;
     if (this._config?.debug) this._debug.track("filtered");
-    const lazyMs = (this._config?.lazy_refresh ?? 1) * 1000;
+    const lazyMs = (this._config?.lazy_refresh ?? 5) * 1000;
     if (lazyMs === 0) {
       this._render();
       return;
