@@ -17,8 +17,8 @@ discussion][discussions].
 Requires [ha-teamtracker](https://github.com/vasqued2/ha-teamtracker) (HACS Integration) — it
 provides the `sensor.<sport>_<team>` entities this card reads.
 
-**Ready-made sensor configs** live in [`docs/sensors/`](docs/sensors/) — one drop-in `sensor:`
-package per league, all rosters verified against ESPN for the 2026/27 season:
+**Ready-made sensor configs** live in [`docs/sensors/`][sensors] — one drop-in `sensor:` package per
+league, all rosters verified against ESPN for the 2026/27 season:
 
 - **NBA** — all 30 teams
 - **NHL** — all 32 teams
@@ -182,7 +182,7 @@ sections:
 | Key               | Default                            | CSS property            | Applies to                                 |
 | ----------------- | ---------------------------------- | ----------------------- | ------------------------------------------ |
 | `colors.team`     | `var(--primary-text-color, white)` | `--ttsc-team-color`     | Your tracked team name                     |
-| `colors.opponent` | `#777` (gray)                      | `--ttsc-opponent-color` | Opponent name                              |
+| `colors.opponent` | `#‌777` (grey)                     | `--ttsc-opponent-color` | Opponent name                              |
 | `colors.special`  | `#2196F3` (Material Blue)          | `--ttsc-special-color`  | `special_teams` highlight                  |
 | `colors.header`   | `#2196F3` (Material Blue)          | `--ttsc-header-color`   | Section header label                       |
 | `colors.winner`   | `orange`                           | `--ttsc-winner-color`   | POST winner score and final clock          |
@@ -195,6 +195,7 @@ sections:
 [repo]: https://github.com/marcintk/ha-teamtracker-scoreboard-card
 [new-issue]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/issues/new
 [discussions]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/discussions
+[sensors]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/tree/main/docs/sensors
 [hacs]: https://hacs.xyz
 [hacs-shield]: https://img.shields.io/badge/HACS-Default-41BDF5.svg
 [releases]: https://github.com/marcintk/ha-teamtracker-scoreboard-card/releases
